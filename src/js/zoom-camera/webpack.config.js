@@ -52,7 +52,7 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: "../../assets/", to: "assets/" },
+        { from: "assets/", to: "assets/" },
         { from: "../../lib/", to: "lib/" },
       ],
       options: {

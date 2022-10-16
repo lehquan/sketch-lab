@@ -3,7 +3,7 @@ Fix the Normals of the material shader to make the outline.
 
 ## Screenshot
 
-![CartoonOutline](../../assets/image/cartoon-outline.png)
+![CartoonOutline](assets/cartoon-outline.png)
 
 ## Live
 

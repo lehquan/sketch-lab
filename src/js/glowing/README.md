@@ -4,7 +4,7 @@ Custom ShaderMaterial to achieve glowing effect.
 
 ## Screenshot
 
-![GlowingShader](../../assets/image/shader-glowing.png)
+![GlowingShader](assets/shader-glowing.png)
 
 ## Live
 

@@ -54,7 +54,7 @@ class Zoom {
     container.appendChild(this.renderer.domElement);
     
     // envMap
-    new RGBELoader().load('assets/texture/royal_esplanade_1k.hdr', texture => {
+    new RGBELoader().load('assets/royal_esplanade_1k.hdr', texture => {
       texture.mapping = THREE.EquirectangularReflectionMapping
       this.scene.environment = texture
     })

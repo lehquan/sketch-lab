@@ -4,7 +4,7 @@ Random object position in cylinder shape.
 
 ## Screenshot
 
-![RandomPosition](../../assets/image/random-cylinder.png)
+![RandomPosition](assets/random-cylinder.png)
 
 ## Live
 
