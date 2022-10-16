@@ -4,10 +4,10 @@ Customize Three.js Reflector to achieve solid reflector.
 
 ## Screenshot
 
-![CartoonOutline](assets/solid-reflector.png)
+![Solid Reflection](assets/solid-reflector.png)
 
 ## Live
 
-[Cartoon Outline](https://cartoon-outline.netlify.app/)
+[Solid Reflection](https://csb-khep7.netlify.app/)
 
-[R3F version](https://github.com/lehquan/cartoon-outline)
+[R3F version](https://github.com/lehquan/solid-reflector)
