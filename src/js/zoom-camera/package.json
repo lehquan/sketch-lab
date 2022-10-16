@@ -1,0 +1,29 @@
+{
+  "name": "zoom-camera",
+  "version": "1.0.0",
+  "description": "Fit object into camera viewport with any scale of object.",
+  "main": "init.js",
+  "scripts": {
+    "test": "webpack --config webpack.config.js",
+    "build": "webpack --config webpack.config.js",
+    "dev": "webpack serve --config webpack.config.js"
+  },
+  "author": "quanle.is",
+  "license": "ISC",
+  "dependencies": {
+    "css-loader": "^6.7.1",
+    "esbuild-loader": "^2.20.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "sass": "^1.55.0",
+    "sass-loader": "^13.1.0",
+    "style-loader": "^3.3.1",
+    "three": "^0.142.0",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.9.3"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^9.1.0"
+  }
+}
