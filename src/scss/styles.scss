@@ -1,0 +1,81 @@
+$colordark: #020c1b;
+$coloryellow: #FFCC66;
+$colorpink: #CB134E;
+$colorgreen: #64ffda;
+$colorblue: #6C6CE5;
+$colordefault: #454360;
+$colorgray: #808080;
+$colorwhite: #FFFFFF;
+$colorblack: #000000;
+@import "typo";
+
+@mixin dark-mode {
+  --surface-background: #020c1b;
+  --surface-dp00: #112240;
+  --surface-dp01: #CCD6F6;
+
+  --primary: #64ffda;
+  --primary-light: #233554;
+  --secondary: #8892b0;
+  --secondary-light: #a8b2d1;
+  --secondary-extralight: #ccd6f6;
+  --highlight: #FFCC66;
+
+  --font01: #808080;
+  --font02: #9c9ab3;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  @include dark-mode;
+}
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: scroll;
+  position: absolute;
+  background: var(--surface-background);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 20px 100px 20px;
+  & > .group-item {
+    border: 1px solid red;
+    width: 400px;
+    height: 300px;
+    margin: 30px;
+    & > img {
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+      -webkit-filter: brightness(100%);
+      &:hover {
+        -webkit-filter: brightness(30%);
+        -webkit-transition: all .6s ease;
+        -moz-transition: all .6s ease;
+        -o-transition: all .6s ease;
+        -ms-transition: all .6s ease;
+        transition: all .6s ease;
+        //background: linear-gradient(rgba(0, 0, 0, 0.7),rgba(0, 0, 0, 0.7));
+      }
+    }
+    & > a {
+      text-decoration: none;
+    }
+    .title {
+      color: var(--secondary-light);
+      @include type4-bold;
+      cursor: pointer;
+      &:hover {
+        color: var(--primary);
+      }
+    }
+  }
+}
