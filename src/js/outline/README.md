@@ -1,4 +1,5 @@
 # Cartoon Outline
+Fix the Normals of the material shader to make the outline.
 
 ## Screenshot
 
