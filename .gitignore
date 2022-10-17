@@ -92,6 +92,7 @@ out
 .nuxt
 dist
 .idea/
+.netlify
 
 # Gatsby files
 .cache/
