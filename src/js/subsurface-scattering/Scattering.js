@@ -283,7 +283,7 @@ class Scattering {
     
     this.composer.setSize(window.innerWidth, window.innerHeight)
     this.composer.setPixelRatio( window.devicePixelRatio );
-    this.effectFXAA.uniforms[ 'resolution' ].value.set( 1 / ( width * window.devicePixelRatio ), 1 / ( height * window.devicePixelRatio ) );
+    this.effectFXAA.uniforms[ 'resolution' ].value.set( 1 / ( window.innerWidth * window.devicePixelRatio ), 1 / ( window.innerWidth * window.devicePixelRatio ) );
     
     this.#render();
   };
