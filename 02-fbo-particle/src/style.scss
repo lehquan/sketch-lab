@@ -1,0 +1,15 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.curtain {
+  width: 100%;
+  position: fixed;
+  height: 50%;
+  background: #dde8eb;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
