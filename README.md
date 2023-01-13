@@ -18,7 +18,6 @@ Some pieces of sketch made with three.js :heart:
     <td><a href="https://shadertoy-and-three.netlify.app/"><img src="07-shadertoy-and-three/src/assets/screenshot.jpeg" alt=""></a></td>
     <td><a href="https://flying-triangles.netlify.app/"><img src="08-animating-triangles/src/assets/screenshot.png" alt=""></a></td>
     <td><a href="https://subsurface-scattering.netlify.app/"><img src="09-subsurface-scattering/src/assets/screenshot.png" alt=""></a></td>
-    <td>To be continued...</td>
   </tr>
 </table>
 
