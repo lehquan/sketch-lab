@@ -1,29 +1,41 @@
 # Sketch of three.js
+
 Some pieces of sketch made with three.js
 
-## Requirements
+<table>
+  <tr>
+    <td>
+        <a href="https://vertices-animation.netlify.app/"><img src="01-animating-vertices/src/assets/screenshot.jpeg" alt=""></a>
+    </td>
+    <td>Maria Anders</td>
+    <td>Maria Anders</td>
+  </tr>
+  <tr>
+    <td>Ernst Handel</td>
+    <td>Roland Mendel</td>
+    <td>Roland Mendel</td>
+  </tr>
+  <tr>
+    <td>Island Trading</td>
+    <td>Helen Bennett</td>
+    <td>Helen Bennett</td>
+  </tr>
+  <tr>
+    <td>Laughing Bacchus Winecellars</td>
+    <td>Yoshi Tannamuri</td>
+    <td>Yoshi Tannamuri</td>
+  </tr>
+  <tr>
+    <td>Magazzini Alimentari Riuniti</td>
+    <td>Giovanni Rovelli</td>
+    <td>Giovanni Rovelli</td>
+  </tr>
+</table>
 
-Node >=12.x
-
-## Usage
-
-1. Go to the example you want to try and install the necessary node modules.
-
-```
-npm i
-```
-
-2. Run the npm script `dev` to launch example.
-
-```
-npm run dev
-```
-
-3. When finishing development, run the npm script `build` to make the compressed files.
-
-```
-npm run build
-```
+## Libraries
+- Three.js : [v148](https://unpkg.com/browse/three@0.148.0/)
+- DRACO Decoder: [v148](https://unpkg.com/browse/three@0.148.0/examples/jsm/libs/draco/)
+- Load GLSL with [glslify](https://github.com/glslify/glslify)
 
 Have fun!
 
