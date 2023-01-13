@@ -2,18 +2,25 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls';
 import fragmentShader from "./glsl/fragment.glsl";
 import vertexShader from "./glsl/vertex.glsl";
+
 class Portal {
   constructor() {
     
-    this.init()
-    this.start()
+    this.setScene()
+    this.setCamera()
+    this.setRenderer()
+    this.setControls()
+    
+    this.on()
+    this.build()
   }
   
-  init = () => {
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    
-    // camera
+  setScene = () => {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x1e2243)
+  }
+  
+  setCamera = () => {
     this.camera = new THREE.PerspectiveCamera(
         75,
         window.innerWidth / window.innerHeight,
@@ -21,8 +28,12 @@ class Portal {
         1000
     );
     this.camera.position.set(0, 0, 5);
-    
-    // renderer
+  }
+  
+  setRenderer = () => {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+  
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
     });
@@ -32,21 +43,19 @@ class Portal {
     // this.renderer.physicallyCorrectLights = true;
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(this.renderer.domElement);
-    
-    // scene
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x1e2243)
-    
-    // controls
+  }
+  
+  setControls = () => {
     const controls = new OrbitControls(this.camera, this.renderer.domElement);
     controls.update()
-    
-    this.update()
-    this.on()
   };
   
-  start = () => {
-    this.material = new THREE.ShaderMaterial({
+  build = () => {
+    this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial())
+    this.mesh.scale.setScalar(10)
+    this.scene.add(this.mesh)
+    
+    this.mesh.material = new THREE.ShaderMaterial({
       transparent: true,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
@@ -64,13 +73,11 @@ class Portal {
       vertexShader: vertexShader,
       fragmentShader: fragmentShader
     })
-    
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), this.material)
-    mesh.scale.setScalar(10)
-    this.scene.add(mesh)
+    this.mesh.material.needsUpdate = true
   }
   
   on = () => {
+    this.update()
     window.addEventListener('resize', this.windowResize);
   };
   
@@ -83,7 +90,7 @@ class Portal {
   };
   
   update = () => {
-    if(this.material) this.material.uniforms.iTime.value = performance.now() / 1000
+    if(this.mesh) this.mesh.material.uniforms.iTime.value = performance.now() / 1000
     
     requestAnimationFrame(this.update)
     this.renderer.render(this.scene, this.camera);

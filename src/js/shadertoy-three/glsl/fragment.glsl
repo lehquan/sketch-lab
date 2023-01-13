@@ -63,11 +63,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     p*=4.;
 
     float rz = dualfbm(p);
-    //        float rz = dualfbm(p)-dualfbm(p*2.);
+    // float rz = dualfbm(p)-dualfbm(p*2.);
 
     //rings
-    //    p /= 7.0; //exp(mod(time*10.,3.14159));
-    //    rz *= pow(abs((0.0-circ(p))),.99);
+    // p /= 7.0; //exp(mod(time*10.,3.14159));
+    // rz *= pow(abs((0.0-circ(p))),.99);
 
     rz *= abs((-circ(vec2(p.x / 4.2, p.y / 7.0))));
     rz *= abs((-circ(vec2(p.x / 4.2, p.y / 7.0))));
@@ -84,5 +84,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 void main() {
     mainImage(gl_FragColor, vUv);
-    //    mainImage(gl_FragColor, ((vUv-.5)*2.)+.5); // scalling vUv to remove transparent edges
+    //mainImage(gl_FragColor, ((vUv-.5)*2.)+.5); // scalling vUv to remove transparent edges
 }
