@@ -1,7 +1,6 @@
 # Sketch of three.js
-<br></br>
 
-Some pieces of sketch made with three.js
+Some pieces of sketch made with three.js :heart:
 <br></br>
 
 <table>
@@ -22,12 +21,12 @@ Some pieces of sketch made with three.js
   </tr>
 </table>
 
-<br></br>
 
 ## Libraries
 - Three.js : [v148](https://unpkg.com/browse/three@0.148.0/)
 - DRACO Decoder: [v148](https://unpkg.com/browse/three@0.148.0/examples/jsm/libs/draco/)
 - Load GLSL with [glslify](https://github.com/glslify/glslify)
+
 
 ## Misc
 
