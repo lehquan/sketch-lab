@@ -3,6 +3,7 @@ import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler'
 import Experience from '../Experience'
 import vertexShader from '../../shaders/glowing.vert'
 import fragmentShader from '../../shaders/glowing.frag'
+import {scaleCurve} from '../../utils/Utils';
 
 export default class Glowing {
   constructor() {
@@ -27,11 +28,36 @@ export default class Glowing {
     this._normal = new THREE.Vector3();
     this._scale = new THREE.Vector3();
 
+    this.addFloor()
+
+    // test
+    // const box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1),
+    //     new THREE.MeshLambertMaterial({
+    //       color: 0xe5e1d6,
+    //       transparent: true,
+    //       opacity: 1
+    //     })
+    // )
+    // box.position.y = 1
+    // box.receiveShadow = box.castShadow = true
+    // this.scene.add(box)
+
     this.setMaterial()
     this.setSurface()
     this.setFlower()
     this.resample()
-    this.addObjects()
+    // this.addObjects()
+  }
+  addFloor = () => {
+    const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry( 8, 8 ),
+        new THREE.MeshStandardMaterial( { color: 0xd6adad } )
+    );
+    plane.scale.setScalar(100)
+    plane.rotation.x = - Math.PI / 2;
+    plane.position.y = -1.7;
+    plane.receiveShadow = true;
+    this.scene.add( plane );
   }
   setSurface = () => {
     const model = this.resources.items.skull.scene
@@ -41,13 +67,17 @@ export default class Glowing {
       if (child.isMesh) {
 
         child.geometry = child.geometry.toNonIndexed()
-        child.geometry.scale(30, 30, 30);
-        child.geometry.translate(0, 2, 0);
-        child.geometry.rotateY(Math.PI/180 * -90);
+        // child.geometry.scale(30, 30, 30);
+        // child.geometry.translate(0, 2, 0);
+        // child.geometry.rotateY(Math.PI/180 * -90);
 
-        // child.material.wireframe = true
+        child.geometry.scale(2, 2, 2);
+        child.geometry.translate(0, 0.3, 0);
+        child.geometry.rotateY(Math.PI/180 * -45);
 
         child.material = this.material
+        child.receiveShadow = true
+        child.castShadow = true
         this.surface = child
       }
     })
@@ -60,16 +90,21 @@ export default class Glowing {
     const stemGeometry = _stemMesh.geometry.clone();
     const blossomGeometry = _blossomMesh.geometry.clone();
 
+    // const scaleFactor = THREE.MathUtils.randFloat(5, 10)
+    const scaleFactor = THREE.MathUtils.randFloat(0.5, 0.8)
+
     const defaultTransform = new THREE.Matrix4()
     .makeRotationX( Math.PI )
     .multiply( new THREE.Matrix4()
-    .makeScale( 10, 10, 10 ) );
+    .makeScale( scaleFactor, scaleFactor, scaleFactor ) );
 
     stemGeometry.applyMatrix4( defaultTransform );
     blossomGeometry.applyMatrix4( defaultTransform );
 
-    const stemMaterial = this.material // _stemMesh.material;
+    const stemMaterial = _stemMesh.material;
     const blossomMaterial = _blossomMesh.material;
+    _blossomMesh.material.emissive = new THREE.Color(0xff2255)
+    _blossomMesh.material.emissiveIntensity = 0.6
 
     this.stemMesh = new THREE.InstancedMesh( stemGeometry, stemMaterial, this.params.count );
     this.blossomMesh = new THREE.InstancedMesh( blossomGeometry, blossomMaterial, this.params.count );
@@ -100,7 +135,7 @@ export default class Glowing {
     for ( let i = 0; i < this.params.count; i ++ ) {
 
       this.ages[ i ] = Math.random();
-      this.scales[ i ] = this.scaleCurve( this.ages[ i ] );
+      this.scales[ i ] = scaleCurve( this.ages[ i ] );
 
       this.resampleParticle( i );
     }
@@ -126,7 +161,7 @@ export default class Glowing {
     if ( this.ages[ i ] >= 1 ) {
 
       this.ages[ i ] = 0.001;
-      this.scales[ i ] = this.scaleCurve( this.ages[ i ] );
+      this.scales[ i ] = scaleCurve( this.ages[ i ] );
 
       this.resampleParticle( i );
 
@@ -135,7 +170,7 @@ export default class Glowing {
 
     // Update scale.
     const prevScale = this.scales[ i ];
-    this.scales[ i ] = this.scaleCurve( this.ages[ i ] );
+    this.scales[ i ] = scaleCurve( this.ages[ i ] );
     this._scale.set( this.scales[ i ] / prevScale, this.scales[ i ] / prevScale, this.scales[ i ] / prevScale );
 
     // Update transform.
@@ -178,12 +213,6 @@ export default class Glowing {
     this.ico.speed = Math.random() + THREE.MathUtils.randFloat(1200, 2000)
     this.scene.add( this.ico );
   }
-  easeOutCubic = function ( t ) {
-    return ( -- t ) * t * t + 1;
-  };
-  scaleCurve = function ( t ) {
-    return Math.abs( this.easeOutCubic( ( t > 0.5 ? 1 - t : t ) * 2 ) );
-  };
   update = () => {
     if ( this.stemMesh && this.blossomMesh ) {
 
@@ -195,18 +224,7 @@ export default class Glowing {
       this.blossomMesh.instanceMatrix.needsUpdate = true;
     }
 
-    this.torus.position.y = THREE.MathUtils.lerp(this.torus.position.y, (2 + Math.sin(performance.now() / this.torus.speed)) * 10, 0.1)
-    this.ico.position.y = THREE.MathUtils.lerp(this.ico.position.y, (1 + Math.sin(performance.now() / this.ico.speed)) * 8, 0.1)
-
-    // this.ico.rotation.y = THREE.MathUtils.lerp(
-    //     this.ico.rotation.y,
-    //     (((-2 + Math.sin(performance.now() / this.ico.speed)) * Math.PI) / 180) * -120,
-    //     0.5,
-    // )
-    // this.torus.rotation.z = THREE.MathUtils.lerp(
-    //     this.torus.rotation.z,
-    //     (((-2 + Math.sin(performance.now() / this.torus.speed)) * Math.PI) / 180) * -120,
-    //     0.5,
-    // )
+    if(this.torus) this.torus.position.y = THREE.MathUtils.lerp(this.torus.position.y, (2 + Math.sin(performance.now() / this.torus.speed)) * 10, 0.1)
+    if(this.ico) this.ico.position.y = THREE.MathUtils.lerp(this.ico.position.y, (1 + Math.sin(performance.now() / this.ico.speed)) * 8, 0.1)
   }
 }

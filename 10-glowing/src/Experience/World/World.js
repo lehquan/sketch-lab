@@ -14,6 +14,6 @@ export default class World {
     })
   }
   update() {
-    if (this.glowing) this.glowing.update()
+    if (this.glowing) this.glowing.update();
   }
 }

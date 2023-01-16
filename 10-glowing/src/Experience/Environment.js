@@ -10,13 +10,21 @@ export default class Environment {
     this.setEnv()
   }
   setEnv = () => {
-    // this.scene.background = new THREE.Color(0xE39469)
+    // this.scene.background = new THREE.Color(0xd6adad)
+    this.scene.add( new THREE.AmbientLight( 0x000000, 0.5 ) );
 
-    const pointLight = new THREE.PointLight( 0xAA8899, 0.75 );
-    pointLight.position.set( 50, - 25, 75 );
-    this.scene.add( pointLight );
+    const light = new THREE.SpotLight(0xffffff, 0.2, 10, Math.PI/3, 0.3)
+    // light.position.set(0, 2, 2)
+    light.position.set(0, 5, 2)
+    light.target.position.set(0, 0, 0)
 
-    this.scene.add( new THREE.HemisphereLight() );
+    light.castShadow = true
+    light.shadow.camera.near = 0.1
+    light.shadow.camera.far = 9
+    // light.shadow.bias = 0.0000001
+    light.shadow.mapSize.width = 2048
+    light.shadow.mapSize.height = 2048
+    this.scene.add(light)
   }
   update = () => {}
 }
