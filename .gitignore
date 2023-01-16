@@ -8,6 +8,22 @@ lerna-debug.log*
 .pnpm-debug.log*
 package-lock.json
 
+# Resources
+_assets
+_archived
+devicemotion-three.js
+displacement-roll
+dotted-map
+fit-scale
+gps_example
+krpano_image
+meshopt
+ray
+req-image
+test-speed-download
+tfjs-pose-detection
+tracker
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 

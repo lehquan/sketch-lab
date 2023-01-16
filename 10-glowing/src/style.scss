@@ -1,0 +1,34 @@
+$colordark: #020c1b;
+$coloryellow: #FFCC66;
+$colorpink: #CB134E;
+$colorgreen: #64ffda;
+$colorblue: #6C6CE5;
+$colordefault: #454360;
+$colorgray: #808080;
+$colorwhite: #FFFFFF;
+$colorblack: #000000;
+@mixin dark-mode {
+  --surface-background: #020c1b;
+  --surface-dp00: #112240;
+  --surface-dp01: #CCD6F6;
+
+  --primary: #64ffda;
+  --primary-light: #233554;
+  --secondary: #8892b0;
+  --secondary-light: #a8b2d1;
+  --secondary-extralight: #ccd6f6;
+  --highlight: #FFCC66;
+
+  --font01: #808080;
+  --font02: #9c9ab3;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  //@include dark-mode;
+}
