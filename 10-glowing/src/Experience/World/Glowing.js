@@ -74,6 +74,24 @@ export default class Glowing {
     }
   }
   setSurface = () => {
+    const cherry = this.resources.items.cherry_blossoms.scene
+    cherry.scale.setScalar(1/3.5)
+    cherry.rotation.set(Math.PI/180 * 170, 0, 0)
+    cherry.position.set(0, 1.7, 0)
+
+    cherry.traverse(child => {
+      child.castShadow = true
+
+      if (child.material) {
+        child.material.transparent = true
+        // child.material.opacity = .6
+        // child.material.emissive = new THREE.Color(0xFF7F00)
+        // child.material.emissiveIntensity = 0.1
+      }
+    })
+    this.scene.add(cherry)
+
+    //
     const model = this.resources.items.skull.scene
     this.scene.add(model)
 

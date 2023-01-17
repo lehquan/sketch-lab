@@ -36,12 +36,11 @@ export default class Environment {
     light.position.set(0, 10, 0)
     light.castShadow = true;
     light.target.position.set(0, 0, 0)
-    light.angle = 0.3;
+    light.angle = 0.5;
     light.penumbra = 0.3;
     light.decay = 2;
     light.shadow.bias = -.001
     light.distance = 50;
-    light.add( new THREE.AxesHelper(1))
     this.scene.add(light)
   }
 }
