@@ -11,4 +11,10 @@ export default [
     path: "assets/models/Flower/Flower.glb",
     source: "https://skfb.ly/6SVEQ"
   },
+  {
+    name: "cherry_blossoms",
+    type: "gltfModel",
+    path: "assets/models/cherry-petal.glb",
+    source: "https://skfb.ly/6XqvQ"
+  },
 ];

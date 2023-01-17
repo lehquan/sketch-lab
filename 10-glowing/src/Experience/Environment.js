@@ -7,8 +7,10 @@ export default class Environment {
     this.scene = this.experience.scene
 
     this.setLight()
+    this.setEnv()
   }
   setEnv = () => {
+    // this.scene.background = new THREE.Color(0xffaacc)
     // this.scene.background = new THREE.Color(0xd6adad)
     // this.scene.add( new THREE.AmbientLight( 0xd6adad, 0.1 ) );
     // this.scene.add( new THREE.AmbientLight( 0x000000, 0.5 ) );
@@ -27,10 +29,10 @@ export default class Environment {
     // this.scene.add(light)
   }
   setLight = () => {
-    this.scene.add( new THREE.AmbientLight( 0x404040, .2 ) );
+    this.scene.add( new THREE.AmbientLight( 0xb2768e, .2 ) );
 
-    // const light = new THREE.SpotLight( 0xFF7F00, 1 );
-    const light = new THREE.SpotLight( 0x663200, 1 );
+    // const light = new THREE.SpotLight( 0x663200, .5 );
+    const light = new THREE.SpotLight( 0xFF7F00, .5 );
     light.position.set(0, 10, 0)
     light.castShadow = true;
     light.target.position.set(0, 0, 0)

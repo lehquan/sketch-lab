@@ -10,8 +10,10 @@ export default class Glowing {
     this.experience = new Experience()
     this.scene = this.experience.scene
     this.resources = this.experience.resources
+    this.debug = this.experience.debug
 
     this.params = {
+      wall: true,
       count: 2000,
       distribution: 'random',
       surfaceColor: 0xFFF784,
@@ -28,18 +30,18 @@ export default class Glowing {
     this._normal = new THREE.Vector3();
     this._scale = new THREE.Vector3();
 
-    // this.addFloor()
+    this.addWall()
     this.setMaterial()
     this.setSurface()
     this.setFlower()
     this.resample()
     // this.addObjects()
   }
-  addFloor = () => {
+  addWall = () => {
     const geometry = new THREE.BoxGeometry( 10, 0.15, 10 )
-    const material = new THREE.MeshStandardMaterial( {color: 0xd6adad} )
+    const material = new THREE.MeshStandardMaterial( {color: 0xb2768e} )
     const ground = new THREE.Mesh( geometry, material )
-    ground.scale.multiplyScalar( 3 )
+    ground.scale.multiplyScalar( 5 )
     ground.position.y = -1.7
     ground.castShadow = false
     ground.receiveShadow = true
@@ -55,7 +57,14 @@ export default class Glowing {
     const top = ground.clone()
     top.position.set(0, 15, 0)
 
-    this.scene.add( ground, left, back, top );
+    // this.scene.add( ground, left, back, top );
+
+    //
+    if (this.debug.active) {
+      this.debug.ui.add(this.params, 'wall').onChange(val=> {
+        val ? this.scene.add( ground, left, back, top ) : this.scene.remove( ground, left, back, top )
+      })
+    }
   }
   setSurface = () => {
     const model = this.resources.items.skull.scene
@@ -65,13 +74,9 @@ export default class Glowing {
       if (child.isMesh) {
 
         child.geometry = child.geometry.toNonIndexed()
-        // child.geometry.scale(30, 30, 30);
-        // child.geometry.translate(0, 2, 0);
-        // child.geometry.rotateY(Math.PI/180 * -90);
-
         child.geometry.scale(2, 2, 2);
-        child.geometry.translate(0, 0.3, 0);
-        child.geometry.rotateY(Math.PI/180 * -45);
+        child.geometry.translate(0, 0.5, 0);
+        child.geometry.rotateY(Math.PI/180 * -90);
 
         child.material = this.material
         child.receiveShadow = true
@@ -88,7 +93,6 @@ export default class Glowing {
     const stemGeometry = _stemMesh.geometry.clone();
     const blossomGeometry = _blossomMesh.geometry.clone();
 
-    // const scaleFactor = THREE.MathUtils.randFloat(5, 10)
     const scaleFactor = THREE.MathUtils.randFloat(0.5, 0.8)
 
     const defaultTransform = new THREE.Matrix4()
@@ -106,14 +110,6 @@ export default class Glowing {
 
     this.stemMesh = new THREE.InstancedMesh( stemGeometry, stemMaterial, this.params.count );
     this.blossomMesh = new THREE.InstancedMesh( blossomGeometry, blossomMaterial, this.params.count );
-
-    // Assign random colors to the blossoms.
-    const color = new THREE.Color();
-    const blossomPalette = [ 0xF20587, 0xF2D479, 0xF2C879, 0xF2B077, 0xF24405 ];
-    for ( let i = 0; i < this.params.count; i ++ ) {
-      color.setHex( blossomPalette[ Math.floor( Math.random() * blossomPalette.length ) ] );
-      this.blossomMesh.setColorAt( i, color );
-    }
 
     // Instance matrices will be updated every frame.
     this.stemMesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage );
