@@ -8,7 +8,16 @@ export default class Renderer {
     this.sizes = this.experience.sizes
     this.scene = this.experience.scene
     this.camera = this.experience.camera
+    this.debug = this.experience.debug
 
+    this.toneMappingOptions = {
+      None: THREE.NoToneMapping,
+      Reinhard: THREE.ReinhardToneMapping,
+      ACESFilmic: THREE.ACESFilmicToneMapping,
+    };
+    this.params = {
+      toneMapping: 'None',
+    }
     this.setInstance()
   }
 
@@ -18,14 +27,19 @@ export default class Renderer {
       antialias: true,
     })
 
-    // this.instance.setClearColor(0x262626, 1)
-    // this.instance.physicallyCorrectLights = true
     this.instance.outputEncoding = THREE.sRGBEncoding
-    // this.instance.toneMapping = THREE.ReinhardToneMapping
-    // this.instance.toneMappingExposure = 1
+    this.instance.toneMapping = this.toneMappingOptions[this.params.toneMapping];
+    this.instance.toneMappingExposure = 1
     this.instance.shadowMap.enabled = true
-    // this.instance.shadowMap.type = THREE.PCFSoftShadowMap
-    // this.instance.autoClear = false
+    this.instance.shadowMap.type = THREE.PCFSoftShadowMap
+
+    //
+    if (this.debug.active) {
+      this.debug.ui.add(this.params, 'toneMapping', Object.keys(this.toneMappingOptions)).onChange(val => {
+        this.instance.toneMapping = this.toneMappingOptions[val];
+        this.update()
+      })
+    }
 
     this.resize()
   }

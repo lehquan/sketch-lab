@@ -28,20 +28,7 @@ export default class Glowing {
     this._normal = new THREE.Vector3();
     this._scale = new THREE.Vector3();
 
-    this.addFloor()
-
-    // test
-    // const box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1),
-    //     new THREE.MeshLambertMaterial({
-    //       color: 0xe5e1d6,
-    //       transparent: true,
-    //       opacity: 1
-    //     })
-    // )
-    // box.position.y = 1
-    // box.receiveShadow = box.castShadow = true
-    // this.scene.add(box)
-
+    // this.addFloor()
     this.setMaterial()
     this.setSurface()
     this.setFlower()
@@ -49,15 +36,26 @@ export default class Glowing {
     // this.addObjects()
   }
   addFloor = () => {
-    const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry( 8, 8 ),
-        new THREE.MeshStandardMaterial( { color: 0xd6adad } )
-    );
-    plane.scale.setScalar(100)
-    plane.rotation.x = - Math.PI / 2;
-    plane.position.y = -1.7;
-    plane.receiveShadow = true;
-    this.scene.add( plane );
+    const geometry = new THREE.BoxGeometry( 10, 0.15, 10 )
+    const material = new THREE.MeshStandardMaterial( {color: 0xd6adad} )
+    const ground = new THREE.Mesh( geometry, material )
+    ground.scale.multiplyScalar( 3 )
+    ground.position.y = -1.7
+    ground.castShadow = false
+    ground.receiveShadow = true
+
+    const left = ground.clone()
+    left.position.set(-15, 0, 0)
+    left.rotation.set(0, 0, Math.PI/180 * 90)
+
+    const back = ground.clone()
+    back.position.set(0, 0, -15)
+    back.rotation.set(Math.PI/180 * 90, 0, 0)
+
+    const top = ground.clone()
+    top.position.set(0, 15, 0)
+
+    this.scene.add( ground, left, back, top );
   }
   setSurface = () => {
     const model = this.resources.items.skull.scene
@@ -198,8 +196,9 @@ export default class Glowing {
     // torus
     this.torus = new THREE.Mesh(new THREE.TorusKnotGeometry( 1, .3, 100, 32 ),this.material )
     this.torus.rotation.y = Math.PI/180 * 30
-    this.torus.position.set(-30, 20, 0)
-    this.torus.scale.setScalar(4)
+    // this.torus.position.set(-30, 20, 0)
+    this.torus.position.set(-5, 1, 0)
+    this.torus.scale.setScalar(1/4)
     this.torus.speed = Math.random() + THREE.MathUtils.randFloat(1000, 1500)
     this.scene.add( this.torus )
 
@@ -224,7 +223,7 @@ export default class Glowing {
       this.blossomMesh.instanceMatrix.needsUpdate = true;
     }
 
-    if(this.torus) this.torus.position.y = THREE.MathUtils.lerp(this.torus.position.y, (2 + Math.sin(performance.now() / this.torus.speed)) * 10, 0.1)
-    if(this.ico) this.ico.position.y = THREE.MathUtils.lerp(this.ico.position.y, (1 + Math.sin(performance.now() / this.ico.speed)) * 8, 0.1)
+    // if(this.torus) this.torus.position.y = THREE.MathUtils.lerp(this.torus.position.y, (2 + Math.sin(performance.now() / this.torus.speed)) * 10, 0.1)
+    // if(this.ico) this.ico.position.y = THREE.MathUtils.lerp(this.ico.position.y, (1 + Math.sin(performance.now() / this.ico.speed)) * 8, 0.1)
   }
 }

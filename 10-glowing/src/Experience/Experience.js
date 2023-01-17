@@ -37,7 +37,6 @@ export default class Experience {
     this.stats = new Stats()
     this.sizes = new Sizes()
     // this.time = new Time()
-    this.mouse = new Mouse()
     this.resources = new Resources(sources)
 
     this.scene = new THREE.Scene()
@@ -55,7 +54,7 @@ export default class Experience {
   resize() {
     this.camera.resize()
     this.renderer.resize()
-    this.postEffect.update()
+    this.postEffect.resize()
   }
 
   update() {

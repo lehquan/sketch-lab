@@ -20,16 +20,20 @@ export default class Camera {
       0.1,
       10000
     )
-    // this.instance.position.set(0, 10, 80);
-    this.instance.position.set(4.5, 1, 4.5 );
+    this.instance.position.set(3.5, 0, 3.5 );
     this.instance.lookAt(0, 0, 0)
     this.scene.add(this.instance)
   }
   setControls() {
     this.controls = new OrbitControls(this.instance, this.canvas)
     this.controls.enabled = true
-    // this.controls.autoRotate = false
-    // this.controls.enableZoom = false
+    this.controls.enablePan = false
+    this.controls.maxDistance = 10
+    this.controls.minDistance = 2
+    // this.controls.minPolarAngle = 0;
+    // this.controls.maxPolarAngle = Math.PI;
+    // this.controls.minAzimuthAngle = -Math.PI/180* 30;
+    // this.controls.maxAzimuthAngle = Math.PI/180* 30;
   }
   resize() {
     this.instance.aspect = this.sizes.width / this.sizes.height

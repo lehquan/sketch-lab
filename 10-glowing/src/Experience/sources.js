@@ -6,12 +6,6 @@ export default [
     source: "https://skfb.ly/6SVEQ"
   },
   {
-    name: "whale",
-    type: "objModel",
-    path: "assets/models/Whale_Model.obj",
-    source: "https://skfb.ly/6SVEQ"
-  },
-  {
     name: "flower",
     type: "gltfModel",
     path: "assets/models/Flower/Flower.glb",
