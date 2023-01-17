@@ -9,7 +9,7 @@ export default [
     name: "flower",
     type: "gltfModel",
     path: "assets/models/Flower/Flower.glb",
-    source: "https://skfb.ly/6SVEQ"
+    source: "https://threejs.org/examples/#webgl_instancing_scatter"
   },
   {
     name: "cherry_blossoms",

@@ -26,11 +26,9 @@ export default class Experience {
     /**Global Access */
     window.experience = this
 
-    /**Canvas*/
-    const _canvas = document.createElement("canvas")
-    _canvas.id = 'experience'
-    document.body.appendChild(_canvas)
-    this.canvas = _canvas
+    /**Canvas & DOM */
+    this.createDOM()
+    this.canvas = document.querySelector("#experience")
 
     /**Setup Classes */
     this.debug = new Debug()
@@ -49,6 +47,38 @@ export default class Experience {
     this.sizes.on("resize", () => this.resize())
     // this.time.on("tick", () => this.update())
     this.tick()
+  }
+
+  createDOM = () => {
+    // canvas
+    const _canvas = document.createElement("canvas")
+    _canvas.id = 'experience'
+    document.body.appendChild(_canvas)
+
+    // footer
+    const footer = document.createElement("div")
+    footer.classList.add('footer')
+    document.body.appendChild(footer)
+
+    const note1 = document.createElement('p')
+    note1.innerHTML = '3D Models: '
+    footer.appendChild(note1)
+
+    const linkNote1 = document.createElement('a')
+    linkNote1.innerHTML = 'Tree Sprite: \'Skull Kid\', '
+    linkNote1.href = 'https://skfb.ly/6QWIL'
+    linkNote1.target = 'blank'
+    note1.appendChild(linkNote1)
+    const linkNote2 = document.createElement('a')
+    linkNote2.innerHTML = 'Flower, '
+    linkNote2.href = 'https://threejs.org/examples/#webgl_instancing_scatter'
+    linkNote2.target = 'blank'
+    note1.appendChild(linkNote2)
+    const linkNote3 = document.createElement('a')
+    linkNote3.innerHTML = 'Cherry Blossoms'
+    linkNote3.href = 'https://skfb.ly/6XqvQ'
+    linkNote3.target = 'blank'
+    note1.appendChild(linkNote3)
   }
 
   resize() {
