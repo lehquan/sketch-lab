@@ -35,14 +35,13 @@ export default class Glowing {
     this.setSurface()
     this.setFlower()
     this.resample()
-    // this.addObjects()
   }
   addWall = () => {
     const geometry = new THREE.BoxGeometry( 10, 0.15, 10 )
     const material = new THREE.MeshStandardMaterial( {color: 0xb2768e} )
     const ground = new THREE.Mesh( geometry, material )
-    ground.scale.multiplyScalar( 5 )
-    ground.position.y = -1.7
+    ground.scale.multiplyScalar( 3 )
+    ground.position.y = -2.3
     ground.castShadow = false
     ground.receiveShadow = true
 
@@ -50,19 +49,27 @@ export default class Glowing {
     left.position.set(-15, 0, 0)
     left.rotation.set(0, 0, Math.PI/180 * 90)
 
+    const right = ground.clone()
+    right.position.set(15, 0, 0)
+    right.rotation.set(0, 0, Math.PI/180 * 90)
+
     const back = ground.clone()
     back.position.set(0, 0, -15)
     back.rotation.set(Math.PI/180 * 90, 0, 0)
 
+    const front = ground.clone()
+    front.position.set(0, 0, 15)
+    front.rotation.set(Math.PI/180 * 90, 0, 0)
+
     const top = ground.clone()
     top.position.set(0, 15, 0)
 
-    // this.scene.add( ground, left, back, top );
+    this.scene.add( ground, left, right, back, front, top );
 
     //
     if (this.debug.active) {
       this.debug.ui.add(this.params, 'wall').onChange(val=> {
-        val ? this.scene.add( ground, left, back, top ) : this.scene.remove( ground, left, back, top )
+        val ? this.scene.add( ground, left, right, back, front, top ) : this.scene.remove( ground, left, right, back, front, top );
       })
     }
   }
@@ -75,7 +82,7 @@ export default class Glowing {
 
         child.geometry = child.geometry.toNonIndexed()
         child.geometry.scale(2, 2, 2);
-        child.geometry.translate(0, 0.5, 0);
+        child.geometry.translate(0, 0, 0);
         child.geometry.rotateY(Math.PI/180 * -90);
 
         child.material = this.material
