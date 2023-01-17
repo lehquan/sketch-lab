@@ -1,6 +1,6 @@
-# Glowing
+# Spring glowing
 
-Custom ShaderMaterial to achieve glowing effect.
+A study about [MeshSurfaceSampler](https://threejs.org/docs/#examples/en/math/MeshSurfaceSampler) and glowing effect.
 
 ![screenshot](src/assets/screenshot.png)
 
