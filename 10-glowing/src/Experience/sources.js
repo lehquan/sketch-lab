@@ -29,34 +29,4 @@ export default [
     path: "assets/models/cherry-petal.glb",
     source: "https://skfb.ly/6XqvQ"
   },
-  {
-    name: "snowflake1",
-    type: "texture",
-    path: "assets/textures/snowflake1.png",
-    source: ""
-  },
-  {
-    name: "snowflake2",
-    type: "texture",
-    path: "assets/textures/snowflake2.png",
-    source: ""
-  },
-  {
-    name: "snowflake3",
-    type: "texture",
-    path: "assets/textures/snowflake3.png",
-    source: ""
-  },
-  {
-    name: "snowflake4",
-    type: "texture",
-    path: "assets/textures/snowflake4.png",
-    source: ""
-  },
-  {
-    name: "snowflake5",
-    type: "texture",
-    path: "assets/textures/snowflake5.png",
-    source: ""
-  },
 ];

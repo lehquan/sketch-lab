@@ -1,7 +1,7 @@
 import Experience from "../Experience.js"
 import Glowing from './Glowing';
+import Skull from './Skull';
 import Petal from './Petal';
-import Snow from './Snow';
 
 export default class World {
   constructor() {
@@ -13,13 +13,14 @@ export default class World {
     // Wait for resources
     this.resources.on("ready", () => {
       this.glowing = new Glowing()
-      // this.petal = new Petal()
-      this.snow = new Snow()
+      this.glowingMat = this.glowing.material
+
+      this.skull = new Skull(this.glowingMat)
+      this.petal = new Petal()
     })
   }
   update() {
-    if (this.glowing) this.glowing.update();
-    if (this.snow) this.snow.update();
-    // if (this.petal) this.petal.update();
+    if (this.skull) this.skull.update();
+    if (this.petal) this.petal.update();
   }
 }

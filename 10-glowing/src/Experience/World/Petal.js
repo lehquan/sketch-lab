@@ -2,64 +2,106 @@ import * as THREE from 'three'
 import Experience from '../Experience';
 
 export default class Petal {
-  constructor() {
+  constructor(material) {
     this.experience = new Experience()
     this.scene = this.experience.scene
+    this.camera = this.experience.camera.instance
     this.resources = this.experience.resources
 
-    this.np= 100
-    this.interval = 16000;
-    this.seeds=[]
-    this.rotateSpeed = 5.
-    this.wobbleSpeed = 300.
-    this.wobbleMag = .05
+    this.count = 1000
+    this.maxRange = 50;
+    this.minRange = this.maxRange / 2;
+    this.vertex = new THREE.Vector3();
+    this.dummy = new THREE.Object3D()
+    this.color = new THREE.Color();
+    this.matrix = new THREE.Matrix4();
+    this.position = new THREE.Vector3();
+    this.colors = [0xffbccd, 0xffb2c8, 0xffaac1, 0xd07c96, 0xffaab7, 0xb4566e, 0xefaaaf, 0xff7fac, 0xffd6d6, 0xffa5a5, 0xffafc3, 0xffe7fc, 0xff9eb6, 0xffa3ba];
 
-    this.setPetal()
+    this.setInstanedMesh()
   }
-  setPetal = () => {
-    this.petal=new THREE.Mesh(new THREE.SphereGeometry(.05),new THREE.MeshStandardMaterial({color:'pink'}));
+  getColor = () => {return this.colors[Math.floor(Math.random() * this.colors.length)]};
+  setInstanedMesh = () => {
+    const model = this.resources.items.cherry_petal.scene
+    this._initMesh = model.getObjectByName('petal02')
 
-    this.pmesh = new THREE.InstancedMesh(this.petal.geometry,this.petal.material,this.np);
-    // this.pmesh.add( new THREE.AxesHelper())
-    this.pmesh.rotation.x = Math.PI/180*90
-    this.pmesh.scale.multiplyScalar(1.)
-    this.pmesh.position.y+=.5;
-    this.petal.scale.z*=.1
-    this.petal.scale.x*=.75
+    // this._initMesh.material.emissive = new THREE.Color(0xffaab7)
+    // this._initMesh.material.emissiveIntensity = 0.2
 
-    this.scene.add(this.pmesh);
+    //
+    const matrix = new THREE.Matrix4();
+    this.instancedMesh = new THREE.InstancedMesh( this._initMesh.geometry, this._initMesh.material, this.count );
 
-    for(let i=0;i<this.np;i++) {
-      this.seeds[i] = Math.random();
+    for ( let i = 0; i < this.count; i ++ ) {
+      this.randomizeMatrix( matrix );
+      this.instancedMesh.setMatrixAt( i, matrix );
+
+      // color
+      this.instancedMesh.setColorAt(i, this.color.set(new THREE.Color(this.getColor())));
+      this.instancedMesh.instanceColor.needsUpdate = true;
     }
+
+    this.instancedMesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
+
+    this.scene.add( this.instancedMesh );
   }
-  animate = (t,i) => {
-    let seed=this.seeds[i]
-    t = t+(this.seeds[i]*this.interval)
-    t/=this.interval;
+  randomizeMatrix = function () {
 
-    //Wobble
-    this.petal.position.x=(Math.sin(t+seed*6.)*Math.cos((t*seed)*.3*this.wobbleSpeed)*this.wobbleMag)
-    this.petal.position.y=(Math.cos(t+seed*.5)*Math.sin((t*seed)*.67*this.wobbleSpeed)*this.wobbleMag)
+    const position = new THREE.Vector3();
+    const rotation = new THREE.Euler();
+    const quaternion = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
 
-    //Move constant speed on z...
-    this.petal.position.z=((t%1)*3)-1.5;
+    return function ( matrix ) {
 
-    //Rotate
-    this.petal.rotation.x=Math.sin((t+seed)*this.rotateSpeed)*16.2
-    this.petal.rotation.y=Math.cos((t+seed*.76)*this.rotateSpeed)*16.2
-    this.petal.rotation.z=Math.sin((t+seed*1.8)*this.rotateSpeed)*16.2
+      position.x = Math.floor(Math.random() * this.maxRange - this.minRange) //Math.random() * 40 - 20;
+      position.y = Math.floor(Math.random() * this.maxRange - this.minRange) // Math.random() * 40 - 20;
+      position.z = Math.floor(Math.random() * this.maxRange - this.minRange) //Math.random() * 40 - 20;
 
-    // seeded random start offset
-    this.petal.position.x+=Math.sin(seed*2164);
-    this.petal.position.y+=Math.cos(seed*3123)*.1;
-    this.petal.updateMatrix();
-  }
+      rotation.x = Math.random() * 2 * Math.PI;
+      rotation.y = Math.random() * 2 * Math.PI;
+      rotation.z = Math.random() * 2 * Math.PI;
+
+      quaternion.setFromEuler( rotation );
+
+      scale.x = scale.y = scale.z = Math.random() * 0.5;
+
+      matrix.compose( position, quaternion, scale );
+
+    };
+  }();
   update = () => {
-    for(let i=0; i<this.np; i++){
-      this.animate(performance.now(), i);
-      this.pmesh.setMatrixAt(i, this.petal.matrix);
+    if (this.instancedMesh) {
+      for(let i=0; i< this.count; i++) {
+        this.instancedMesh.getMatrixAt( i, this.matrix );
+
+        // position: ok
+        /*this.position.setFromMatrixPosition( this.matrix );
+        this.position.y -= 0.02; // move
+        this.matrix.setPosition( this.position );*/
+
+        this.matrix.decompose(this.dummy.position, this.dummy.quaternion, this.dummy.scale);
+
+        // position
+        this.dummy.position.x -= 0.03
+        this.dummy.position.y -= 0.02;
+        if (this.dummy.position.x < - this.minRange) {
+          this.dummy.position.x = this.minRange;
+        }
+        if (this.dummy.position.y < - this.minRange) {
+          this.dummy.position.y = this.minRange;
+        }
+
+        // rotation
+        this.dummy.rotation.x += 0.02 // * (i % 2 === 0 ? -1 : 1);
+        this.dummy.rotation.y += 0.02 // * (i % 2 === 0 ? -1 : 1);
+        this.dummy.rotation.z += 0.02 // * (i % 2 === 0 ? -1 : 1);
+        this.dummy.updateMatrix();
+
+        this.instancedMesh.setMatrixAt(i, this.dummy.matrix);
+        this.instancedMesh.instanceMatrix.needsUpdate = true;
+      }
     }
-    this.pmesh.instanceMatrix.needsUpdate = true;
+
   }
 }
