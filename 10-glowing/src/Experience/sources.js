@@ -1,11 +1,5 @@
 export default [
   {
-    name: "totoro",
-    type: "gltfModel",
-    path: "assets/models/totoromy_neighbor_totoro-v1.glb",
-    source: "https://skfb.ly/6TFnN"
-  },
-  {
     name: "skull",
     type: "gltfModel",
     path: "assets/models/tree_sprite_skull_kid-v1.glb",

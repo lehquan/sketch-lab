@@ -105,6 +105,7 @@ export default class Skull {
         child.material = this.material
         child.receiveShadow = true
         child.castShadow = true
+
         this.surface = child
       }
     })

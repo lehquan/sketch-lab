@@ -21,17 +21,16 @@ export default class Camera {
       10000
     )
     this.instance.position.set(0, 0, 6 );
-    // this.instance.lookAt(0, 0, 0)
     this.scene.add(this.instance)
   }
   setControls() {
     this.controls = new OrbitControls(this.instance, this.canvas)
     this.controls.enabled = true
-    // this.controls.autoRotate = true
-    // this.controls.autoRotateSpeed = 0.5
+    this.controls.autoRotate = true
+    this.controls.autoRotateSpeed = 0.5
     this.controls.enablePan = false
-    // this.controls.maxDistance = 10
-    // this.controls.minDistance = 2
+    this.controls.maxDistance = 10
+    this.controls.minDistance = 2
     this.controls.minPolarAngle = 0;
     this.controls.maxPolarAngle = Math.PI;
   }
