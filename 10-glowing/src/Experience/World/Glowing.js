@@ -30,11 +30,12 @@ export default class Glowing {
     this._normal = new THREE.Vector3();
     this._scale = new THREE.Vector3();
 
-    this.addWall()
+    // this.addWall()
     this.setMaterial()
     this.setSurface()
     this.setFlower()
     this.resample()
+
   }
   addWall = () => {
     const geometry = new THREE.BoxGeometry( 10, 0.15, 10 )
@@ -74,6 +75,7 @@ export default class Glowing {
     }
   }
   setSurface = () => {
+    // hat
     const cherry = this.resources.items.cherry_blossoms.scene
     cherry.scale.setScalar(1/3.5)
     cherry.rotation.set(Math.PI/180 * 170, 0, 0)
@@ -91,7 +93,7 @@ export default class Glowing {
     })
     this.scene.add(cherry)
 
-    //
+    // skull surface
     const model = this.resources.items.skull.scene
     this.scene.add(model)
 
@@ -109,6 +111,27 @@ export default class Glowing {
         this.surface = child
       }
     })
+
+    // totoro surface
+    /*const model = this.resources.items.totoro.scene
+    model.scale.setScalar(1/25)
+    model.position.y = -2
+    this.scene.add(model)
+
+    model.traverse(child => {
+      if (child.isMesh) {
+
+        child.geometry = child.geometry//.toNonIndexed()
+        // child.geometry.scale(1/25, 1/25, 1/25);
+        // child.geometry.translate(0, -2, 0);
+        // child.geometry.rotateY(Math.PI/180 * -90);
+
+        child.material = this.material
+        child.receiveShadow = true
+        child.castShadow = true
+        this.surface = child
+      }
+    })*/
   }
   setFlower = () => {
     const flower = this.resources.items.flower.scene
