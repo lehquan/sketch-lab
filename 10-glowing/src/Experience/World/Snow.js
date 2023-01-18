@@ -12,13 +12,73 @@ export default class Snow {
     this.velocities = [];
     this.materials = [];
     this.count = 1000
-    this.maxRange = 100;
+    this.maxRange = 50;
     this.minRange = this.maxRange / 2;
+    this.rotateSpeed = 5.
+    this.wobbleSpeed = 300.
+    this.wobbleMag = .05
+    this.interval = 16000;
+
     this.textureSize = 64.0;
     this.vertex = new THREE.Vector3();
+    this.seeds=[]
+    this.dummy = new THREE.Object3D()
 
-    this.setSnow2()
+    this.matrix = new THREE.Matrix4();
+    this.position = new THREE.Vector3();
+
+    // this.setSnow2()
+    this.initMesh()
   }
+  initMesh = () => {
+    const model = this.resources.items.cherry_petal.scene
+    this._initMesh = model.getObjectByName('petal02')
+
+    for (let i = 0; i < this.count; i++) {
+      const x = Math.floor(Math.random() * 6 - 3) * 0.1;
+      const y = Math.floor(Math.random() * 10 + 3) * - 0.05;
+      const z = Math.floor(Math.random() * 6 - 3) * 0.1;
+      this.velocities.push(x, y, z);
+    }
+    this._initMesh.geometry.setAttribute('velocity', new THREE.Float32BufferAttribute(this.velocities, 3))
+
+    //
+    const matrix = new THREE.Matrix4();
+    this.instancedMesh = new THREE.InstancedMesh( this._initMesh.geometry, this._initMesh.material, this.count );
+
+    for ( let i = 0; i < this.count; i ++ ) {
+      this.randomizeMatrix( matrix );
+      this.instancedMesh.setMatrixAt( i, matrix );
+    }
+    // this.instancedMesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
+
+    this.scene.add( this.instancedMesh );
+  }
+  randomizeMatrix = function () {
+
+    const position = new THREE.Vector3();
+    const rotation = new THREE.Euler();
+    const quaternion = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+
+    return function ( matrix ) {
+
+      position.x = Math.floor(Math.random() * this.maxRange - this.minRange) //Math.random() * 40 - 20;
+      position.y = Math.floor(Math.random() * this.maxRange - this.minRange) // Math.random() * 40 - 20;
+      position.z = Math.floor(Math.random() * this.maxRange - this.minRange) //Math.random() * 40 - 20;
+
+      rotation.x = Math.random() * 2 * Math.PI;
+      rotation.y = Math.random() * 2 * Math.PI;
+      rotation.z = Math.random() * 2 * Math.PI;
+
+      quaternion.setFromEuler( rotation );
+
+      scale.x = scale.y = scale.z = Math.random() * 0.5;
+
+      matrix.compose( position, quaternion, scale );
+
+    };
+  }();
   setSnow2 = () => {
     const pointMaterial = new THREE.PointsMaterial({
       size: 1,
@@ -30,7 +90,6 @@ export default class Snow {
       depthWrite: false
     });
 
-    //
     let pointGeometry = new THREE.BufferGeometry();
     for (let i = 0; i < this.count; i++) {
       const x = Math.floor(Math.random() * this.maxRange - this.minRange);
@@ -120,35 +179,14 @@ export default class Snow {
     }
   }
   update = () => {
-    /*const time = Date.now() * 0.000001;
-    for ( let i = 0; i < this.scene.children.length; i ++ ) {
-      const object = this.scene.children[ i ];
-      if ( object instanceof THREE.Points ) {
-        object.rotation.y = time * ( i < 4 ? i + 1 : - ( i + 1 ) );
-      }
-    }*/
-
-    // snow 2
-    // let positionAttribute = this.particles.geometry.attributes.position;
-    // for ( let i = 0; i < positionAttribute.count; i ++ ) {
-    //   this.vertex.fromBufferAttribute( positionAttribute, i );
-    //
-    //   this.vertex.y -= 1;
-    //   if (this.vertex.y < - 60) {
-    //     this.vertex.y = 90;
-    //   }
-    //   positionAttribute.setXYZ( i, this.vertex.x, this.vertex.y, this.vertex.z );
-    // }
-    // positionAttribute.needsUpdate = true;
-
-    let positionAttribute = this.particles.geometry.attributes.position; // n
+    /*let positionAttribute = this.particles.geometry.attributes.position; // n
     let velocityAttribute = this.particles.geometry.attributes.velocity.array; // n
 
     for ( let i = 0; i < positionAttribute.count; i ++ ) {
       this.vertex.fromBufferAttribute( positionAttribute, i ); // vertex
       const velocity = velocityAttribute[i]; // n
 
-      this.vertex.y -= 1/20;
+      this.vertex.y -= 1/30;
       if (this.vertex.y < - this.minRange) {
         this.vertex.y = this.minRange;
       }
@@ -157,11 +195,44 @@ export default class Snow {
       const velZ = Math.cos(performance.now() * 0.0015 * velocity) * 0.1;
 
       this.vertex.x += velX
-      this.vertex.z += velZ
+      // this.vertex.z += velZ
 
       positionAttribute.setXYZ( i, this.vertex.x, this.vertex.y, this.vertex.z ); // again setting attribute
     }
-    positionAttribute.needsUpdate = true
+    positionAttribute.needsUpdate = true*/
+
+    //
+    if (this.instancedMesh) {
+      for(let i=0; i< this.count; i++) {
+        this.instancedMesh.getMatrixAt( i, this.matrix );
+
+        // position: ok
+        /*this.position.setFromMatrixPosition( this.matrix );
+        this.position.y -= 0.02; // move
+        this.matrix.setPosition( this.position );*/
+
+        this.matrix.decompose(this.dummy.position, this.dummy.quaternion, this.dummy.scale);
+
+        // position
+        this.dummy.position.x -= 0.03
+        this.dummy.position.y -= 0.02;
+        if (this.dummy.position.x < - this.minRange) {
+          this.dummy.position.x = this.minRange;
+        }
+        if (this.dummy.position.y < - this.minRange) {
+          this.dummy.position.y = this.minRange;
+        }
+
+        // rotation
+        this.dummy.rotation.x += 0.01 * (i % 2 === 0 ? -1 : 1);
+        this.dummy.rotation.y += 0.01 * (i % 2 === 0 ? -1 : 1);
+        this.dummy.rotation.z += 0.01 * (i % 2 === 0 ? -1 : 1);
+        this.dummy.updateMatrix();
+
+        this.instancedMesh.setMatrixAt(i, this.dummy.matrix);
+        this.instancedMesh.instanceMatrix.needsUpdate = true;
+      }
+    }
 
   }
 }

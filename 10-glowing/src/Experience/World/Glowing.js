@@ -30,7 +30,7 @@ export default class Glowing {
     this._normal = new THREE.Vector3();
     this._scale = new THREE.Vector3();
 
-    // this.addWall()
+    this.addWall()
     this.setMaterial()
     this.setSurface()
     this.setFlower()

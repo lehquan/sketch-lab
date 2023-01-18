@@ -12,7 +12,6 @@ export default class Environment {
   setEnv = () => {
     // this.scene.background = new THREE.Color(0xffaacc)
     // this.scene.background = new THREE.Color(0xd6adad)
-    // this.scene.add( new THREE.AmbientLight( 0xd6adad, 0.1 ) );
     // this.scene.add( new THREE.AmbientLight( 0x000000, 0.5 ) );
 
     // const light = new THREE.SpotLight(0xffffff, 0.2, 10, Math.PI/3, 0.3)
