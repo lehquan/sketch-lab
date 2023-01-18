@@ -7,7 +7,6 @@
 
 Some pieces of sketch made with three.js :heart:
 <br></br>
-
 <table>
   <tr>
     <td><a href="https://vertices-animation.netlify.app/"><img src="01-animating-vertices/src/assets/screenshot.jpeg" alt=""></a></td>
@@ -23,6 +22,9 @@ Some pieces of sketch made with three.js :heart:
     <td><a href="https://shadertoy-and-three.netlify.app/"><img src="07-shadertoy-and-three/src/assets/screenshot.jpeg" alt=""></a></td>
     <td><a href="https://flying-triangles.netlify.app/"><img src="08-animating-triangles/src/assets/screenshot.png" alt=""></a></td>
     <td><a href="https://subsurface-scattering.netlify.app/"><img src="09-subsurface-scattering/src/assets/screenshot.png" alt=""></a></td>
+  </tr>
+  <tr>
+    <td><a href="https://shader-glowing.netlify.app/"><img src="10-glowing/src/assets/screenshot.png" alt=""></a></td>
   </tr>
 </table>
 
