@@ -17,7 +17,9 @@ export default class Skull {
       distribution: 'random',
       surfaceColor: 0xFFF784,
       backgroundColor: 0xE39469,
-    };
+    }
+    this.surfaces = []
+    this.samplers = []
     this.stemMesh = null
     this.blossomMesh = null
     this.sampler = null
@@ -119,7 +121,7 @@ export default class Skull {
     model.traverse(child => {
       if (child.isMesh) {
 
-        child.geometry = child.geometry//.toNonIndexed()
+        child.geometry = child.geometry.toNonIndexed()
         // child.geometry.scale(1/25, 1/25, 1/25);
         // child.geometry.translate(0, -2, 0);
         // child.geometry.rotateY(Math.PI/180 * -90);
@@ -181,6 +183,7 @@ export default class Skull {
     }
     this.stemMesh.instanceMatrix.needsUpdate = true;
     this.blossomMesh.instanceMatrix.needsUpdate = true;
+
   }
   resampleParticle = i => {
     this.sampler.sample( this._position, this._normal );
