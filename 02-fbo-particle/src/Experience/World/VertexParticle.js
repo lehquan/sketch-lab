@@ -2,7 +2,6 @@ import * as THREE from 'three'
 import Experience from '../Experience'
 import vertexShader from '../../shaders/particles.vert'
 import fragmentShader from '../../shaders/particles.frag'
-
 export default class VertexParticle {
   constructor(_debugFolder) {
     this.experience = new Experience()

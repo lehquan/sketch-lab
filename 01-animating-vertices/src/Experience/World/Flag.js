@@ -2,7 +2,6 @@ import * as THREE from 'three'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise'
 import Experience from '../Experience'
 import { gsap } from 'gsap'
-import {EFFECTS} from '../../utils/contains';
 
 export default class Flag {
   constructor() {

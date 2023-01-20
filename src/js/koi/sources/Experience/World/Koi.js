@@ -6,10 +6,10 @@ export default class Koi {
     this.experience = new Experience()
     this.scene = this.experience.scene
     this.resources = this.experience.resources
-    
+
     this.resource = this.resources.items.koiModel
     this.numPoints = 511
-    
+
     this.createPath()
     this.setModel()
   }
@@ -30,14 +30,14 @@ export default class Koi {
     const cSegments = 30
     const cStep = (Math.PI * 2) / cSegments
     const heightStep = 2.5
-    
+
     for(let i=0; i< turns*cSegments; i++) {
       cPts.push(new THREE.Vector3(Math.cos(cStep * i) * radius, heightStep * i, Math.sin(cStep * i) * radius))
     }
-    
+
     this.curve = new THREE.CatmullRomCurve3(cPts)
     this.curve.closed = true
-    
+
     const cPoints = this.curve.getSpacedPoints(this.numPoints);
     const cObjects = this.curve.computeFrenetFrames(this.numPoints, true);
     const pGeom = new THREE.BufferGeometry().setFromPoints(cPoints);
@@ -45,17 +45,17 @@ export default class Koi {
     const linePath = new THREE.Line(pGeom, pMat)
     linePath.position.set(0, -50, 0)
     this.scene.add(linePath)
-    
+
     // data texture
     this.createDataTexture(cPoints, cObjects)
   }
   createDataTexture = (cPoints, cObjects) => {
     let data = [];
-    cPoints.forEach( v => { data.push(v.x, v.y, v.z,0.);} );
+    cPoints.forEach( v => { data.push(v.x, v.y, v.z,0.);} );  // 4 channels
     cObjects.binormals.forEach( v => { data.push(v.x, v.y, v.z,0.);} );
     cObjects.normals.forEach( v => { data.push(v.x, v.y, v.z,0.);} );
     cObjects.tangents.forEach( v => { data.push(v.x, v.y, v.z,0.);} );
-  
+
     let dataArray = new Float32Array(data);
     this.dataTexture = new THREE.DataTexture(dataArray, this.numPoints + 1, 4, THREE.RGBAFormat, THREE.FloatType);
     this.dataTexture.magFilter = THREE.NearestFilter;
@@ -70,7 +70,7 @@ export default class Koi {
     objGeom.scale(0.3, 0.3, 0.3);
     const bbox = new THREE.Box3().setFromBufferAttribute(objGeom.getAttribute("position"));
     const size = bbox.getSize(new THREE.Vector3());
-  
+
     const material = new THREE.MeshBasicMaterial({color: 0xff6600, wireframe: true})
     material.onBeforeCompile = shader => {
       shader.uniforms.uSpatialTexture = { value: this.dataTexture }
@@ -78,7 +78,7 @@ export default class Koi {
       shader.uniforms.time = { value: 0 };
       shader.uniforms.uLengthRatio = { value: size.z / this.curve.cacheArcLengths[200]}
       shader.uniforms.uObjSize = { value: size}
-    
+
       shader.vertexShader = `
       uniform sampler2D uSpatialTexture;
       uniform vec2 uTextureSize;
@@ -128,10 +128,10 @@ export default class Koi {
       transformed = P + (N * pos.x) + (B * pos.y);
   `
       );
-    
+
       material.userData.shader = shader
     }
-  
+
     this.model = new THREE.Mesh(objGeom, material);
     this.model.position.set(0, -50, 0)
     this.scene.add(this.model);
