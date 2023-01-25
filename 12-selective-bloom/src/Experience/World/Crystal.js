@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { MathEx } from '@ykob/js-util'
 import Experience from '../Experience';
 import vertexShader from '../../shaders/crystal.vert'
 import fragmentShader from '../../shaders/crystal.frag'
@@ -20,7 +19,8 @@ export default class Crystal {
     const delays = []
     const speeds = []
 
-    for (let i = 0; i<this.count; i++) {
+    // old version
+    /*for (let i = 0; i<this.count; i++) {
       const radian1 = MathEx.radians(MathEx.randomArbitrary(0, 350) - 75)
       const radian2 = MathEx.radians(MathEx.randomArbitrary(0, 410))
       const radius = Math.random() * Math.random() * 8 + 4
@@ -28,7 +28,19 @@ export default class Crystal {
 
       vertices.push(spherical[0], spherical[1], spherical[2])
       delays.push(Math.random())
-      speeds.push(MathEx.randomArbitrary(1, 10) * (THREE.MathUtils.randInt(0, 1) * 2.0 -1.0))
+      speeds.push(MathEx.randomArbitrary(1, 10) * (MathEx.randomInt(0, 1) * 2.0 -1.0))
+    }*/
+
+    const spherical = new THREE.Spherical();
+    for(let i = 0; i < this.count; i++){
+      spherical.phi = Math.random() * Math.PI;
+      spherical.theta = Math.random() * Math.PI * 2;
+      spherical.radius = Math.random() * 10; // 10 is the desired radius
+
+      const vec = new THREE.Vector3().setFromSpherical(spherical)
+      vertices.push(vec.x, vec.y, vec.z)
+      delays.push(Math.random())
+      speeds.push(THREE.MathUtils.randFloat(1, 10) * (THREE.MathUtils.randInt(0, 1) * 2.0 -1.0))
     }
 
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))

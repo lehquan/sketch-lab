@@ -18,7 +18,7 @@ export default class Environment {
     bottom_1.position.set(0, -20, 250)
     this.scene.add( bottom_1 );
 
-    const back = new THREE.PointLight( 0xffffff, 10, 300 )
+    const back = new THREE.PointLight( 0xffffff, 1, 300 )
     back.position.set(-100, -20, -250)
     this.scene.add( back );
 
