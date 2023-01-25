@@ -64,6 +64,7 @@ export default class Experience {
     /**update everything */
     this.camera.update()
     this.world.update()
+    this.environment.update()
     // this.renderer.update() // Don't use this if using PostProcessing
     // if(this.postEffect) this.postEffect.update()
 

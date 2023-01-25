@@ -18,9 +18,12 @@ export default class Renderer {
       alpha: true,
     });
 
+    // this.instance.setClearColor(0xdde8eb, 1);
     this.instance.outputEncoding = THREE.sRGBEncoding;
     this.instance.toneMapping = THREE.ACESFilmicToneMapping;
     this.instance.toneMappingExposure = 1;
+    this.instance.shadowMap.enabled = true
+    this.instance.shadowMap.type = THREE.PCFSoftShadowMap
 
     this.resize();
   }

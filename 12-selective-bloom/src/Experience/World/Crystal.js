@@ -75,7 +75,7 @@ export default class Crystal {
 
     //
     this.scene.add(this.sparkle)
-    this.start(0)
+    this.start(Math.random())
   }
   start = hex => {
     this.material.uniforms.hex.value = hex
