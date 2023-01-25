@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import Experience from '../Experience';
-
 export default class ScifiGirl {
   constructor() {
     this.experience = new Experience()
@@ -13,7 +12,7 @@ export default class ScifiGirl {
   }
   setModel = () => {
     this.model = this.resources.items.scifi_girl.scene
-    this.model.position.set(0, -3.6, 0)
+    this.model.position.set(0, -3, 0)
     this.model.scale.setScalar(2.5)
     this.model.rotation.y = Math.PI/180 * -90
 
@@ -28,6 +27,15 @@ export default class ScifiGirl {
         }
       }
     })
+
+    // If you wanna add particle into model position
+    // this.particle = new Crystal()
+    // this.particle.sparkle.position.copy(this.model.position)
+    // this.particle.sparkle.position.x = this.model.position.x
+    // this.particle.sparkle.position.z = this.model.position.z
+    // this.particle.sparkle.position.y = this.model.position.y + 3.5
+    // this.particle.start(0)
+    // this.scene.add(this.particle.sparkle)
   }
   update = () => {
     // 1. Make all non-bloomed objects totally black
@@ -49,5 +57,8 @@ export default class ScifiGirl {
 
     // 4. Render the scene with finalComposer
     this.postEffect.finalUpdate()
+
+    // particles
+    // if(this.particle) this.particle.update()
   }
 }
