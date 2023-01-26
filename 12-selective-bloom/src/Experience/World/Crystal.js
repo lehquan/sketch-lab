@@ -40,9 +40,10 @@ export default class Crystal {
       const vec = new THREE.Vector3().setFromSpherical(spherical)
       vertices.push(vec.x, vec.y, vec.z)
       delays.push(Math.random())
-      speeds.push(THREE.MathUtils.randFloat(1, 10) * (THREE.MathUtils.randInt(0, 1) * 2.0 -1.0))
+      speeds.push(THREE.MathUtils.randFloat(1, 5) * (THREE.MathUtils.randInt(0, 1) * 2.0 -1.0))
     }
 
+    // geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
     geometry.setAttribute('delay', new THREE.Float32BufferAttribute(delays, 1))
     geometry.setAttribute('speed', new THREE.Float32BufferAttribute(speeds, 1))

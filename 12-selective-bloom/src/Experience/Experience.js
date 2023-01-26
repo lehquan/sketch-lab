@@ -66,7 +66,6 @@ export default class Experience {
     this.world.update()
     this.environment.update()
     // this.renderer.update() // Don't use this if using PostProcessing
-    // if(this.postEffect) this.postEffect.update()
 
     /**Finish analyzing frame */
     this.stats.active && this.stats.afterRender()

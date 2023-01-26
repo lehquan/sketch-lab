@@ -12,7 +12,7 @@ export default class ScifiGirl {
   }
   setModel = () => {
     this.model = this.resources.items.scifi_girl.scene
-    this.model.position.set(0, -3, 0)
+    this.model.position.set(0, -3.6, 0)
     this.model.scale.setScalar(2.5)
     this.model.rotation.y = Math.PI/180 * -90
 
@@ -57,8 +57,5 @@ export default class ScifiGirl {
 
     // 4. Render the scene with finalComposer
     this.postEffect.finalUpdate()
-
-    // particles
-    // if(this.particle) this.particle.update()
   }
 }
