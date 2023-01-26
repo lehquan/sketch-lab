@@ -25,6 +25,7 @@ Some pieces of sketch made with three.js :heart:
   </tr>
   <tr>
     <td><a href="https://shader-glowing.netlify.app/"><img src="10-glowing/src/assets/screenshot.png" alt=""></a></td>
+    <td><a href="https://selective-bloom.netlify.app/"><img src="12-selective-bloom/src/assets/screenshot.png" alt=""></a></td>
   </tr>
 </table>
 
