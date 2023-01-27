@@ -27,10 +27,8 @@ export default class Experience {
     window.experience = this
 
     /**Canvas*/
-    const _canvas = document.createElement("canvas")
-    _canvas.id = 'experience'
-    document.body.appendChild(_canvas)
-    this.canvas = _canvas
+    this.createDOM()
+    this.canvas = document.querySelector("#experience")
 
     /**Setup Classes */
     this.debug = new Debug()
@@ -51,7 +49,27 @@ export default class Experience {
     // this.time.on("tick", () => this.update())
     this.tick()
   }
+  createDOM = () => {
+    // canvas
+    const _canvas = document.createElement("canvas")
+    _canvas.id = 'experience'
+    document.body.appendChild(_canvas)
 
+    // footer
+    const footer = document.createElement("div")
+    footer.classList.add('footer')
+    document.body.appendChild(footer)
+
+    const note = document.createElement('p')
+    note.innerHTML = '3D Model(s): '
+    footer.appendChild(note)
+
+    const linkNote = document.createElement('a')
+    linkNote.innerHTML = 'Scifi Girl v.01'
+    linkNote.href = 'https://skfb.ly/HpVV'
+    linkNote.target = 'blank'
+    note.appendChild(linkNote)
+  }
   resize() {
     this.camera.resize()
     this.renderer.resize()
