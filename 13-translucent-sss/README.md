@@ -1,6 +1,4 @@
-# Selective Blooming Effect by Emissive color
-
-## Screenshot
+# Translucent Subsurface Scattering
 
 ![screenshot](src/assets/screenshot.png)
 

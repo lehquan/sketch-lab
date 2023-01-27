@@ -93,6 +93,5 @@ export default class SSS {
 
     // this.sphere.position.y = h;
     this.sssUniforms.uLightPos.value.y = h;
-    if (this.model) this.model.rotation.y = performance.now() / 2500;
   }
 }

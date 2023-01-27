@@ -26,10 +26,8 @@ export default class Experience {
     window.experience = this
 
     /**Canvas*/
-    const _canvas = document.createElement("canvas")
-    _canvas.id = 'experience'
-    document.body.appendChild(_canvas)
-    this.canvas = _canvas
+    this.createDOM()
+    this.canvas = document.querySelector("#experience")
 
     /**Setup Classes */
     this.debug = new Debug()
@@ -48,6 +46,28 @@ export default class Experience {
     this.sizes.on("resize", () => this.resize())
     // this.time.on("tick", () => this.update())
     this.tick()
+  }
+
+  createDOM = () => {
+    // canvas
+    const _canvas = document.createElement("canvas")
+    _canvas.id = 'experience'
+    document.body.appendChild(_canvas)
+
+    // footer
+    const footer = document.createElement("div")
+    footer.classList.add('footer')
+    document.body.appendChild(footer)
+
+    const note = document.createElement('p')
+    note.innerHTML = '3D Model(s): '
+    footer.appendChild(note)
+
+    const linkNote = document.createElement('a')
+    linkNote.innerHTML = 'Girl Statue'
+    linkNote.href = 'https://skfb.ly/o8RJv'
+    linkNote.target = 'blank'
+    note.appendChild(linkNote)
   }
 
   resize() {
