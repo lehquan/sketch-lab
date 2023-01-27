@@ -41,7 +41,7 @@ export default class SSS {
   }
   update = () => {
     const min = -1.0 // 0.5
-    const max = +1.0  // 0.7
+    const max = 0.7
     const h = Math.sin(performance.now() / 1000) * min + max
 
     this.sphere.position.y = h;
