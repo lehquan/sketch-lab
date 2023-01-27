@@ -6,9 +6,9 @@ export default [
     source: "https://skfb.ly/ooM8o"
   },
   {
-    name: "lantern",
+    name: "statue",
     type: "gltfModel",
-    path: "assets/models/japanese_paper_lantern.glb",
-    source: "https://skfb.ly/6YGZE"
+    path: "assets/models/girl_statue-v1.glb",
+    source: "https://skfb.ly/o8RJv"
   },
 ];
