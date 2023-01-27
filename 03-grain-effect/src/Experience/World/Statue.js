@@ -10,9 +10,6 @@ export default class Statue {
     this.setModel()
   }
 
-  /**
-   * Free download: https://sketchfab.com/3d-models/statue-of-liberty-84094e8d5e724b5c882cf576ca12e44e
-   */
   setModel = () => {
     this.model = this.resources.items.statueOfLiberty.scene
     this.model.scale.setScalar(1/4)

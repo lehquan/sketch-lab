@@ -71,9 +71,7 @@ export default class World {
     this.uniforms.uNoiseMax.value = this.guiController.uNoiseMax
     this.uniforms.uNoiseScale.value = this.guiController.uNoiseScale
   }
-  /**
-   * Free download: https://sketchfab.com/3d-models/rocky-ground-with-moss-2c0386dd36124ad78f37dbf6432eac21
-   */
+
   setGround = () => {
     this.ground = this.resources.items.rockyGround.scene
     this.ground.position.y = -2
