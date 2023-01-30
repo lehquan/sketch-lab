@@ -1,18 +1,13 @@
 export default [
   {
-    name: "testMatcap",
-    type: "texture",
-    path: "assets/textures/matcap.png",
-  },
-  {
-    name: "foxModel",
-    type: "gltfModel",
-    path: "assets/models/Fox/glTF/Fox.gltf",
-  },
-  {
     name: "tontu",
     type: "gltfModel",
-    path: "assets/models/tonttugirl_meshoptimizer.glb",
+    path: "assets/models/out.glb",
+  },
+  {
+    name: "helmet",
+    type: "gltfModel",
+    path: "assets/models/DamagedHelmet-v2.glb",
   },
   {
     name: "royal_esplanade",

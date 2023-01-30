@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import { GLTFLoader} from 'three/addons/loaders/GLTFLoader'
+import { GLTFLoader} from 'three/addons/loaders/GLTFLoader';
 import { DRACOLoader} from 'three/addons/loaders/DRACOLoader'
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader'
 import { OBJLoader} from 'three/addons/loaders/OBJLoader'
@@ -42,6 +42,7 @@ export default class Resources extends EventEmitter {
 
     // ktx2 for meshopt
     const ktx2Loader = new KTX2Loader()
+    ktx2Loader.setTranscoderPath('/vendor/basis/')
     ktx2Loader.detectSupport(this.renderer)
     this.loaders.gltfLoader.setKTX2Loader(ktx2Loader)
 

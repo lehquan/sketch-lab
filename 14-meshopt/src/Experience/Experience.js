@@ -9,7 +9,7 @@ import Stats from "../utils/Stats.js"
 
 import sources from "./sources.js"
 import Environment from './Environment'
-import Mouse from '../utils/Mouse';
+// import Mouse from '../utils/Mouse';
 import Debug from '../utils/Debug';
 import Ray from './Ray';
 
@@ -37,8 +37,7 @@ export default class Experience {
     this.stats = new Stats()
     this.sizes = new Sizes()
     this.time = new Time()
-    this.mouse = new Mouse()
-    // this.resources = new Resources(sources)
+    // this.mouse = new Mouse()
 
     this.scene = new THREE.Scene()
     this.camera = new Camera()
@@ -46,7 +45,7 @@ export default class Experience {
     this.resources = new Resources(sources) // resources need renderer
     this.environment = new Environment()
     this.world = new World()
-    // this.ray = new Ray(this.camera, this.scene)
+    this.ray = new Ray(this.camera, this.scene)
 
     this.sizes.on("resize", () => this.resize())
     this.time.on("tick", () => this.update())
