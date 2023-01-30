@@ -51,6 +51,7 @@ export default class Experience {
   resize() {
     this.camera.resize()
     this.renderer.resize()
+    this.postEffect.resize()
   }
 
   update() {
@@ -60,8 +61,8 @@ export default class Experience {
     /**update everything */
     this.camera.update()
     this.world.update()
-    // this.renderer.update()
-    if (this.postEffect) this.postEffect.update()
+    this.renderer.update()
+    // if (this.postEffect) this.postEffect.update()
 
     /**Finish analyzing frame */
     this.stats.active && this.stats.afterRender()

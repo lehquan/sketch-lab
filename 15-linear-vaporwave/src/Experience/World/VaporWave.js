@@ -13,10 +13,11 @@ export default class VaporWave {
       metalness: 1,
       roughness: 0.5,
     }
+    this.speed = 0
+    this.position = 0
 
     this.setPlane()
 
-    // window.addEventListener('wheel', this.debounce(this.onScrollHandler, 200));
   }
   setPlane = () => {
     console.log(this.resources.items)
@@ -41,48 +42,41 @@ export default class VaporWave {
     this.plane2.position.set(0, 0, -1.85)
     this.scene.add(this.plane2)
   }
-  /*onScrollHandler = ev => {
+  onScrollHandler = ev => {
+
     if (ev.deltaY < 0) {
       this.isScrolling = true
 
-      const prev = this.currentSelectedId
+      // console.log('scrolling up')
+
+      /*const prev = this.currentSelectedId
       if (this.currentSelectedId < this.projectData.length) {
-        // this.currentSelectedId++
-        console.log('scrolling up: ')
+        this.currentSelectedId++
+        console.log('scrolling up: ', this.currentSelectedId, ' prev: ', prev)
       }
 
-      // this.gotoPage()
+      this.gotoPage()*/
     }
     else if (ev.deltaY > 0) {
       this.isScrolling = true
 
-      const prev = this.currentSelectedId
+      console.log('scrolling down')
+
+      this.speed += ev.deltaY * 0.0002
+
+     /* const prev = this.currentSelectedId
       if (this.currentSelectedId > 1) {
-        //this.currentSelectedId--
-        console.log('scrolling down: ')
+        this.currentSelectedId--
+        console.log('scrolling down: ', this.currentSelectedId, ' prev: ', prev)
       }
 
-      // this.gotoPage()
-    }
-  }*/
-  debounce = function(fn, d) {
-    let timer;
-    return function() {
-      let context = this;
-      let args = arguments;
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        fn.apply(context, args);
-      }, d);
+      this.gotoPage()*/
     }
   }
   update = () => {
-
     if (this.plane) {
       this.plane.position.z = (this.clock.getElapsedTime() * 0.12) % 2
-
       this.plane2.position.z = ((this.clock.getElapsedTime() * 0.12) % 2) - 2;
-
     }
   }
 }

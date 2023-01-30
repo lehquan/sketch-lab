@@ -14,17 +14,18 @@ export default class Camera {
   }
   setInstance() {
     this.instance = new THREE.PerspectiveCamera(
-      75,
+      45,
       this.sizes.width / this.sizes.height,
       0.01,
-      20
+      10000
     )
-    this.instance.position.set(0, 0.06, 1.1);
+    // this.instance.position.set(0, 0.06, 1.1);
+    this.instance.position.set(0, 0, 5);
     this.scene.add(this.instance)
   }
   setControls() {
     this.controls = new OrbitControls(this.instance, this.canvas)
-    this.controls.enabled = false
+    this.controls.enabled = true
     this.controls.autoRotate = false
 
     if (this.debug.active) {

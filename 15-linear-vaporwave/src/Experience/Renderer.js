@@ -18,10 +18,10 @@ export default class Renderer {
       antialias: true,
     });
 
-    // this.instance.setClearColor("#262626", 1);
-    // this.instance.physicallyCorrectLights = true;
+    this.instance.setClearColor("#262626", 1);
+    this.instance.physicallyCorrectLights = true;
     this.instance.outputEncoding = THREE.sRGBEncoding;
-    this.instance.toneMapping = THREE.NoToneMapping;
+    this.instance.toneMapping = THREE.ACESFilmicToneMapping;
     this.instance.toneMappingExposure = 1;
 
     this.resize();
