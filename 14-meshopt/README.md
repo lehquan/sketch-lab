@@ -1,4 +1,4 @@
-# Three.js & Webpack Template
+# Meshopt and Raycaster
 
 ## Screenshot
 
@@ -6,7 +6,7 @@
 
 ## Description
 
-- Three.js : [v148](https://unpkg.com/browse/three@0.149.0/)
-- DRACO Decoder: [v148](https://unpkg.com/browse/three@0.149.0/examples/jsm/libs/draco/)
-- GUI Debug
-- Play GLB model animation.
+- Three.js : [v149](https://unpkg.com/browse/three@0.149.0/)
+- DRACO Decoder: [v149](https://unpkg.com/browse/three@0.149.0/examples/jsm/libs/draco/)
+- MeshoptDecoder: v149
+- KTX2 Transcoder: [v149](https://unpkg.com/browse/three@0.149.0/examples/jsm/libs/basis/)
