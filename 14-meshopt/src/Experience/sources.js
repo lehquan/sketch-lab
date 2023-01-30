@@ -2,7 +2,7 @@ export default [
   {
     name: "tontu",
     type: "gltfModel",
-    path: "assets/models/out.glb",
+    path: "assets/models/out2.glb",
   },
   {
     name: "helmet",
