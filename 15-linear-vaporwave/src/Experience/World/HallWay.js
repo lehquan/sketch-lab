@@ -40,7 +40,6 @@ export default class HallWay {
   }
   setModel = () => {
     this.hallway = this.resources.items.hallway.scene
-    this.hallway.position.set(0, -2, -10)
 
     let rightColumn = this.hallway.getObjectByName('pillar_left').clone()
     rightColumn.position.x *= -1
@@ -62,34 +61,26 @@ export default class HallWay {
 
     const center = this.hallway.getObjectByName('center')
     center.material.color = new THREE.Color(0x000000)
+
+    // 1
+    this.hallway.position.set(0, -2, -10)
     this.scene.add(this.hallway)
 
-    //
+    // 2
     this.hallway2 = this.hallway.clone()
     this.hallway2.position.set(0, -2, -30)
-    // this.scene.add(this.hallway2)
+    this.scene.add(this.hallway2)
 
-  }
-  setPlane = () => {
-    const geometry = new THREE.PlaneGeometry(1, 2, 24, 24)
-    const material = new THREE.MeshStandardMaterial({
-      map: this.resources.items.grid,
-      displacementMap: this.resources.items.displacement,
-      displacementScale: this.params.displacementScale,
-      metalnessMap: this.resources.items.metalness,
-      metalness: this.params.metalness,
-      roughness: this.params.roughness
-    })
+    // 3
+    this.hallway3 = this.hallway.clone()
+    this.hallway3.position.set(0, -2, -50)
+    this.scene.add(this.hallway3)
 
-    this.plane = new THREE.Mesh(geometry, material)
-    this.plane.rotation.x = -Math.PI * 0.5
-    this.plane.position.set(0, 0, 0.15)
-    this.scene.add(this.plane)
+    // 4
+    this.hallway4 = this.hallway.clone()
+    this.hallway4.position.set(0, -2, -70)
+    this.scene.add(this.hallway4)
 
-    //
-    this.plane2 = this.plane.clone()
-    this.plane2.position.set(0, 0, -1.85)
-    this.scene.add(this.plane2)
   }
   onScrollHandler = ev => {
 
@@ -135,20 +126,26 @@ export default class HallWay {
   }
   update = () => {
     if (this.hallway) {
-      /*this.plane.position.z = (this.clock.getElapsedTime() * 0.12) % 2
-      this.plane2.position.z = ((this.clock.getElapsedTime() * 0.12) % 2) - 2;*/
+      this.hallway.position.z += 0.05
+      this.hallway2.position.z += 0.05
+      this.hallway3.position.z += 0.05
+      this.hallway4.position.z += 0.05
 
-      this.hallway.position.z += 0.15
-      // this.hallway.position.z = (this.clock.getElapsedTime() * 0.15) % 2
-      // this.hallway2.position.z = ((this.clock.getElapsedTime() * 0.15) % 2) - 2;
+      if (this.hallway.position.z >= 10) {
+        this.hallway.position.z = -68
+      }
 
-      /*this.position += this.speed
-      this.speed *= 0.8
-      this.plane.position.z = this.position
+      if (this.hallway2.position.z >= 10) {
+        this.hallway2.position.z = -68
+      }
 
-      if (this.plane.position.z >= 0.05) {
-      }*/
+      if (this.hallway3.position.z >= 10) {
+        this.hallway3.position.z = -68
+      }
 
+      if (this.hallway4.position.z >= 10) {
+        this.hallway4.position.z = -68
+      }
     }
   }
 }

@@ -15,8 +15,10 @@ export default class Environment {
   }
   setEnv = () => {
     // fog
-    const fog = new THREE.Fog(0x000000, 1, 2.5)
-    // this.scene.fog = fog
+    // const fog = new THREE.Fog(0x000000, 1, 2.5)
+    // const fog = new THREE.Fog(0x262626, 1, 30)
+    const fog = new THREE.Fog(0x000000, 1, 70)
+    this.scene.fog = fog
 
     // lights
     this.scene.add( new THREE.AmbientLight(0xffffff, 1))
