@@ -1,6 +1,5 @@
 import Experience from "../Experience.js"
 import VaporWave from './VaporWave';
-import HallWay from './HallWay';
 
 export default class World {
   constructor() {
@@ -11,12 +10,10 @@ export default class World {
 
     // Wait for resources
     this.resources.on("ready", () => {
-      // this.vaporwave = new VaporWave()
-      this.hallway = new HallWay()
+      this.vaporwave = new VaporWave()
     })
   }
   update() {
-    // if (this.vaporwave) this.vaporwave.update()
-    if (this.hallway) this.hallway.update()
+    if (this.vaporwave) this.vaporwave.update()
   }
 }

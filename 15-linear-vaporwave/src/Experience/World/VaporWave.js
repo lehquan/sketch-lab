@@ -13,15 +13,10 @@ export default class VaporWave {
       metalness: 1,
       roughness: 0.5,
     }
-    this.speed = 0
-    this.position = 0
 
     this.setPlane()
-
   }
   setPlane = () => {
-    console.log(this.resources.items)
-
     const geometry = new THREE.PlaneGeometry(1, 2, 24, 24)
     const material = new THREE.MeshStandardMaterial({
       map: this.resources.items.grid,
@@ -41,37 +36,6 @@ export default class VaporWave {
     this.plane2 = this.plane.clone()
     this.plane2.position.set(0, 0, -1.85)
     this.scene.add(this.plane2)
-  }
-  onScrollHandler = ev => {
-
-    if (ev.deltaY < 0) {
-      this.isScrolling = true
-
-      // console.log('scrolling up')
-
-      /*const prev = this.currentSelectedId
-      if (this.currentSelectedId < this.projectData.length) {
-        this.currentSelectedId++
-        console.log('scrolling up: ', this.currentSelectedId, ' prev: ', prev)
-      }
-
-      this.gotoPage()*/
-    }
-    else if (ev.deltaY > 0) {
-      this.isScrolling = true
-
-      console.log('scrolling down')
-
-      this.speed += ev.deltaY * 0.0002
-
-     /* const prev = this.currentSelectedId
-      if (this.currentSelectedId > 1) {
-        this.currentSelectedId--
-        console.log('scrolling down: ', this.currentSelectedId, ' prev: ', prev)
-      }
-
-      this.gotoPage()*/
-    }
   }
   update = () => {
     if (this.plane) {
