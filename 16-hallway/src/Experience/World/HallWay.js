@@ -1,36 +1,68 @@
 import * as THREE from 'three'
+import {ReflectorForSSRPass} from 'three/addons/objects/ReflectorForSSRPass';
+
 import Experience from '../Experience';
 export default class HallWay {
   constructor() {
     this.experience = new Experience()
     this.scene = this.experience.scene
     this.resources = this.experience.resources
+    this.sizes = this.experience.sizes
 
-    this.clock = new THREE.Clock()
-    this.speed = 0
-    this.position = 0
+    this.otherMeshes = [];
+    this.selects = [];
 
-    // this.setGround()
-    this.setModel()
-
-    // window.addEventListener('wheel', this.debounce(this.onScrollHandler, 200));
-    // window.addEventListener('wheel', this.onScrollHandler);
+    this.setGround()
+    this.setObjects()
   }
   setGround = () => {
-    console.log(this.resources.items)
-    const geometry = new THREE.PlaneGeometry(1, 2, 1, 1)
-    const material = new THREE.MeshStandardMaterial({
-      roughnessMap: this.resources.items.floor_roughness,
-      metalness: 0,
-      roughness: 1,
-      side: THREE.DoubleSide
-    })
+    this.ground = new THREE.Mesh(
+        new THREE.PlaneGeometry( 8, 8 ),
+        new THREE.MeshStandardMaterial( { metalness:1,roughness:.1, color: 0x606060 } )
+    );
+    this.ground.rotation.x = - Math.PI / 2;
+    this.ground.position.y = 0.0365;
+    // this.ground.receiveShadow = true;
+    this.scene.add( this.ground );
+  }
+  setObjects = () => {
+    const green = new THREE.Mesh(
+        new THREE.BoxBufferGeometry( .05, .05, .05 ),
+        new THREE.MeshStandardMaterial( { metalness:.5,roughness:.1, color: 'green' } ) );
+    green.position.set( - .12, this.ground.position.y + .025, .015 );
+    this.scene.add( green );
+    this.otherMeshes.push( green );
+    this.selects.push( green );
 
-    this.plane = new THREE.Mesh(geometry, material)
-    this.plane.rotation.x = -Math.PI * 0.5
-    this.plane.position.set(0, -4.5, 0)
-    this.plane.scale.setScalar(1000, 1000)
-    this.scene.add(this.plane)
+    const cyan = new THREE.Mesh(
+        new THREE.IcosahedronBufferGeometry( .025, 4 ),
+        new THREE.MeshStandardMaterial( { metalness:.5,roughness:.1, color: 'cyan' } ) );
+    cyan.position.set( - .05, this.ground.position.y + .025, .08 );
+    this.scene.add( cyan );
+    this.otherMeshes.push( cyan );
+    this.selects.push( cyan );
+
+    const yellow = new THREE.Mesh(
+        new THREE.ConeBufferGeometry( .025, .05, 64 ),
+        new THREE.MeshStandardMaterial( { metalness:.5,roughness:.1, color: 'yellow' } ) );
+    yellow.position.set( - .05, this.ground.position.y + .025, - .055 );
+    this.scene.add( yellow );
+    this.otherMeshes.push( yellow );
+    this.selects.push( yellow );
+
+    this.groundReflector = new ReflectorForSSRPass( new THREE.PlaneBufferGeometry( 8, 8 ), {
+      clipBias: 0.003,
+      textureWidth: window.innerWidth,
+      textureHeight: window.innerHeight,
+      color: 0x888888,
+      useDepthTexture: true,
+    } );
+    // window.this.groundReflector= this.groundReflector
+    this.groundReflector.material.depthWrite = false;
+    this.groundReflector.position.y = this.ground.position.y + .0001;
+    this.groundReflector.rotation.x = - Math.PI / 2;
+    this.groundReflector.visible = false;
+    this.scene.add( this.groundReflector );
   }
   setModel = () => {
     this.hallway = this.resources.items.hallway.scene
@@ -74,72 +106,8 @@ export default class HallWay {
     this.hallway4 = this.hallway.clone()
     this.hallway4.position.set(0, -2, -70)
     this.scene.add(this.hallway4)
-
-  }
-  onScrollHandler = ev => {
-
-    if (ev.deltaY < 0) {
-      this.isScrolling = true
-
-      // console.log('scrolling up')
-
-      /*const prev = this.currentSelectedId
-      if (this.currentSelectedId < this.projectData.length) {
-        this.currentSelectedId++
-        console.log('scrolling up: ', this.currentSelectedId, ' prev: ', prev)
-      }
-
-      this.gotoPage()*/
-    }
-    else if (ev.deltaY > 0) {
-      this.isScrolling = true
-
-      console.log('scrolling down')
-
-      this.speed += ev.deltaY * 0.0002
-
-     /* const prev = this.currentSelectedId
-      if (this.currentSelectedId > 1) {
-        this.currentSelectedId--
-        console.log('scrolling down: ', this.currentSelectedId, ' prev: ', prev)
-      }
-
-      this.gotoPage()*/
-    }
-  }
-  debounce = function(fn, d) {
-    let timer;
-    return function() {
-      let context = this;
-      let args = arguments;
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        fn.apply(context, args);
-      }, d);
-    }
   }
   update = () => {
-    if (this.hallway) {
-      this.hallway.position.z += 0.05
-      this.hallway2.position.z += 0.05
-      this.hallway3.position.z += 0.05
-      this.hallway4.position.z += 0.05
 
-      if (this.hallway.position.z >= 10) {
-        this.hallway.position.z = -68
-      }
-
-      if (this.hallway2.position.z >= 10) {
-        this.hallway2.position.z = -68
-      }
-
-      if (this.hallway3.position.z >= 10) {
-        this.hallway3.position.z = -68
-      }
-
-      if (this.hallway4.position.z >= 10) {
-        this.hallway4.position.z = -68
-      }
-    }
   }
 }

@@ -38,11 +38,11 @@ export default class Experience {
     this.resources = new Resources(sources)
 
     this.scene = new THREE.Scene()
-    this.environment = new Environment()
     this.camera = new Camera()
     this.renderer = new Renderer()
-    this.postEffect = new PostEffect()
+    this.environment = new Environment()
     this.world = new World()
+    this.postEffect = new PostEffect()
 
     this.sizes.on("resize", () => this.resize())
     this.tick()

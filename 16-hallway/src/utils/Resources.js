@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import {RGBELoader} from 'three/addons/loaders/RGBELoader';
 import EventEmitter from "./EventEmitter.js";
 
 export default class Resources extends EventEmitter {
@@ -27,7 +28,8 @@ export default class Resources extends EventEmitter {
 
     this.loaders.objLoader = new OBJLoader()
     this.loaders.textureLoader = new THREE.TextureLoader();
-    this.loaders.cubeTextureLoader = new THREE.CubeTextureLoader();
+    this.loaders.cubeTextureLoader = new THREE.CubeTextureLoader()
+    this.loaders.hdrLoader = new RGBELoader()
   }
 
   startLoading() {
@@ -50,6 +52,11 @@ export default class Resources extends EventEmitter {
       }
       else if (source.type === "cubeTexture") {
         this.loaders.cubeTextureLoader.load(source.path, (file) => {
+          this.sourceLoaded(source, file);
+        });
+      }
+      else if (source.type === "hdrTexture") {
+        this.loaders.hdrLoader.load(source.path, (file) => {
           this.sourceLoaded(source, file);
         });
       }

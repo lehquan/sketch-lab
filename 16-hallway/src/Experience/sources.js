@@ -19,4 +19,10 @@ export default [
     type: "gltfModel",
     path: "assets/models/assets_0802-v1.glb",
   },
+  {
+    name: "royal_esplanade",
+    type: "hdrTexture",
+    path: "assets/textures/royal_esplanade_1k.hdr",
+    source: ""
+  },
 ];

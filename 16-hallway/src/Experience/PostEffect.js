@@ -1,54 +1,149 @@
 import * as THREE from 'three'
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer'
-import { RenderPass } from 'three/addons/postprocessing/RenderPass'
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass'
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass';
-import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader';
-import { GammaCorrectionShader } from 'three/addons/shaders/GammaCorrectionShader';
+import { SSRPass } from 'three/addons/postprocessing/SSRPass';
 import Experience from './Experience'
 
 export default class PostEffect {
   constructor() {
     this.experience = new Experience()
     this.renderer = this.experience.renderer.instance
+    this.resources = this.experience.resources
     this.scene = this.experience.scene
     this.camera = this.experience.camera.instance
     this.sizes = this.experience.sizes
     this.debug = this.experience.debug
 
     this.params = {
-      exposure: 1,
-      bloomStrength: 0.4,
-      bloomThreshold: 0,
-      bloomRadius: 0,
-      rgbShiftIntensity: 0.001
+      enableSSR: true,
+      autoRotate: true,
+      isOtherMeshes: true,
+      isGroundReflector: true,
+      isPerspectiveCamera: true
     }
-    this.setEffect()
+
+    this.resources.on("ready", () => {
+      this.groundReflector = this.experience.world.hallway.groundReflector
+      this.selects = this.experience.world.hallway.selects
+      this.otherMeshes = this.experience.world.hallway.otherMeshes
+
+      this.setEffect()
+    })
+
   }
   setEffect = () => {
-    this.composer = new EffectComposer(this.renderer)
+    const renderer = this.renderer
+    const scene = this.scene
+    const camera = this.camera
 
-    const renderPass = new RenderPass(this.scene, this.camera)
-    this.composer.addPass(renderPass)
+    this.composer = new EffectComposer(renderer)
 
-    // const rgbShiftPass = new ShaderPass(RGBShiftShader)
-    // rgbShiftPass.uniforms.amount.value = this.params.rgbShiftIntensity
-    // this.composer.addPass(rgbShiftPass)
+    // ssr
+    this.ssrPass = new SSRPass( {
+      renderer,
+      scene,
+      camera,
+      width: innerWidth,
+      height: innerHeight,
+      encoding: THREE.sRGBEncoding,
+      isPerspectiveCamera: this.params.isPerspectiveCamera,
+      groundReflector: this.params.isGroundReflector ? this.groundReflector : null,
+      selects: this.params.isGroundReflector ? this.selects : null
+    } );
+    this.composer.addPass(this.ssrPass)
 
-    // const gammaCorrectionShader = new ShaderPass(GammaCorrectionShader)
-    // this.composer.addPass(gammaCorrectionShader)
+    //
+    if (this.debug.active) {
+      this.debug.ui.add( this.params, 'enableSSR' ).name( 'Enable SSR' );
+      this.debug.ui.add( this.params, 'isGroundReflector' ).onChange( () => {
 
-    this.bloomPass = new UnrealBloomPass( new THREE.Vector2( this.sizes.width, this.sizes.height ), 1.5, 0.4, 0.85 )
-    this.bloomPass.threshold = this.params.bloomThreshold
-    this.bloomPass.radius = this.params.bloomRadius
-    this.bloomPass.strength = this.params.bloomStrength
-    this.composer.addPass(this.bloomPass)
+        if ( this.params.isGroundReflector ) {
+
+          this.ssrPass.groundReflector = this.groundReflector,
+              this.ssrPass.selects = this.selects;
+
+        } else {
+
+          this.ssrPass.groundReflector = null,
+              this.ssrPass.selects = null;
+
+        }
+
+      } );
+
+      const folder = this.debug.ui.addFolder( 'more settings' );
+      folder.add( this.ssrPass, 'fresnel' ).onChange( ()=>{
+
+        this.groundReflector.fresnel = this.ssrPass.fresnel;
+
+      } );
+      folder.add( this.ssrPass, 'distanceAttenuation' ).onChange( ()=>{
+
+        this.groundReflector.distanceAttenuation = this.ssrPass.distanceAttenuation;
+
+      } );
+      this.ssrPass.maxDistance = .1;
+      // groundReflector.maxDistance = ssrPass.maxDistance;
+      this.groundReflector.maxDistance = Infinity;
+      folder.add( this.ssrPass, 'maxDistance' ).min( 0 ).max( .5 ).step( .001 ).onChange( ()=>{
+
+        // groundReflector.maxDistance = ssrPass.maxDistance;
+
+      } );
+      folder.add( this.params, 'isOtherMeshes' ).onChange( () => {
+
+        if ( this.params.isOtherMeshes ) {
+
+          this.otherMeshes.forEach( mesh => mesh.visible = true );
+
+        } else {
+
+          this.otherMeshes.forEach( mesh => mesh.visible = false );
+
+        }
+
+      } );
+      folder.add( this.ssrPass, 'bouncing' );
+      folder.add( this.ssrPass, 'output', {
+        'Default': SSRPass.OUTPUT.Default,
+        'Beauty': SSRPass.OUTPUT.Beauty,
+        'SSR Only': SSRPass.OUTPUT.SSR,
+        'Depth': SSRPass.OUTPUT.Depth,
+        'Normal': SSRPass.OUTPUT.Normal,
+        'Metalness': SSRPass.OUTPUT.Metalness,
+      } ).onChange( function ( value ) {
+
+        this.ssrPass.output = parseInt( value );
+
+      } );
+      this.ssrPass.opacity = 1;
+      this.groundReflector.opacity = this.ssrPass.opacity;
+      folder.add( this.ssrPass, 'opacity' ).min( 0 ).max( 1 ).onChange( ()=>{
+
+        this.groundReflector.opacity = this.ssrPass.opacity;
+
+      } );
+      if ( this.params.isPerspectiveCamera ) {
+
+        this.ssrPass.surfDist = 0.0015;
+        folder.add( this.ssrPass, 'surfDist' ).min( 0 ).max( .005 ).step( .0001 );
+
+      } else {
+
+        this.ssrPass.surfDist = 2;
+        folder.add( this.ssrPass, 'surfDist' ).min( 0 ).max( 7 ).step( .01 );
+
+      }
+      folder.add( this.ssrPass, 'infiniteThick' );
+      // folder.add( this.ssrPass, 'thickTolerance' ).min( 0 ).max( .05 ).step( .0001 );
+      folder.add( this.ssrPass, 'blur' );
+    }
   }
   resize = () => {
     this.composer.setSize(this.sizes.width, this.sizes.height)
-    this.composer.setPixelRatio(Math.min(this.sizes.pixelRatio, 2));
+    // this.composer.setPixelRatio(Math.min(this.sizes.pixelRatio, 2));
+    this.groundReflector.getRenderTarget().setSize( window.innerWidth, window.innerHeight );
   }
   update = () => {
-    if(this.composer) this.composer.render(0.01)
+    if(this.composer) this.composer.render()
   }
 }

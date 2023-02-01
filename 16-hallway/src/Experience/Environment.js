@@ -5,41 +5,40 @@ export default class Environment {
   constructor() {
     this.experience = new Experience()
     this.scene = this.experience.scene
+    this.renderer = this.experience.renderer.instance
     this.resources = this.experience.resources
 
-    this.params = {
-      spotLightColor: 0xd53c3d
-    }
-
-    this.setEnv()
+    this.resources.on("ready", () => {
+      this.setEnv()
+    })
   }
   setEnv = () => {
-    // fog
-    // const fog = new THREE.Fog(0x000000, 1, 2.5)
-    // const fog = new THREE.Fog(0x262626, 1, 30)
-    const fog = new THREE.Fog(0x000000, 1, 70)
-    this.scene.fog = fog
+    const pmremGenerator = new THREE.PMREMGenerator( this.renderer );
+    pmremGenerator.compileEquirectangularShader();
 
-    // lights
-    this.scene.add( new THREE.AmbientLight(0xffffff, 1))
+    const texture = this.resources.items.royal_esplanade
+    texture.mapping = THREE.EquirectangularReflectionMapping
+    // this.scene.environment = texture
 
-    const dir = new THREE.DirectionalLight(0xffffff, 3)
-    dir.position.set(5, 7, 10)
-    this.scene.add(dir)
+    // const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+    this.scene.background = texture;
+    this.scene.environment = texture;
+    texture.dispose();
+    pmremGenerator.dispose();
 
-    // right
-    const rightSpot = new THREE.SpotLight(this.params.spotLightColor, 40, 25, Math.PI * 0.1, 0.25);
-    rightSpot.position.set(0.5, 0.75, 2.1);
-    rightSpot.target.position.set(-0.25, 0.25, 0.25);
-    // this.scene.add(rightSpot, rightSpot.target);
+    // this.scene.fog = new THREE.Fog( 0x000000, 1, 70 );
 
-    // left
-    const leftSpot = rightSpot.clone()
-    leftSpot.position.set(-0.5, 0.75, 2.2);
-    leftSpot.target.position.set(0.25, 0.25, 0.25);
-    // this.scene.add(leftSpot, leftSpot.target);
+    // this.scene.add( new THREE.AmbientLight(0xffffff, 1))
+
+    const hemiLight = new THREE.HemisphereLight( 0x443333, 0x111122 );
+    this.scene.add( hemiLight );
+
+    const spotLight = new THREE.SpotLight();
+    spotLight.angle = Math.PI / 16;
+    spotLight.penumbra = 0.5;
+    // spotLight.castShadow = true;
+    spotLight.position.set( - 1, 1, 1 );
+    this.scene.add( spotLight );
   }
-  update = () => {
-    this.experience.update()
-  }
+  update = () => {}
 }

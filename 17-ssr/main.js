@@ -9,7 +9,6 @@ import Stats from 'stats.js'
 import './style.css';
 
 let ssrEffect;
-let emitterMesh;
 let gui
 let stats
 const url = 'room/room.gltf';
@@ -31,7 +30,14 @@ scene.add(camera);
 
 // canvas
 const canvas = document.querySelector('.webgl');
-rendererCanvas = canvas;
+
+// use an offscreen canvas if available
+if (window.OffscreenCanvas) {
+  rendererCanvas = canvas.transferControlToOffscreen()
+  rendererCanvas.style = canvas.style
+} else {
+  rendererCanvas = canvas
+}
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -130,12 +136,14 @@ gltflLoader.load(url, asset => {
 
   let ceiling;
 
+  // setup material
   room.traverse(c => {
     if (c.material) {
+
+      // except the screen
       if (c.name !== 'emissive') {
         const lightMap = c.material.emissiveMap;
 
-        // lightmap
         if (lightMap) {
           c.material.lightMap = lightMap;
           c.material.emissiveMap = null;
@@ -152,6 +160,7 @@ gltflLoader.load(url, asset => {
       c.material.color.setScalar(0.05);
       c.material.roughness = 0.2;
 
+      // ceiling
       if (c.material.name.includes('ceiling')) {
         c.material.map.offset.setScalar(0);
         c.material.emissive.setHex(0xffb580);
@@ -181,13 +190,11 @@ gltflLoader.load(url, asset => {
 
     if (c.name === 'emissive') {
       c.material.envMapIntensity = 0;
-      emitterMesh = c;
     }
   });
 
   // now init SSR effect
   ssrEffect = new SSREffect(scene, camera, params);
-
   const bloomEffect = new POSTPROCESSING.BloomEffect({
     intensity: 2,
     luminanceThreshold: 0.4,
@@ -195,13 +202,10 @@ gltflLoader.load(url, asset => {
     kernelSize: POSTPROCESSING.KernelSize.HUGE,
     mipmapBlur: true,
   });
-
   const vignetteEffect = new POSTPROCESSING.VignetteEffect({
     darkness: 0.3675,
   });
-
   const fxaaEffect = new POSTPROCESSING.FXAAEffect();
-
   composer.addPass( new POSTPROCESSING.EffectPass(camera, fxaaEffect, ssrEffect, bloomEffect, vignetteEffect) );
 
   new THREE.TextureLoader().load('OfficeCeiling002_1K_Emission.webp', tex => {
@@ -216,7 +220,7 @@ gltflLoader.load(url, asset => {
   loop();
 
   // gui & debug
-  gui = new SSRDebugGUI(ssrEffect, params)
+  // gui = new SSRDebugGUI(ssrEffect, params)
   stats = new Stats()
   stats.showPanel(0)
   document.body.appendChild(stats.dom)
