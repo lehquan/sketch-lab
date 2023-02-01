@@ -4,10 +4,14 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { useBoxProjectedEnvMap } from './addons/BoxProjectedEnvMapHelper';
 import { enhanceShaderLighting } from './addons/EnhanceShaderLighting';
+import { SSRDebugGUI } from './SSRDebugGUI.js';
+import Stats from 'stats.js'
 import './style.css';
 
 let ssrEffect;
 let emitterMesh;
+let gui
+let stats
 const url = 'room/room.gltf';
 let rendererCanvas;
 const gltflLoader = new GLTFLoader();
@@ -210,6 +214,12 @@ gltflLoader.load(url, asset => {
   });
 
   loop();
+
+  // gui & debug
+  gui = new SSRDebugGUI(ssrEffect, params)
+  stats = new Stats()
+  stats.showPanel(0)
+  document.body.appendChild(stats.dom)
 });
 
 const loadingEl = document.querySelector('#loading');
@@ -230,7 +240,11 @@ THREE.DefaultLoadingManager.onProgress = () => {
 };
 
 const loop = () => {
+  if (stats) stats.begin()
+
   composer.render();
+
+  if (stats) stats.end()
   window.requestAnimationFrame(loop);
 };
 

@@ -12,3 +12,4 @@ Follow [0beqz](https://github.com/0beqz/screen-space-reflections) library and ap
 - Load GLSL with [vite-plugin-glsl v1.1.2](https://www.npmjs.com/package/vite-plugin-glsl)
 - [postprocessing v6.29.3](https://www.npmjs.com/package/postprocessing)
 - [screen-space-reflections v2.5.0](https://github.com/0beqz/screen-space-reflections)
+- GUI debug.
