@@ -12,8 +12,7 @@ export default class HallWay {
     this.otherMeshes = [];
     this.selects = [];
 
-    this.setGround()
-    this.setObjects()
+    this.setModel()
   }
   setGround = () => {
     this.ground = new THREE.Mesh(
@@ -108,6 +107,27 @@ export default class HallWay {
     this.scene.add(this.hallway4)
   }
   update = () => {
+    if (this.hallway) {
+      this.hallway.position.z += 0.05
+      this.hallway2.position.z += 0.05
+      this.hallway3.position.z += 0.05
+      this.hallway4.position.z += 0.05
 
+      if (this.hallway.position.z >= 10) {
+        this.hallway.position.z = -68
+      }
+
+      if (this.hallway2.position.z >= 10) {
+        this.hallway2.position.z = -68
+      }
+
+      if (this.hallway3.position.z >= 10) {
+        this.hallway3.position.z = -68
+      }
+
+      if (this.hallway4.position.z >= 10) {
+        this.hallway4.position.z = -68
+      }
+    }
   }
 }

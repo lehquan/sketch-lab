@@ -1,7 +1,9 @@
 import * as THREE from 'three'
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer'
 import { SSRPass } from 'three/addons/postprocessing/SSRPass';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass';
 import Experience from './Experience'
+import {RenderPass} from 'three/addons/postprocessing/RenderPass';
 
 export default class PostEffect {
   constructor() {
@@ -18,7 +20,11 @@ export default class PostEffect {
       autoRotate: true,
       isOtherMeshes: true,
       isGroundReflector: true,
-      isPerspectiveCamera: true
+      isPerspectiveCamera: true,
+      exposure: 1,
+      bloomStrength: 2,
+      bloomThreshold: 0,
+      bloomRadius: 0.55
     }
 
     this.resources.on("ready", () => {
@@ -31,25 +37,41 @@ export default class PostEffect {
 
   }
   setEffect = () => {
-    const renderer = this.renderer
-    const scene = this.scene
-    const camera = this.camera
+    // const renderer = this.renderer
+    // const scene = this.scene
+    // const camera = this.camera
 
-    this.composer = new EffectComposer(renderer)
+    this.composer = new EffectComposer(this.renderer)
 
     // ssr
-    this.ssrPass = new SSRPass( {
-      renderer,
-      scene,
-      camera,
-      width: innerWidth,
-      height: innerHeight,
-      encoding: THREE.sRGBEncoding,
-      isPerspectiveCamera: this.params.isPerspectiveCamera,
-      groundReflector: this.params.isGroundReflector ? this.groundReflector : null,
-      selects: this.params.isGroundReflector ? this.selects : null
-    } );
-    this.composer.addPass(this.ssrPass)
+    // this.ssrPass = new SSRPass( {
+    //   renderer,
+    //   scene,
+    //   camera,
+    //   width: innerWidth,
+    //   height: innerHeight,
+    //   encoding: THREE.sRGBEncoding,
+    //   isPerspectiveCamera: this.params.isPerspectiveCamera,
+    //   groundReflector: this.params.isGroundReflector ? this.groundReflector : null,
+    //   selects: this.params.isGroundReflector ? this.selects : null
+    // } );
+    // this.composer.addPass(this.ssrPass)
+
+    this.renderScene = new RenderPass(this.scene, this.camera);
+
+    this.bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        1.5,
+        0.4,
+        0.85
+    );
+    this.bloomPass.threshold = this.params.bloomThreshold;
+    this.bloomPass.strength = this.params.bloomStrength;
+    this.bloomPass.radius = this.params.bloomRadius;
+
+    this.composer.renderToScreen = false;
+    this.composer.addPass(this.renderScene);
+    this.composer.addPass(this.bloomPass);
 
     //
     if (this.debug.active) {
@@ -139,9 +161,11 @@ export default class PostEffect {
     }
   }
   resize = () => {
-    this.composer.setSize(this.sizes.width, this.sizes.height)
+    // this.composer.setSize(this.sizes.width, this.sizes.height)
     // this.composer.setPixelRatio(Math.min(this.sizes.pixelRatio, 2));
-    this.groundReflector.getRenderTarget().setSize( window.innerWidth, window.innerHeight );
+    // this.groundReflector.getRenderTarget().setSize( window.innerWidth, window.innerHeight );
+
+    this.composer.setSize(this.sizes.width, this.sizes.height)
   }
   update = () => {
     if(this.composer) this.composer.render()

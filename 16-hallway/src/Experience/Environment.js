@@ -8,9 +8,10 @@ export default class Environment {
     this.renderer = this.experience.renderer.instance
     this.resources = this.experience.resources
 
-    this.resources.on("ready", () => {
+    this.setLight()
+    /*this.resources.on("ready", () => {
       this.setEnv()
-    })
+    })*/
   }
   setEnv = () => {
     const pmremGenerator = new THREE.PMREMGenerator( this.renderer );
@@ -25,20 +26,24 @@ export default class Environment {
     this.scene.environment = texture;
     texture.dispose();
     pmremGenerator.dispose();
+  }
+  setLight = () => {
+    this.scene.fog = new THREE.Fog( 0x000000, 1, 70 );
 
-    // this.scene.fog = new THREE.Fog( 0x000000, 1, 70 );
+    this.scene.add( new THREE.AmbientLight(0xffffff, 10))
 
-    // this.scene.add( new THREE.AmbientLight(0xffffff, 1))
+    const dir = new THREE.DirectionalLight(0xffffff, 3)
+    dir.position.set(5, 7, 10)
+    this.scene.add(dir)
 
-    const hemiLight = new THREE.HemisphereLight( 0x443333, 0x111122 );
-    this.scene.add( hemiLight );
-
-    const spotLight = new THREE.SpotLight();
-    spotLight.angle = Math.PI / 16;
-    spotLight.penumbra = 0.5;
-    // spotLight.castShadow = true;
-    spotLight.position.set( - 1, 1, 1 );
-    this.scene.add( spotLight );
+    // const hemiLight = new THREE.HemisphereLight( 0x443333, 0x111122 );
+    // this.scene.add( hemiLight );
+    //
+    // const spotLight = new THREE.SpotLight();
+    // spotLight.angle = Math.PI / 16;
+    // spotLight.penumbra = 0.5;
+    // spotLight.position.set( - 1, 1, 1 );
+    // this.scene.add( spotLight );
   }
   update = () => {}
 }

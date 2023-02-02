@@ -15,14 +15,14 @@ export default class Renderer {
   setInstance() {
     this.instance = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: false, //true,
+      antialias: true,
     });
 
     // this.instance.setClearColor(0x000000, 1);
     // this.instance.physicallyCorrectLights = true;
     this.instance.outputEncoding = THREE.sRGBEncoding;
-    // this.instance.toneMapping = THREE.LinearToneMapping;
-    // this.instance.toneMappingExposure = 1;
+    this.instance.toneMapping = THREE.LinearToneMapping;
+    this.instance.toneMappingExposure = 1;
 
     this.resize();
   }

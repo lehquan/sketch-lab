@@ -7,6 +7,7 @@ import { enhanceShaderLighting } from './addons/EnhanceShaderLighting';
 import { SSRDebugGUI } from './SSRDebugGUI.js';
 import Stats from 'stats.js'
 import './style.css';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 let ssrEffect;
 let gui
@@ -21,7 +22,7 @@ SSREffect.patchDirectEnvIntensity(0.1);
 
 // scene
 const scene = new THREE.Scene();
-scene.autoUpdate = false;
+scene.matrixWorldAutoUpdate = false;
 scene.add(new THREE.AmbientLight());
 
 // camera
@@ -31,7 +32,8 @@ scene.add(camera);
 // canvas
 const canvas = document.querySelector('.webgl');
 
-// use an offscreen canvas if available
+// use an offscreen canvas if available.
+// But cannot use OrbitControls with offscreenCanvas
 if (window.OffscreenCanvas) {
   rendererCanvas = canvas.transferControlToOffscreen()
   rendererCanvas.style = canvas.style
@@ -52,8 +54,12 @@ const renderer = new THREE.WebGLRenderer({
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.4;
+renderer.autoClear =true
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+
+// controls
+const controls = new OrbitControls( camera, renderer.domElement );
 
 // composer
 const composer = new POSTPROCESSING.EffectComposer(renderer);
@@ -247,6 +253,7 @@ const loop = () => {
   if (stats) stats.begin()
 
   composer.render();
+  // renderer.render(scene, camera)
 
   if (stats) stats.end()
   window.requestAnimationFrame(loop);
