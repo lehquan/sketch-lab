@@ -28,6 +28,9 @@ Some pieces of sketch made with three.js :heart:
     <td><a href="https://selective-bloom.netlify.app/"><img src="12-selective-bloom/src/assets/screenshot.png" alt=""></a></td>
     <td><a href="https://translucent-sss.netlify.app/"><img src="13-translucent-sss/src/assets/screenshot.png" alt=""></a></td>
   </tr>
+  <tr>
+    <td><a href="https://dispose-scene.netlify.app/"><img src="18-dispose/src/assets/screenshot.png" alt=""></a></td>
+  </tr>
 </table>
 
 ## Libraries
