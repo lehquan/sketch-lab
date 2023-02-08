@@ -31,7 +31,6 @@ export default class PostEffect {
     this.bloomPass.threshold = this.params.bloomThreshold
     this.bloomPass.strength = this.params.bloomStrength
     this.bloomPass.radius = this.params.bloomRadius
-    // this.bloomPass.clearColor = new THREE.Color(0xff2255)
 
     this.composer.addPass(renderModel)
     this.composer.addPass(this.bloomPass)
