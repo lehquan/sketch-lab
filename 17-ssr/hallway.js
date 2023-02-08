@@ -220,7 +220,7 @@ function init() {
       darkness: 0.3675,
     });
     const fxaaEffect = new POSTPROCESSING.FXAAEffect();
-    composer.addPass( new POSTPROCESSING.EffectPass(camera, fxaaEffect, bloomEffect, vignetteEffect) );
+    composer.addPass( new POSTPROCESSING.EffectPass(camera, ssrEffect, fxaaEffect, bloomEffect, vignetteEffect) );
 
     new THREE.TextureLoader().load('floor-roughness.jpg', tex => {
       floor.material.roughnessMap = tex
@@ -263,7 +263,7 @@ function animate() {
   requestAnimationFrame( animate );
 
   // renderer.render( scene, camera );
-  renderer.setClearColor(0x000000, 1)
+  renderer.clear()
   composer.render();
 
 }

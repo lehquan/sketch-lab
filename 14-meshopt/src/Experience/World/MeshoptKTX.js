@@ -19,7 +19,7 @@ export default class MeshoptKTX {
   }
   setModel = () => {
     this.model = this.resources.items.tontu.scene
-    this.model.scale.setScalar(50)
+    this.model.scale.setScalar(60)
     this.model.position.set(0, -1, 0)
     this.scene.add( this.model )
 

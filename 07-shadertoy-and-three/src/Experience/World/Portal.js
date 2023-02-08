@@ -3,46 +3,58 @@ import Experience from '../Experience'
 import vertexShader from '../../shaders/portal.vert'
 import fragmentShader from '../../shaders/portal.frag'
 
+// import vertexShader from '../../shaders/tunnel.vert'
+// import fragmentShader from '../../shaders/tunnel.frag'
+
 export default class Portal {
   constructor() {
     this.experience = new Experience
     this.scene = this.experience.scene
     this.resources = this.experience.resources
 
+    this.clock = new THREE.Clock()
+
     this.setMaterial()
-    this.setObject()
   }
   setMaterial = () => {
     // Credit: https://www.shadertoy.com/view/ldKGDh
-    const uniforms = {
-      iTime: { value: 0 },
-      iChannel0: {
-        value: this.resources.items.greynoise
-      },
-      iResolution: {
-        value: new THREE.Vector2(1,1)
-      },
+    this.uniforms = {
+      iTime:      { type: 'f', value: 0.1 },
+      iChannel0:  { type: 't', value: this.resources.items.greynoise },
+      iResolution: { value: new THREE.Vector2( window.innerWidth, window.innerHeight) }
     }
-    this.material = new THREE.ShaderMaterial({
-      uniforms: uniforms,
+    this.uniforms.iChannel0.value.wrapS = this.uniforms.iChannel0.value.wrapT = THREE.RepeatWrapping;
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: this.uniforms,
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
-      transparent: true,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
-      depthWrite: false,
     })
-  }
-  setObject = () => {
-    const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(1, 1),
-        this.material
-    )
-    // plane.position.x = -3
-    plane.scale.setScalar(7)
+
+    // Credit: https://www.shadertoy.com/view/4sXSzs
+    /*this.uniforms = {
+      iTime:    { type: 'f', value: 0.1 },
+      iChannel0:  { type: 't', value: this.resources.items.ichannel0 },
+      iChannel1:  { type: 't', value: this.resources.items.ichannel1  },
+    };
+    this.uniforms.iChannel0.value.wrapS = this.uniforms.iChannel0.value.wrapT = THREE.RepeatWrapping;
+    this.uniforms.iChannel1.value.wrapS = this.uniforms.iChannel1.value.wrapT = THREE.RepeatWrapping;
+
+    this.material = new THREE.ShaderMaterial( {
+      uniforms: this.uniforms,
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+      side:THREE.DoubleSide
+    } );*/
+
+    const plane = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), material)
+    plane.scale.setScalar(10)
     this.scene.add(plane)
   }
   update = () => {
-    this.material.uniforms.iTime.value = performance.now() / 1000
+    // this.material.uniforms.iTime.value = performance.now() / 1000
+    this.uniforms.iTime.value = performance.now() / 1000
   }
 }

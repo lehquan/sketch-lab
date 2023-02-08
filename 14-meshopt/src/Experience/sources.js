@@ -2,6 +2,16 @@ export default [
   {
     name: "tontu",
     type: "gltfModel",
+    path: "assets/models/tontu.glb",
+  },
+  {
+    name: "emc",
+    type: "gltfModel",
+    path: "assets/models/emc.glb",
+  },
+  {
+    name: "shop",
+    type: "gltfModel",
     path: "assets/models/out.glb",
   },
   {

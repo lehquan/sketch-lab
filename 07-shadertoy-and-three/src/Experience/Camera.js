@@ -28,10 +28,10 @@ export default class Camera {
   setControls() {
     this.controls = new OrbitControls(this.instance, this.canvas)
     this.controls.enabled = true
-    this.controls.autoRotate = false
-    this.controls.enableDamping = true
-    this.controls.enableZoom = false
-    this.controls.enablePan = false
+    // this.controls.autoRotate = false
+    // this.controls.enableDamping = true
+    // this.controls.enableZoom = false
+    // this.controls.enablePan = false
 
     /*if (this.debug.active) {
       this.debugFolder = this.debug.ui.addFolder('Camera')
