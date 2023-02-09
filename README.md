@@ -30,6 +30,7 @@ Some pieces of sketch made with three.js :heart:
   </tr>
   <tr>
     <td><a href="https://dispose-scene.netlify.app/"><img src="18-dispose/src/assets/screenshot.png" alt=""></a></td>
+    <td><a href=""><img src="19-texture-animation/src/assets/screenshot.png" alt=""></a></td>
   </tr>
 </table>
 
