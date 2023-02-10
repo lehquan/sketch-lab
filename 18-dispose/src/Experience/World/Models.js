@@ -10,33 +10,39 @@ export default class Models {
     this.debug = this.experience.debug;
     this.clock = new THREE.Clock()
 
-    this.setModels()
+    this.animation = {}
 
-    // for fox
-    this.setMaterial()
+    this.setModels()
     this.setAnimation()
   }
 
   setModels() {
     // fox
-    this.resource = this.resources.items.foxModel
-    this.fox = this.resource.scene
+    this.foxResource = this.resources.items.foxModel
+    this.fox = this.foxResource.scene
     this.fox.isModel = true
     this.fox.rotation.set(0, Math.PI/180 * -60, 0)
     this.fox.position.set(0, -30, 0)
     this.scene.add(this.fox)
+    this.material = new THREE.MeshMatcapMaterial({
+      matcap: this.resources.items.testMatcap,
+    });
+    this.fox.traverse((child) => {
+      child.material = this.material;
+    });
+
+    // tontu
+    this.tontuResource = this.resources.items.tontu
+    this.tontu = this.tontuResource.scene
+    this.tontu.isModel = true
+    this.tontu.scale.setScalar(700)
+    this.tontu.position.set(0, -30, 0)
+    this.scene.add(this.tontu)
 
     // cherry
     this.cherry = this.resources.items.cherry.scene
     this.cherry.isModel = true
     this.scene.add(this.cherry)
-
-    // tontu
-    this.tontu = this.resources.items.tontu.scene
-    this.tontu.isModel = true
-    this.tontu.scale.setScalar(700)
-    this.tontu.position.set(0, -30, 0)
-    this.scene.add(this.tontu)
 
     console.log(this.renderer.info)
 
@@ -120,6 +126,11 @@ export default class Models {
     }
   }
 
+  /**
+   * Traverse the whole {resource} and clean up
+   * geometry, material, texture, uniforms and skeleton.
+   * @param resource
+   */
   dispose = resource => {
 
     if (resource instanceof THREE.Object3D) {
@@ -166,73 +177,30 @@ export default class Models {
     this.scene.remove(resource)
   }
 
-  setMaterial() {
-    this.material = new THREE.MeshMatcapMaterial({
-      matcap: this.resources.items.testMatcap,
-    });
-
-    this.fox.traverse((child) => {
-      child.material = this.material;
-    });
-  }
-
   setAnimation() {
-    this.animation = {};
 
-    // Mixer
-    this.animation.mixer = new THREE.AnimationMixer(this.fox);
+    // Mixers
+    this.animation.foxMixer = new THREE.AnimationMixer(this.fox)
+    this.animation.tontuMixer = new THREE.AnimationMixer(this.tontu)
 
-    // Actions
-    this.animation.actions = {};
+    // fox
+    this.animation.foxActions = {}
+    this.animation.foxActions.run = this.animation.foxMixer.clipAction(this.foxResource.animations[0])
+    this.animation.foxActions.survey = this.animation.foxMixer.clipAction(this.foxResource.animations[1]);
+    this.animation.foxActions.walk = this.animation.foxMixer.clipAction(this.foxResource.animations[2]);
+    this.animation.foxActions.run.play()
 
-    this.animation.actions.run = this.animation.mixer.clipAction(this.resource.animations[0]);
-    this.animation.actions.survey = this.animation.mixer.clipAction(this.resource.animations[1]);
-    this.animation.actions.walk = this.animation.mixer.clipAction(this.resource.animations[2]);
-
-    this.animation.actions.current = this.animation.actions.run;
-    this.animation.actions.current.play();
-
-    // Play the action
-    this.animation.play = (name) => {
-      const newAction = this.animation.actions[name];
-      const oldAction = this.animation.actions.current;
-
-      newAction.reset();
-      newAction.play();
-      newAction.crossFadeFrom(oldAction, 1);
-
-      this.animation.actions.current = newAction;
-    };
-
-    // Debug
-    /*if (this.debug.active) {
-      this.debugFolder = this.debug.ui.addFolder("Fox");
-
-      const foxDebug = {
-        playRun: () => {
-          this.animation.play('run');
-        },
-        playSurvey: () => {
-          this.animation.play('survey');
-        },
-        playWalking: () => {
-          this.animation.play('walk');
-        },
-      };
-      this.debugFolder.add(foxDebug, "playRun");
-      this.debugFolder.add(foxDebug, "playSurvey");
-      this.debugFolder.add(foxDebug, "playWalking");
-      this.debugFolder.close()
-    }*/
+    // tontu
+    this.animation.tontuActions = {}
+    this.animation.tontuActions.dance = this.animation.tontuMixer.clipAction(this.tontuResource.animations[0])
+    this.animation.tontuActions.intro = this.animation.tontuMixer.clipAction(this.tontuResource.animations[1])
+    this.animation.tontuActions.dance.play()
   }
 
   update() {
+    const delta = this.clock.getDelta()
 
-    // this.animation.mixer.update(this.time.delta * 0.001);
-    this.animation.mixer.update(this.clock.getDelta());
-
-    // this.mouse.x = THREE.MathUtils.lerp(this.mouse.x, this.targetMouse.x, 0.1)
-    // this.mouse.y = THREE.MathUtils.lerp(this.mouse.y, this.targetMouse.y, 0.1)
-    // this.fox.rotation.y = THREE.MathUtils.degToRad(20 * this.mouse.x)
+    this.animation.foxMixer.update(delta)
+    this.animation.tontuMixer.update(delta)
   }
 }
