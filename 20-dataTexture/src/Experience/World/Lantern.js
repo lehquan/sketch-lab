@@ -7,6 +7,8 @@ export default class Lantern {
     this.experience = new Experience()
     this.scene = this.experience.scene
 
+    this.count = 500
+
     this.setLantern()
   }
 
@@ -14,37 +16,35 @@ export default class Lantern {
    * https://stackoverflow.com/questions/70647003/create-an-instancedbuffergeometry-from-existing-geometry-in-three-js
    */
   setLantern = () => {
-    let geoms = [];
+    const geoms = [];
     let pts = [
-      new THREE.Vector2(0, 1. - 0),
+      new THREE.Vector2(0,    1. - 0),
       new THREE.Vector2(0.25, 1. - 0),
       new THREE.Vector2(0.25, 1. - 0.125),
       new THREE.Vector2(0.45, 1. - 0.125),
       new THREE.Vector2(0.45, 1. - 0.95)
     ];
-    var geom = new THREE.LatheGeometry(pts, 20);
+    const geom = new THREE.LatheGeometry(pts, 20);
     geoms.push(geom);
 
-    var geomLight = new THREE.CylinderGeometry(0.1, 0.1, 0.05, 20);
+    const geomLight = new THREE.CylinderGeometry(0.1, 0.1, 0.05, 20);
     geoms.push(geomLight);
 
-    var fullGeom = BufferGeometryUtils.mergeBufferGeometries(geoms);
+    const fullGeom = BufferGeometryUtils.mergeBufferGeometries(geoms);
     let instGeom = new THREE.InstancedBufferGeometry().copy(fullGeom);
-    // const instGeom = new THREE.InstancedBufferGeometry(fullGeom);
 
-    // var num = 500;
-    // let instPos = []; //3
-    // let instSpeed = []; //1
-    // let instLight = []; // 2 (initial intensity, frequency)
-    // for (let i = 0; i < num; i++){
-    //   instPos.push( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
-    //   instSpeed.push( Math.random() * 0.25 + 1);
-    //   instLight.push( Math.PI + (Math.PI * Math.random()), Math.random() + 5);
-    // }
-    //
-    // instGeom.setAttribute("instPos", new THREE.InstancedBufferAttribute(new Float32Array(instPos), 3));
-    // instGeom.setAttribute("instSpeed", new THREE.InstancedBufferAttribute(new Float32Array(instSpeed), 1));
-    // instGeom.setAttribute("instLight", new THREE.InstancedBufferAttribute(new Float32Array(instPos), 2));
+    instGeom.instanceCount = this.count
+    let instPos = [];
+    let instSpeed = [];
+    let instLight = []; // 2 (initial intensity, frequency)
+    for (let i = 0; i < this.count ; i++){
+      instPos.push( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
+      instSpeed.push( Math.random() * 0.25 + 1);
+      instLight.push( Math.PI + (Math.PI * Math.random()), Math.random() + 5);
+    }
+    instGeom.setAttribute("instPos", new THREE.InstancedBufferAttribute(new Float32Array(instPos), 3, 1));
+    instGeom.setAttribute("instSpeed", new THREE.InstancedBufferAttribute(new Float32Array(instSpeed), 1, 1));
+    instGeom.setAttribute("instLight", new THREE.InstancedBufferAttribute(new Float32Array(instPos), 2, 1));
 
     // material
     this.mat = new THREE.ShaderMaterial({
@@ -109,12 +109,10 @@ export default class Lantern {
       side: THREE.DoubleSide
     });
 
-    var lantern = new THREE.Mesh(fullGeom, this.mat);
+    const lantern = new THREE.Mesh(instGeom, this.mat);
     this.scene.add(lantern);
   }
   update = () => {
-    if (this.mat) {
-      // this.mat.uniforms.uTime.value = performance.now() / 1000
-    }
+    if (this.mat) this.mat.uniforms.uTime.value = performance.now() / 1000
   }
 }

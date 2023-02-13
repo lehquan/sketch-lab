@@ -65,8 +65,8 @@ export default class Experience {
     footer.appendChild(note1)
 
     const linkNote1 = document.createElement('a')
-    linkNote1.innerHTML = 'Texture Animation by Lee Stemkoski'
-    linkNote1.href = 'http://stemkoski.github.io/Three.js/Texture-Animation.html'
+    linkNote1.innerHTML = 'Flying lanterns and Koi fish by Paul West'
+    linkNote1.href = 'https://codepen.io/prisoner849/pen/WNQNdpv?editors=1010'
     linkNote1.target = 'blank'
     note1.appendChild(linkNote1)
   }
