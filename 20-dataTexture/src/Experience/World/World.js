@@ -9,11 +9,11 @@ export default class World {
     // Wait for resources
     this.resources.on("ready", () => {
       this.koi = new Koi()
-      this.lantern = new Lantern()
+      // this.lantern = new Lantern()
     })
   }
   update() {
     if (this.koi) this.koi.update()
-    if (this.lantern) this.lantern.update()
+    // if (this.lantern) this.lantern.update()
   }
 }

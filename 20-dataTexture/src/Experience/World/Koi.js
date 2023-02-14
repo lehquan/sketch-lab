@@ -88,7 +88,6 @@ export default class Koi {
       this.debugFolder = this.debug.ui.addFolder("RED Path (only)")
       this.scene.add(rPathLine)
       this.scene.add(bPathLine)
-      this.spheres.forEach( sphere => sphere.visible = true)
 
       const pathDebug = {
         showPath: () => {
