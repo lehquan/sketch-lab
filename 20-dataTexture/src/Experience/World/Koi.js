@@ -7,10 +7,13 @@ export default class Koi {
     this.scene = this.experience.scene
     this.resources = this.experience.resources
     this.debug = this.experience.debug
+    this.clock = new THREE.Clock()
 
     this.params = {
       numPoints: 511,
       cSegments: 6,
+      rSpeed: 0.2,
+      bSpeed: 0.1,
     }
     this.spheres = []
 
@@ -21,40 +24,57 @@ export default class Koi {
   setPath = () => {
     const baseVector = new THREE.Vector3(40, 0, 0)
     const axis = new THREE.Vector3(0, 1, 0)
-    const cPts = [] // this contains all vec3 to create curve
+    const rPts = [] // this contains all vec3 to create curve
+    const bPts = [] // this contains all vec3 to create curve
     const cStep = Math.PI * 2 / this.params.cSegments
 
-    for (let i = 0; i < this.params.cSegments; i++){
-      cPts.push(
+    // path 1: Red path
+    for (let i = 0; i < this.params.cSegments; i++) {
+      rPts.push(
           new THREE.Vector3().copy(baseVector)
-              //.setLength(35 + (Math.random() - 0.5) * 5)
               .applyAxisAngle(axis, cStep * i).setY(THREE.MathUtils.randFloat(-10, 10))
       );
     }
-    this.curve = new THREE.CatmullRomCurve3(cPts)
-    this.curve.closed = true
+    this.redCurve = new THREE.CatmullRomCurve3(rPts)
+    this.redCurve.closed = true
 
-    // Divide {this.curve} into {numPoints} pieces/points
-    // => returns set of points that are equally distributed along {this.curve}.
+    // path 2: Blue Path
+    for (let i = 0; i < this.params.cSegments; i++) {
+      bPts.push(
+          new THREE.Vector3().copy(baseVector)
+          .setLength(35 + (Math.random() - 0.5) * 5)
+          .applyAxisAngle(axis, cStep * i).setY(THREE.MathUtils.randFloat(-30, 30))
+      );
+    }
+    this.blueCurve = new THREE.CatmullRomCurve3(bPts)
+    this.blueCurve.closed = true
+
+    // Divide the curve into {numPoints} pieces/points
+    // => returns set of points that are equally distributed along {this.redCurve}.
     // The distances between points are kept equal in 3D space.
     // So depending on where your camera is rendering from, the points may appear closer that it actually is.
-    let cPoints = this.curve.getSpacedPoints(this.params.numPoints) // try this with 5
+    let rPoints = this.redCurve.getSpacedPoints(this.params.numPoints) // try this with 5
+    let bPoints = this.blueCurve.getSpacedPoints(this.params.numPoints)
 
     // create data texture
-    this.createDataTexture(cPoints)
+    this.createDataTexture([rPoints, bPoints])
 
-    // create line for visualization
-    let pGeom = new THREE.BufferGeometry().setFromPoints(cPoints)
-    let pMat = new THREE.LineBasicMaterial({color: "red"})
-    let pathLine = new THREE.Line(pGeom, pMat)
+    // create lines for visualization
+    let rMat = new THREE.LineBasicMaterial({color: "red"})
+    let rGeom = new THREE.BufferGeometry().setFromPoints(rPoints)
+    let rPathLine = new THREE.Line(rGeom, rMat)
+
+    let bMat = new THREE.LineBasicMaterial({color: "blue"})
+    let bGeom = new THREE.BufferGeometry().setFromPoints(bPoints)
+    let bPathLine = new THREE.Line(bGeom, bMat)
 
     // show points for debug
-    for(let i=0; i< cPoints.length; i++) {
+    for(let i=0; i< rPoints.length; i++) {
       const sphere = new THREE.Mesh(
           new THREE.SphereGeometry(0.1, 8),
           new THREE.MeshBasicMaterial()
       )
-      sphere.position.copy(cPoints[i])
+      sphere.position.copy(rPoints[i])
       sphere.visible = false
       // const helper = new VertexNormalsHelper( sphere, 1, 0xff0000 );
       // this.scene.add( helper );
@@ -65,16 +85,17 @@ export default class Koi {
 
     // debug
     if (this.debug.active) {
-      this.debugFolder = this.debug.ui.addFolder("Path")
-      this.scene.add(pathLine)
+      this.debugFolder = this.debug.ui.addFolder("RED Path (only)")
+      this.scene.add(rPathLine)
+      this.scene.add(bPathLine)
       this.spheres.forEach( sphere => sphere.visible = true)
 
-      const lineDebug = {
+      const pathDebug = {
         showPath: () => {
-          this.scene.add(pathLine)
+          this.scene.add(rPathLine)
         },
         hidePath: () => {
-          this.scene.remove(pathLine)
+          this.scene.remove(rPathLine)
         },
         showPoints: () => {
           this.spheres.forEach( sphere => sphere.visible = true)
@@ -83,35 +104,45 @@ export default class Koi {
           this.spheres.forEach( sphere => sphere.visible = false)
         }
       }
-      this.debugFolder.add(lineDebug, "showPath")
-      this.debugFolder.add(lineDebug, "hidePath")
-      this.debugFolder.add(lineDebug, "showPoints")
-      this.debugFolder.add(lineDebug, "hidePoints")
+      this.debugFolder.add(pathDebug, "showPath")
+      this.debugFolder.add(pathDebug, "hidePath")
+      this.debugFolder.add(pathDebug, "showPoints")
+      this.debugFolder.add(pathDebug, "hidePoints")
     }
   }
+  createDataTexture = pointSet => {
+    let rData = []
+    let bData = []
 
-  /**
-   * THREE.DataTexture: Creates a texture directly from raw data, width and height.
-   * @param cPoints  : set of points distant equally in 3D
-   */
-  createDataTexture = cPoints => {
-    let data = []
+    // RED path
+    pointSet[0].forEach( v => { rData.push(v.x, v.y, v.z,0.0);} );  // 4 channels
 
-    // Generates data(the Frenet Frames) containing tangents, normals and binormals.
-    let cObjects = this.curve.computeFrenetFrames(this.params.numPoints, true)
-    console.log(cObjects)
+    // Generates rData containing tangents, normals and binormals.
+    let rObjects = this.redCurve.computeFrenetFrames(this.params.numPoints, true)
+    rObjects.binormals.forEach( v => { rData.push(v.x, v.y, v.z,0.0);} );
+    rObjects.normals.forEach( v => { rData.push(v.x, v.y, v.z,0.0);} );
+    rObjects.tangents.forEach( v => { rData.push(v.x, v.y, v.z,0.0);} );
 
-    cPoints.forEach( v => { data.push(v.x, v.y, v.z,0.0);} );  // 4 channels
-    cObjects.binormals.forEach( v => { data.push(v.x, v.y, v.z,0.0);} );
-    cObjects.normals.forEach( v => { data.push(v.x, v.y, v.z,0.0);} );
-    cObjects.tangents.forEach( v => { data.push(v.x, v.y, v.z,0.0);} );
+    let rDataArray = new Float32Array(rData)
+    this.rDataTexture = new THREE.DataTexture(rDataArray, this.params.numPoints + 1, 4, THREE.RGBAFormat, THREE.FloatType)
+    this.rDataTexture.magFilter = THREE.NearestFilter
+    this.rDataTexture.wrapS = this.rDataTexture.wrapT = THREE.RepeatWrapping
+    this.rDataTexture.needsUpdate = true
 
-    let dataArray = new Float32Array(data)
-    this.dataTexture = new THREE.DataTexture(dataArray, this.params.numPoints + 1, 4, THREE.RGBAFormat, THREE.FloatType)
-    this.dataTexture.magFilter = THREE.NearestFilter
-    this.dataTexture.wrapS = this.dataTexture.wrapT = THREE.RepeatWrapping
-    this.dataTexture.needsUpdate = true
-    console.log(this.dataTexture)
+    // BLUE path
+    pointSet[1].forEach( v => { bData.push(v.x, v.y, v.z,0.0);} );  // 4 channels
+
+    // Generates bData containing tangents, normals and binormals.
+    let bObjects = this.blueCurve.computeFrenetFrames(this.params.numPoints, true)
+    bObjects.binormals.forEach( v => { bData.push(v.x, v.y, v.z,0.0);} );
+    bObjects.normals.forEach( v => { bData.push(v.x, v.y, v.z,0.0);} );
+    bObjects.tangents.forEach( v => { bData.push(v.x, v.y, v.z,0.0);} );
+
+    let bDataArray = new Float32Array(bData)
+    this.bDataTexture = new THREE.DataTexture(bDataArray, this.params.numPoints + 1, 4, THREE.RGBAFormat, THREE.FloatType)
+    this.bDataTexture.magFilter = THREE.NearestFilter
+    this.bDataTexture.wrapS = this.bDataTexture.wrapT = THREE.RepeatWrapping
+    this.bDataTexture.needsUpdate = true
   }
   setModel = () => {
     this.resource = this.resources.items.koiModel
@@ -126,27 +157,61 @@ export default class Koi {
       color: 0xff6600,
       wireframe: true,
     })
+    this.rKoi = new THREE.Mesh(objGeom, material)
+    this.scene.add(this.rKoi)
+
+    this.bKoi = this.rKoi.clone()
+    this.bKoi.material = this.rKoi.material.clone()
+    this.scene.add(this.bKoi)
 
     // uniforms
-    this.uniforms = {
-      uSpatialTexture: {value: this.dataTexture },
+    this.rUniforms = {
+      uSpatialTexture: {value: this.rDataTexture },
       uTextureSize: {value: new THREE.Vector2(this.params.numPoints + 1, 4)},
       uTime: {value: 0},
-      uLengthRatio: {value: size.z / this.curve.cacheArcLengths[200]}, // ratio to twist the mesh along the path
+      uSpeed: {value: 0.1},
+      uLengthRatio: {value: size.z / this.redCurve.cacheArcLengths[200]}, // ratio to twist the mesh along the path
+      uObjSize: {value: size}
+    }
+    this.bUniforms = {
+      uSpatialTexture: {value: this.bDataTexture },
+      uTextureSize: {value: new THREE.Vector2(this.params.numPoints + 1, 4)},
+      uTime: {value: 0},
+      uSpeed: {value: 0.1},
+      uLengthRatio: {value: size.z / this.blueCurve.cacheArcLengths[200]}, // ratio to twist the mesh along the path
       uObjSize: {value: size}
     }
 
-    material.onBeforeCompile = shader => {
-      shader.uniforms.uSpatialTexture = this.uniforms.uSpatialTexture
-      shader.uniforms.uTextureSize = this.uniforms.uTextureSize
-      shader.uniforms.uTime = this.uniforms.uTime
-      shader.uniforms.uLengthRatio = this.uniforms.uLengthRatio
-      shader.uniforms.uObjSize = this.uniforms.uObjSize
+    this.compileMaterial('r')
+    this.compileMaterial('b')
 
-      shader.vertexShader = `
+    // debug
+    if (this.debug.active) {
+      this.debugFolder = this.debug.ui.addFolder("Koi")
+      this.debugFolder.add(this.params, 'rSpeed', 0.1, 0.5, 0.01).onChange(val =>{
+        this.rUniforms.uSpeed.value = val
+      })
+      this.debugFolder.add(this.params, 'bSpeed', 0.1, 0.5, 0.01).onChange(val =>{
+        this.bUniforms.uSpeed.value = val
+      })
+    }
+  }
+  compileMaterial = type => {
+    switch (type) {
+      case 'r':
+        this.rKoi.material.onBeforeCompile = shader => {
+          shader.uniforms.uSpatialTexture = this.rUniforms.uSpatialTexture
+          shader.uniforms.uTextureSize = this.rUniforms.uTextureSize
+          shader.uniforms.uTime = this.rUniforms.uTime
+          shader.uniforms.uSpeed = this.rUniforms.uSpeed
+          shader.uniforms.uLengthRatio = this.rUniforms.uLengthRatio
+          shader.uniforms.uObjSize = this.rUniforms.uObjSize
+
+          shader.vertexShader = `
       uniform sampler2D uSpatialTexture;
       uniform vec2 uTextureSize;
       uniform float uTime;
+      uniform float uSpeed;
       uniform float uLengthRatio;
       uniform vec3 uObjSize;
 
@@ -169,14 +234,14 @@ export default class Koi {
         return sd;
       }
       ` + shader.vertexShader;
-      shader.vertexShader = shader.vertexShader.replace(
-          '#include <begin_vertex>',
-          `#include <begin_vertex>
+          shader.vertexShader = shader.vertexShader.replace(
+              '#include <begin_vertex>',
+              `#include <begin_vertex>
 
       vec3 pos = position;
 
       float d = pos.z / uObjSize.z;
-      float t = fract((uTime * 0.1) + (d * uLengthRatio));
+      float t = fract((uTime * uSpeed) + (d * uLengthRatio));
 
       float wStep = 1.0 / uTextureSize.x;
       float hWStep = wStep * 0.5;
@@ -197,13 +262,80 @@ export default class Koi {
 
       // fish transformed
       transformed = P + (N * pos.x) + (B * pos.y); `
-      );
-    }
+          );
+        }
+        break;
+      case 'b':
+        this.bKoi.material.onBeforeCompile = shader => {
+          shader.uniforms.uSpatialTexture = this.bUniforms.uSpatialTexture
+          shader.uniforms.uTextureSize = this.bUniforms.uTextureSize
+          shader.uniforms.uTime = this.bUniforms.uTime
+          shader.uniforms.uSpeed = this.bUniforms.uSpeed
+          shader.uniforms.uLengthRatio = this.bUniforms.uLengthRatio
+          shader.uniforms.uObjSize = this.bUniforms.uObjSize
 
-    const koi = new THREE.Mesh(objGeom, material)
-    this.scene.add(koi)
+          shader.vertexShader = `
+      uniform sampler2D uSpatialTexture;
+      uniform vec2 uTextureSize;
+      uniform float uTime;
+      uniform float uSpeed;
+      uniform float uLengthRatio;
+      uniform vec3 uObjSize;
+
+      struct splineData {
+        vec3 point;
+        vec3 binormal;
+        vec3 normal;
+      };
+
+      splineData getSplineData(float t){
+        float step = 1.0 / uTextureSize.y;
+        float halfStep = step * 0.5;
+        splineData sd;
+
+        sd.point    = texture2D(uSpatialTexture, vec2(t, step * 0.0 + halfStep)).rgb;
+        sd.binormal = texture2D(uSpatialTexture, vec2(t, step * 1.0 + halfStep)).rgb;
+        sd.normal   = texture2D(uSpatialTexture, vec2(t, step * 2.0 + halfStep)).rgb;
+
+        // return P, B, N data of 1 point at t
+        return sd;
+      }
+      ` + shader.vertexShader;
+          shader.vertexShader = shader.vertexShader.replace(
+              '#include <begin_vertex>',
+              `#include <begin_vertex>
+
+      vec3 pos = position;
+
+      float d = pos.z / uObjSize.z;
+      float t = fract((uTime * uSpeed) + (d * uLengthRatio));
+
+      float wStep = 1.0 / uTextureSize.x;
+      float hWStep = wStep * 0.5;
+
+      float numPrev = floor(t / wStep);
+      float numNext = numPrev + 1.0;
+
+      float tPrev = numPrev * wStep + hWStep;
+      float tNext = numNext * wStep  + hWStep;
+
+      splineData splinePrev = getSplineData(tPrev);
+      splineData splineNext = getSplineData(tNext);
+
+      float f = (t - tPrev) / wStep; // 0~1
+      vec3 P = mix(splinePrev.point, splineNext.point, f);
+      vec3 B = mix(splinePrev.binormal, splineNext.binormal, f);
+      vec3 N = mix(splinePrev.normal, splineNext.normal, f);
+
+      // fish transformed
+      transformed = P + (N * pos.x) + (B * pos.y); `
+          );
+        }
+        break;
+    }
   }
   update = () => {
-    if (this.uniforms) this.uniforms.uTime.value = performance.now() / 1000
+    if (this.rUniforms) this.rUniforms.uTime.value = performance.now() / 1000
+    if (this.bUniforms) this.bUniforms.uTime.value = performance.now() / 1500
   }
 }

@@ -20,7 +20,7 @@ export default class Camera {
       0.1,
       500
     )
-    this.instance.position.set(0, -25, 80);
+    this.instance.position.set(0, -100, 150);
     this.scene.add(this.instance)
   }
   setControls() {
