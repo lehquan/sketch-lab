@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import Experience from '../Experience'
 import {VertexNormalsHelper} from 'three/addons/helpers/VertexNormalsHelper';
+
 export default class Koi {
   constructor() {
     this.experience = new Experience()
@@ -32,7 +33,9 @@ export default class Koi {
     for (let i = 0; i < this.params.cSegments; i++) {
       rPts.push(
           new THREE.Vector3().copy(baseVector)
-              .applyAxisAngle(axis, cStep * i).setY(THREE.MathUtils.randFloat(-10, 10))
+          // .setLength(80 + (Math.random() - 0.5) * 5)
+          .applyAxisAngle(axis, cStep * i)
+          .setY(THREE.MathUtils.randFloat(-20, 20))
       );
     }
     this.redCurve = new THREE.CatmullRomCurve3(rPts)
@@ -42,8 +45,9 @@ export default class Koi {
     for (let i = 0; i < this.params.cSegments; i++) {
       bPts.push(
           new THREE.Vector3().copy(baseVector)
-          .setLength(35 + (Math.random() - 0.5) * 5)
-          .applyAxisAngle(axis, cStep * i).setY(THREE.MathUtils.randFloat(-30, 30))
+          // .setLength(80 + (Math.random() - 0.5) * 5)
+          .applyAxisAngle(axis, cStep * i)
+          .setY(THREE.MathUtils.randFloat(-30, 30))
       );
     }
     this.blueCurve = new THREE.CatmullRomCurve3(bPts)
@@ -153,7 +157,7 @@ export default class Koi {
     const size = bbox.getSize(new THREE.Vector3());
 
     const material = new THREE.MeshBasicMaterial({
-      color: 0xff6600,
+      color: 0xE02401,
       wireframe: true,
     })
     this.rKoi = new THREE.Mesh(objGeom, material)
