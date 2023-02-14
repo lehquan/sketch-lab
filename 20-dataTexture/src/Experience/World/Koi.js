@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import Experience from '../Experience'
+import {VertexNormalsHelper} from 'three/addons/helpers/VertexNormalsHelper';
 export default class Koi {
   constructor() {
     this.experience = new Experience()
@@ -11,6 +12,7 @@ export default class Koi {
       numPoints: 511,
       cSegments: 6,
     }
+    this.spheres = []
 
     this.setPath()
     this.setModel()
@@ -38,27 +40,53 @@ export default class Koi {
     // So depending on where your camera is rendering from, the points may appear closer that it actually is.
     let cPoints = this.curve.getSpacedPoints(this.params.numPoints) // try this with 5
 
-    // data texture
+    // create data texture
     this.createDataTexture(cPoints)
 
-    // create line for visualization: optional
+    // create line for visualization
     let pGeom = new THREE.BufferGeometry().setFromPoints(cPoints)
-    let pMat = new THREE.LineBasicMaterial({color: "yellow"})
+    let pMat = new THREE.LineBasicMaterial({color: "red"})
     let pathLine = new THREE.Line(pGeom, pMat)
+
+    // show points for debug
+    for(let i=0; i< cPoints.length; i++) {
+      const sphere = new THREE.Mesh(
+          new THREE.SphereGeometry(0.1, 8),
+          new THREE.MeshBasicMaterial()
+      )
+      sphere.position.copy(cPoints[i])
+      sphere.visible = false
+      // const helper = new VertexNormalsHelper( sphere, 1, 0xff0000 );
+      // this.scene.add( helper );
+
+      this.scene.add(sphere)
+      this.spheres.push(sphere)
+    }
 
     // debug
     if (this.debug.active) {
-      this.debugFolder = this.debug.ui.addFolder("Path");
+      this.debugFolder = this.debug.ui.addFolder("Path")
+      this.scene.add(pathLine)
+      this.spheres.forEach( sphere => sphere.visible = true)
+
       const lineDebug = {
         showPath: () => {
           this.scene.add(pathLine)
         },
         hidePath: () => {
           this.scene.remove(pathLine)
+        },
+        showPoints: () => {
+          this.spheres.forEach( sphere => sphere.visible = true)
+        },
+        hidePoints: () => {
+          this.spheres.forEach( sphere => sphere.visible = false)
         }
       }
       this.debugFolder.add(lineDebug, "showPath")
       this.debugFolder.add(lineDebug, "hidePath")
+      this.debugFolder.add(lineDebug, "showPoints")
+      this.debugFolder.add(lineDebug, "hidePoints")
     }
   }
 
@@ -85,7 +113,7 @@ export default class Koi {
     this.dataTexture.needsUpdate = true
     console.log(this.dataTexture)
   }
-  setModel = () =>{
+  setModel = () => {
     this.resource = this.resources.items.koiModel
     const objGeom = this.resource
     objGeom.center();
@@ -172,8 +200,8 @@ export default class Koi {
       );
     }
 
-    this.model = new THREE.Mesh(objGeom, material)
-    this.scene.add(this.model)
+    const koi = new THREE.Mesh(objGeom, material)
+    this.scene.add(koi)
   }
   update = () => {
     if (this.uniforms) this.uniforms.uTime.value = performance.now() / 1000
