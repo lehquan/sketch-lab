@@ -5,22 +5,23 @@ export default class Koi {
     this.experience = new Experience()
     this.scene = this.experience.scene
     this.resources = this.experience.resources
+    this.debug = this.experience.debug
 
     this.params = {
       numPoints: 511,
-
-      // path
       cSegments: 6,
     }
 
     this.setPath()
     this.setModel()
   }
+
   setPath = () => {
     const baseVector = new THREE.Vector3(40, 0, 0)
     const axis = new THREE.Vector3(0, 1, 0)
     const cPts = [] // this contains all vec3 to create curve
     const cStep = Math.PI * 2 / this.params.cSegments
+
     for (let i = 0; i < this.params.cSegments; i++){
       cPts.push(
           new THREE.Vector3().copy(baseVector)
@@ -37,26 +38,40 @@ export default class Koi {
     // So depending on where your camera is rendering from, the points may appear closer that it actually is.
     let cPoints = this.curve.getSpacedPoints(this.params.numPoints) // try this with 5
 
-    // Generates data(the Frenet Frames) to create TubeGeometry or ExtrudeGeometry,
-    // Including binormals, normals, tangents. Used in geometries like TubeGeometry or ExtrudeGeometry.
-    let cObjects = this.curve.computeFrenetFrames(this.params.numPoints, true)
+    // data texture
+    this.createDataTexture(cPoints)
 
     // create line for visualization: optional
     let pGeom = new THREE.BufferGeometry().setFromPoints(cPoints)
     let pMat = new THREE.LineBasicMaterial({color: "yellow"})
     let pathLine = new THREE.Line(pGeom, pMat)
-    this.scene.add(pathLine);
 
-    // data texture
-    this.createDataTexture(cPoints, cObjects)
+    // debug
+    if (this.debug.active) {
+      this.debugFolder = this.debug.ui.addFolder("Path");
+      const lineDebug = {
+        showPath: () => {
+          this.scene.add(pathLine)
+        },
+        hidePath: () => {
+          this.scene.remove(pathLine)
+        }
+      }
+      this.debugFolder.add(lineDebug, "showPath")
+      this.debugFolder.add(lineDebug, "hidePath")
+    }
   }
+
   /**
    * THREE.DataTexture: Creates a texture directly from raw data, width and height.
    * @param cPoints  : set of points distant equally in 3D
-   * @param cObjects : Including binormals, normals, tangents
    */
-  createDataTexture = (cPoints, cObjects) => {
+  createDataTexture = cPoints => {
     let data = []
+
+    // Generates data(the Frenet Frames) containing tangents, normals and binormals.
+    let cObjects = this.curve.computeFrenetFrames(this.params.numPoints, true)
+    console.log(cObjects)
 
     cPoints.forEach( v => { data.push(v.x, v.y, v.z,0.0);} );  // 4 channels
     cObjects.binormals.forEach( v => { data.push(v.x, v.y, v.z,0.0);} );
@@ -68,6 +83,7 @@ export default class Koi {
     this.dataTexture.magFilter = THREE.NearestFilter
     this.dataTexture.wrapS = this.dataTexture.wrapT = THREE.RepeatWrapping
     this.dataTexture.needsUpdate = true
+    console.log(this.dataTexture)
   }
   setModel = () =>{
     this.resource = this.resources.items.koiModel
@@ -77,23 +93,32 @@ export default class Koi {
     objGeom.scale(0.3, 0.3, 0.3);
     const bbox = new THREE.Box3().setFromBufferAttribute(objGeom.getAttribute("position"));
     const size = bbox.getSize(new THREE.Vector3());
-    console.log(this.curve.cacheArcLengths[200])
 
-    this.material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshBasicMaterial({
       color: 0xff6600,
       wireframe: true,
     })
-    this.material.onBeforeCompile = shader => {
-      shader.uniforms.uSpatialTexture = { value: this.dataTexture }
-      shader.uniforms.uTextureSize = { value: new THREE.Vector2(this.params.numPoints + 1, 4)}
-      shader.uniforms.time = { value: 0 }
-      shader.uniforms.uLengthRatio = { value: size.z / this.curve.cacheArcLengths[200] }
-      shader.uniforms.uObjSize = { value: size}
+
+    // uniforms
+    this.uniforms = {
+      uSpatialTexture: {value: this.dataTexture },
+      uTextureSize: {value: new THREE.Vector2(this.params.numPoints + 1, 4)},
+      uTime: {value: 0},
+      uLengthRatio: {value: size.z / this.curve.cacheArcLengths[200]}, // ratio to twist the mesh along the path
+      uObjSize: {value: size}
+    }
+
+    material.onBeforeCompile = shader => {
+      shader.uniforms.uSpatialTexture = this.uniforms.uSpatialTexture
+      shader.uniforms.uTextureSize = this.uniforms.uTextureSize
+      shader.uniforms.uTime = this.uniforms.uTime
+      shader.uniforms.uLengthRatio = this.uniforms.uLengthRatio
+      shader.uniforms.uObjSize = this.uniforms.uObjSize
 
       shader.vertexShader = `
       uniform sampler2D uSpatialTexture;
       uniform vec2 uTextureSize;
-      uniform float time;
+      uniform float uTime;
       uniform float uLengthRatio;
       uniform vec3 uObjSize;
 
@@ -123,7 +148,7 @@ export default class Koi {
       vec3 pos = position;
 
       float d = pos.z / uObjSize.z;
-      float t = fract((time * 0.1) + (d * uLengthRatio));
+      float t = fract((uTime * 0.1) + (d * uLengthRatio));
 
       float wStep = 1.0 / uTextureSize.x;
       float hWStep = wStep * 0.5;
@@ -145,17 +170,12 @@ export default class Koi {
       // fish transformed
       transformed = P + (N * pos.x) + (B * pos.y); `
       );
-
-      this.material.userData.shader = shader
     }
 
-    this.model = new THREE.Mesh(objGeom, this.material);
-    this.scene.add(this.model);
+    this.model = new THREE.Mesh(objGeom, material)
+    this.scene.add(this.model)
   }
   update = () => {
-    if (this.material) {
-      const shader = this.material.userData.shader
-      if (shader) shader.uniforms.time.value = performance.now() * 0.001
-    }
+    if (this.uniforms) this.uniforms.uTime.value = performance.now() / 1000
   }
 }
