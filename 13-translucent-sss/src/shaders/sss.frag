@@ -7,15 +7,16 @@ uniform vec3 uLightColor;
 uniform float uLightIntensity;
 
 void main() {
-    // vec3 uLightColor = vec3(1.0, 0.5, 0.5);
-    // vec3 uTranslucencyColor = vec3(0.8, 0.2, 0.2);
+//    vec3 uLightColor = vec3(1.0, 0.5, 0.5); // rgb(255, 127, 127)
+//    vec3 uTranslucencyColor = vec3(0.8, 0.2, 0.2); //rgb(204, 51, 51)
 
     vec3 toLightVector = uLightPos - vFragmentPos;
 
     // lightDistanceSQ: distance bw 1 vertex and light pos
     // This calculates light opacity relates to light pos
     // float lightDistanceSQ = dot(toLightVector, toLightVector);
-    float lightDistanceSQ = pow(distance(vec3(0.0), toLightVector), 1.5);
+    // float lightDistanceSQ = pow(distance(vec3(0.0), toLightVector), 1.5);
+    float lightDistanceSQ = pow(distance(vec3(0.), toLightVector), 2.0) ;
 
     vec3 lightDir = normalize(toLightVector);
 

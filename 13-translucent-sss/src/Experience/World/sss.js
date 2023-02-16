@@ -13,11 +13,11 @@ export default class SSS {
   setObject = () => {
     // This indicates where the light is
     this.sphere = new THREE.Mesh(new THREE.SphereGeometry(0.02, 32, 32), new THREE.MeshBasicMaterial())
-    // this.scene.add(this.sphere)
+    this.scene.add(this.sphere)
 
     this.sssUniforms = {
       uLightPos: { value: new THREE.Vector3(0, 0, -0.1) },
-      uTranslucencyColor: { value: new THREE.Color(0xAACB73) },
+      uTranslucencyColor:  { value: new THREE.Color(0xAACB73) },
       uLightColor: { value: new THREE.Color(0xffffff) },
       uLightIntensity: { value: 0.2},
     }
@@ -29,8 +29,6 @@ export default class SSS {
 
     // model
     this.model = this.resources.items.statue.scene
-    // this.model.scale.setScalar(1/50)
-    // this.model.rotation.set(Math.PI/180 * 20, Math.PI/180 * -30, 0)
 
     this.model.rotation.set(0, Math.PI/180 * -180, 0)
     this.model.position.y = -1.5
@@ -85,6 +83,11 @@ export default class SSS {
       }
     })
     this.scene.add(this.model)
+
+    // box
+    // const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
+    // this.box = new THREE.Mesh(boxGeometry, sssMaterial)
+    // this.scene.add(this.box)
   }
   update = () => {
     const min = -1.5 // 0.5
@@ -93,5 +96,6 @@ export default class SSS {
 
     // this.sphere.position.y = h;
     this.sssUniforms.uLightPos.value.y = h;
+    // if(this.box) this.box.rotation.y = performance.now()/1500;
   }
 }
