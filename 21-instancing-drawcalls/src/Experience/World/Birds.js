@@ -2,7 +2,6 @@ import * as THREE from 'three'
 import Experience from '../Experience'
 import birdVertex from '../../shaders/birds.vert'
 import birdFragment from '../../shaders/birds.frag'
-import {Float32BufferAttribute} from 'three';
 
 export default class Birds {
   constructor() {
@@ -25,8 +24,9 @@ export default class Birds {
     const orientationStart = []
     const orientationEnd = []
 
-    positions.push( 0.025, - 0.025, 0 )
-    positions.push( - 0.025, 0.025, 0 )
+    // position for each vertex of a triangle
+    positions.push( 0.025, -0.025, 0 )
+    positions.push( -0.025, 0.025, 0 )
     positions.push( 0, 0, 0.025 )
 
     // instance attribute
@@ -63,11 +63,10 @@ export default class Birds {
     // test
     const geo = new THREE.PlaneGeometry(1, 1)
     console.log(geo)
-
     console.log(geometry)
 
     // material
-    const material = new THREE.RawShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 1.0},
         sineTime: { value: 1.0}
@@ -84,10 +83,9 @@ export default class Birds {
   }
   update = () => {
     if (this.bird) {
-      // this.bird.rotation.y = performance.now() * 0.0005
-      // this.bird.material.uniforms.time.value = performance.now() * 0.005
-      // this.bird.material.uniforms.sineTime.value = Math.sin( this.bird.material.uniforms.time.value * 0.05 );
+      this.bird.rotation.y = performance.now() * 0.0005
+      this.bird.material.uniforms.time.value = performance.now() * 0.005
+      this.bird.material.uniforms.sineTime.value = Math.sin( this.bird.material.uniforms.time.value * 0.05 );
     }
-
   }
 }

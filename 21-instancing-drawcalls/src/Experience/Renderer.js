@@ -17,15 +17,10 @@ export default class Renderer {
     })
 
     // this.instance.setClearColor(0x181005)
-    // this.instance.useLegacyLights = true
+    this.instance.useLegacyLights = true
     this.instance.outputEncoding = THREE.sRGBEncoding
     this.instance.toneMapping = THREE.NoToneMapping
     this.instance.toneMappingExposure = 1
-
-    if (this.instance.capabilities.isWebGL2 === false && this.instance.extensions.has('ANGLE_instanced_arrays') === false) {
-      return;
-    }
-
     this.resize()
   }
 

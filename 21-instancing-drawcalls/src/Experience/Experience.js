@@ -40,7 +40,7 @@ export default class Experience {
     this.renderer = new Renderer()
     this.resources = new Resources(sources) // resources need renderer for meshopt
     this.environment = new Environment()
-    // this.postEffect = new PostEffect()
+    this.postEffect = new PostEffect()
     this.world = new World()
     this.ray = new Ray(this.camera, this.scene)
 
@@ -72,7 +72,7 @@ export default class Experience {
   resize() {
     this.camera.resize()
     this.renderer.resize()
-    // this.postEffect.resize()
+    this.postEffect.resize()
   }
 
   update() {
@@ -82,8 +82,8 @@ export default class Experience {
     /**update everything */
     this.camera.update()
     this.world.update()
-    this.renderer.update() // Don't use this if using PostProcessing
-    // if (this.postEffect) this.postEffect.update()
+    // this.renderer.update() // Don't use this if using PostProcessing
+    if (this.postEffect) this.postEffect.update()
 
     /**Finish analyzing frame */
     this.stats.active && this.stats.afterRender()

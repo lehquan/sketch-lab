@@ -2,10 +2,11 @@ precision highp float;
 
 uniform float sineTime;
 
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-
-attribute vec3 position;
+// for RawShaderMaterial
+//uniform mat4 modelViewMatrix;
+//uniform mat4 projectionMatrix;
+//
+//attribute vec3 position;
 attribute vec3 offset;
 attribute vec4 color;
 attribute vec4 orientationStart;
