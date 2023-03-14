@@ -83,7 +83,6 @@ export default class Experience {
     this.camera.update()
     this.world.update()
     this.environment.update()
-    // this.renderer.update() // Don't use this if using PostProcessing
 
     /**Finish analyzing frame */
     this.stats.active && this.stats.afterRender()
