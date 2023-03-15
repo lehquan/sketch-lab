@@ -12,9 +12,15 @@ export default class PostEffect {
     this.sizes = this.experience.sizes
     this.debug = this.experience.debug
 
-    this.params = {
+    /*this.params = {
       exposure: 1,
       bloomStrength: 1.2,
+      bloomThreshold: 0,
+      bloomRadius: 0
+    }*/
+    this.params = {
+      exposure: 1,
+      bloomStrength: 1.0,
       bloomThreshold: 0,
       bloomRadius: 0
     }
@@ -23,7 +29,6 @@ export default class PostEffect {
     this.setEffect()
   }
   setEffect = () => {
-
     const renderPass = new RenderPass(this.scene, this.camera)
     const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),

@@ -5,4 +5,10 @@ export default [
     path: "assets/textures/royal_esplanade_1k.hdr",
     source: "https://polyhaven.com/a/future_parking"
   },
+  {
+    name: "cottage",
+    type: "gltfModel",
+    path: "assets/models/cottage.glb",
+    source: "https://skfb.ly/orBoW"
+  },
 ];

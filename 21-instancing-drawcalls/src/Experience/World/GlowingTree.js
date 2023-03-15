@@ -6,6 +6,7 @@ export default class GlowingTree {
   constructor() {
     this.experience = new Experience()
     this.scene = this.experience.scene
+    this.resources = this.experience.resources
 
     this.shades = [
         0x339900, 0x236b00, 0x5bad32, 0x3bb300, 0x44cc00,
@@ -17,13 +18,19 @@ export default class GlowingTree {
         0x72C3BE, 0x67b0ab, 0x5b9c98, 0x508985, 0x447572, 0x39625f, 0x80c9c5
     ]
 
-    this.setLight()
+    this.setModel()
     this.makeInstance()
   }
   setLight = () => {
     const light = new THREE.HemisphereLight( 0xffffff, 0x888888 );
     light.position.set( 0, 1, 0 );
     this.scene.add( light );
+  }
+  setModel = () => {
+    const model = this.resources.items.cottage.scene
+    model.scale.setScalar(6)
+    model.position.set(0, -50, 50)
+    this.scene.add(model)
   }
   makeInstance = () => {
     fetch(positionData).then(r => r.json()).then(pos => {
@@ -35,7 +42,7 @@ export default class GlowingTree {
     const dummy = new THREE.Object3D()
 
     const geometry = new THREE.IcosahedronGeometry( 0.5, 3 );
-    const material = new THREE.MeshLambertMaterial( {
+    const material = new THREE.MeshBasicMaterial( {
       transparent: true,
     } );
 
@@ -83,6 +90,7 @@ export default class GlowingTree {
 
   }();
   update = () => {
+
     if (this.mesh) {
       for (let i = 0; i < this.mesh.count; i++) {
         const alpha = 0.5 + 0.5 * Math.sin(performance.now() * 0.0018 + i * 0.1)

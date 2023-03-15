@@ -21,6 +21,7 @@ export default class Renderer {
     this.instance.outputEncoding = THREE.sRGBEncoding
     this.instance.toneMapping = THREE.NoToneMapping
     this.instance.toneMappingExposure = 1
+    // this.instance.autoClearColor = false
     this.resize()
   }
 

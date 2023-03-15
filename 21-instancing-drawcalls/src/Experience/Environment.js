@@ -13,7 +13,7 @@ export default class Environment {
     });
   }
   setEnv = () => {
-    // this.scene.background = new THREE.Color(0xa5c9a5)
+    // this.scene.background = new THREE.Color(0xedaaaa)
 
     const texture = this.resources.items.royal_esplanade
     texture.mapping = THREE.EquirectangularReflectionMapping
