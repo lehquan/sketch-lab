@@ -90,7 +90,6 @@ export default class GlowingTree {
 
   }();
   update = () => {
-
     if (this.mesh) {
       for (let i = 0; i < this.mesh.count; i++) {
         const alpha = 0.5 + 0.5 * Math.sin(performance.now() * 0.0018 + i * 0.1)

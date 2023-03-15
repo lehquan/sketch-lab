@@ -12,12 +12,6 @@ export default class PostEffect {
     this.sizes = this.experience.sizes
     this.debug = this.experience.debug
 
-    /*this.params = {
-      exposure: 1,
-      bloomStrength: 1.2,
-      bloomThreshold: 0,
-      bloomRadius: 0
-    }*/
     this.params = {
       exposure: 1,
       bloomStrength: 1.0,

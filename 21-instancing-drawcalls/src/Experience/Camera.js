@@ -20,7 +20,6 @@ export default class Camera {
         0.1,
         10000,
     )
-    // this.instance.position.set(0, 0, 2);
     this.instance.position.set(0, 0, 300);
     this.scene.add(this.instance)
   }
@@ -28,7 +27,7 @@ export default class Camera {
     this.controls = new OrbitControls(this.instance, this.canvas)
     this.controls.enabled = true
     // this.controls.autoRotate = true
-    // this.controls.maxDistance = 200;
+    this.controls.maxDistance = 500;
     this.controls.enableDamping = true;
   }
   resize() {
