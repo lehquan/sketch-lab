@@ -44,7 +44,7 @@ export default class GlowingTree {
     this.mesh.position.set(0, -100, 50)
 
     // random transformation and color
-    for(let i=0; i<pos.length; i++){
+    for(let i=0; i<pos.length; i++) {
       dummy.position.set(pos[i].tx * 5, pos[i].ty * 7, pos[i].tz * 3)
       dummy.scale.setScalar(THREE.MathUtils.randFloat(0.5, 2))
       dummy.updateMatrix()

@@ -54,19 +54,25 @@ export default class Experience {
     _canvas.id = 'experience'
     document.body.appendChild(_canvas)
 
-    /*const footer = document.createElement('div')
+    const footer = document.createElement('div')
     footer.classList.add('footer')
     document.body.appendChild(footer)
 
     const note1 = document.createElement('p')
-    note1.innerHTML = 'Original post: '
+    note1.classList.add('info')
+    note1.innerHTML = 'Using InstancedUniformsMesh to create the Tree with 10k spheres. ' +
+        'The trunk is made from 7k points, and moving particle is 10k points.'
     footer.appendChild(note1)
 
+    const note2 = document.createElement('p')
+    note2.innerHTML = '3D model: '
+    footer.appendChild(note2)
+
     const linkNote1 = document.createElement('a')
-    linkNote1.innerHTML = 'Flying lanterns and Koi fish by Paul West'
-    linkNote1.href = 'https://codepen.io/prisoner849/pen/WNQNdpv?editors=1010'
+    linkNote1.innerHTML = 'Cottage'
+    linkNote1.href = 'https://skfb.ly/orBoW'
     linkNote1.target = 'blank'
-    note1.appendChild(linkNote1)*/
+    note2.appendChild(linkNote1)
   }
 
   resize() {

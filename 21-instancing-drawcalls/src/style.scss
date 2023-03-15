@@ -37,7 +37,7 @@ body {
 
 .footer {
   width: 100%;
-  height: 50px;
+  height: 100px;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -48,11 +48,15 @@ body {
   font-weight: 400;
   z-index: 2;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  justify-content: center;
   flex-wrap: nowrap;
+  .info {
+    font-size: 16px;
+  }
   p {
     color: $second-color;
-    margin-right: 10px;
+    margin: 0 10px 10px 0;
     a {
       font-weight: 500;
       color: #646cff;
