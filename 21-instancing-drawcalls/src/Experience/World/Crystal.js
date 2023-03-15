@@ -67,13 +67,10 @@ export default class Crystal {
     this.material.uniforms.hex.value = hex
   }
   update = () => {
-    // const time = this.clock.getDelta()
-
     if (this.sparkle) {
+      this.sparkle.rotation.y = -performance.now() / 10000
       this.material.uniforms.time.value = performance.now() / 3000
       this.material.uniforms.hex.value = performance.now() / 3000
     }
-
-
   }
 }

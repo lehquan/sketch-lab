@@ -79,7 +79,7 @@ export default class Wave {
     })
 
     const wave = new THREE.Points(geo, mat)
-    wave.position.set(0, 0, 50)
+    wave.position.set(0, -20, 50)
     wave.rotation.set(0, 0, 0)
     wave.scale.setScalar(20)
     this.scene.add(wave)

@@ -23,7 +23,7 @@ export default class GlowingTree {
   setModel = () => {
     const model = this.resources.items.cottage.scene
     model.scale.setScalar(6)
-    model.position.set(0, -160, 50)
+    model.position.set(0, -180, 50)
     this.scene.add(model)
   }
   makeInstance = () => {
@@ -41,7 +41,7 @@ export default class GlowingTree {
     } );
 
     this.mesh = new InstancedUniformsMesh( geometry, material, pos.length);
-    this.mesh.position.set(0, -50, 50)
+    this.mesh.position.set(0, -100, 50)
 
     // random transformation and color
     for(let i=0; i<pos.length; i++){
