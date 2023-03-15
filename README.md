@@ -31,6 +31,7 @@ Some pieces of sketch made with three.js :heart:
   <tr>
     <td><a href="https://dispose-scene.netlify.app/"><img src="18-dispose/src/assets/screenshot.png" alt=""></a></td>
     <td><a href=""><img src="19-texture-animation/src/assets/screenshot.png" alt=""></a></td>
+    <td><a href="https://instancing-drawcalls.netlify.app/"><img src="21-instancing-drawcalls/src/assets/screenshot.png" alt=""></a></td>
   </tr>
 </table>
 
