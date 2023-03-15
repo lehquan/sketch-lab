@@ -13,7 +13,6 @@ export default class GlowingTree {
         0xff205c, 0xe51c52, 0xff4c7c, 0xcc1949, 0xec003f,
         0xFF0000, 0xbd1a2e, 0xeb2d43, 0xc31227, 0x610913,
         0xff5c00, 0xe65300, 0xff7d33, 0xff6c1a, 0xb34000,
-        0xff5c00, 0xe65300, 0xff7d33, 0xff6c1a, 0xb34000,
         0x1035AC, 0x0c277d, 0x123cc3, 0x1e4fea, 0x091f66,
         0x72C3BE, 0x67b0ab, 0x5b9c98, 0x508985, 0x447572, 0x39625f, 0x80c9c5
     ]
@@ -21,15 +20,10 @@ export default class GlowingTree {
     this.setModel()
     this.makeInstance()
   }
-  setLight = () => {
-    const light = new THREE.HemisphereLight( 0xffffff, 0x888888 );
-    light.position.set( 0, 1, 0 );
-    this.scene.add( light );
-  }
   setModel = () => {
     const model = this.resources.items.cottage.scene
     model.scale.setScalar(6)
-    model.position.set(0, -50, 50)
+    model.position.set(0, -160, 50)
     this.scene.add(model)
   }
   makeInstance = () => {
@@ -47,7 +41,7 @@ export default class GlowingTree {
     } );
 
     this.mesh = new InstancedUniformsMesh( geometry, material, pos.length);
-    this.mesh.position.set(0, -100, 50)
+    this.mesh.position.set(0, -50, 50)
 
     // random transformation and color
     for(let i=0; i<pos.length; i++){

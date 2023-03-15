@@ -1,7 +1,7 @@
 import Experience from "../Experience.js"
 import GlowingTree from './GlowingTree';
-import Birds from './Birds';
 import Crystal from './Crystal';
+import Wave from './Wave';
 export default class World {
   constructor() {
     this.experience = new Experience()
@@ -9,14 +9,14 @@ export default class World {
 
     // Wait for resources
     this.resources.on("ready", () => {
-      // this.birds = new Birds()
       this.spheres = new GlowingTree()
       this.crystal = new Crystal()
+      this.wave = new Wave()
     })
   }
   update() {
-    // if (this.birds) this.birds.update()
     if (this.spheres) this.spheres.update()
     if (this.crystal) this.crystal.update()
+    if (this.wave) this.wave.update()
   }
 }
