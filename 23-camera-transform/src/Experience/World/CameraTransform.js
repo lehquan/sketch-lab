@@ -10,8 +10,8 @@ export default class CameraTransform {
     this.camera = this.experience.camera.instance
     this.controls = this.experience.camera.controls
     this.ray = this.experience.ray
-
     this.origin = this.experience.camera.origin
+
     this.setObjects()
     this.setFooter()
 
@@ -75,6 +75,10 @@ export default class CameraTransform {
   transformCamToTarget = ev => {
     const target = ev.detail
 
+    // helper for visualize
+    this.helper = new THREE.BoxHelper( target, 0xffff00 )
+    this.scene.add( this.helper )
+
     this.controls.enabled = false
 
     const position = new THREE.Vector3()
@@ -82,10 +86,19 @@ export default class CameraTransform {
     const scale = new THREE.Vector3()
 
     target.matrix.decompose( position, quaternion, scale )
-    const bbox = new THREE.Box3().setFromObject(target)
-    const center = bbox.getCenter(new THREE.Vector3())
-    const size = bbox.getSize(new THREE.Vector3())
 
+    // calculate bounding box of the target
+    const size = new THREE.Vector3()
+    const center = new THREE.Vector3()
+    const bbox = new THREE.Box3()
+
+    bbox.setFromObject( target )
+    bbox.getSize(size)
+    bbox.getCenter(center )
+
+    // Move camera to target position
+    // For the z-axis, we can use target.position.z,
+    // but using bbox is more correct
     gsap.to(this.camera.position, {
       duration: 1.5,
       x: position.x,
@@ -108,6 +121,7 @@ export default class CameraTransform {
       },
       onComplete: () => {
         setTimeout(() => {
+          this.scene.remove( this.helper )
           this.resetCamera()
         }, 1000)
       }

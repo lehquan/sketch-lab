@@ -9,7 +9,7 @@ export default class Ray extends EventEmitter {
     this.camera = camera.instance
     this.scene = scene
     this.raycaster = new THREE.Raycaster()
-    this.pointer = new THREE.Vector2()
+    this.pointer = new THREE.Vector2(1, 1)
     this.target = this.scene
 
     window.addEventListener('touchstart', ev => {
@@ -32,11 +32,14 @@ export default class Ray extends EventEmitter {
   onClickHandler = ev => {
     ev.preventDefault()
 
+    // calculate pointer position in normalized device coordinates
+    // (-1 to +1) for both components
     this.pointer.x = ( ev.clientX / window.innerWidth ) * 2 - 1
     this.pointer.y = - ( ev.clientY / window.innerHeight ) * 2 + 1
 
     this.raycaster.setFromCamera(this.pointer, this.camera)
     const intersects = this.raycaster.intersectObjects(this.target.children, true)
+    console.log(intersects)
 
     if (intersects.length > 0) {
       const INTERSECTED = intersects[0].object

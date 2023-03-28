@@ -35,9 +35,9 @@ export default class Camera {
     if (this.debug.active) {
       this.debugFolder = this.debug.ui.addFolder('Camera')
       const debugObject = {
-        'Rotate': this.controls.autoRotate,
+        'AutoRotate': this.controls.autoRotate,
       };
-      this.debugFolder.add(debugObject, "Rotate").onChange(val => {
+      this.debugFolder.add(debugObject, "AutoRotate").onChange(val => {
         this.controls.autoRotate = val
       });
     }
