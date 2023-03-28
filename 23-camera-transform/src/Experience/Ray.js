@@ -39,7 +39,6 @@ export default class Ray extends EventEmitter {
 
     this.raycaster.setFromCamera(this.pointer, this.camera)
     const intersects = this.raycaster.intersectObjects(this.target.children, true)
-    console.log(intersects)
 
     if (intersects.length > 0) {
       const INTERSECTED = intersects[0].object

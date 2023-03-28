@@ -21,15 +21,6 @@ export default class Environment {
   }
 
   setEnv = () => {
-    const pointLight = new THREE.PointLight(0xffffff, 1.5)
-    pointLight.position.set(0, 0, 0)
-    this.scene.add(pointLight)
-    const ambientLight = new THREE.AmbientLight(0xffffff, .5)
-    this.scene.add(ambientLight)
-
-    const gridHelper = new THREE.GridHelper(10, 10)
-    this.scene.add(gridHelper)
-
     // backgroundColor
     this.scene.background = new THREE.Color(this.params.backgroundColor)
 

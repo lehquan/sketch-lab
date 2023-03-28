@@ -7,9 +7,9 @@ import Resources from "../utils/Resources.js"
 import Stats from "../utils/Stats.js"
 import sources from "./sources.js"
 import Environment from './Environment'
-import Debug from '../utils/Debug';
-import PostEffect from './PostEffect';
-import Ray from './Ray';
+import PostEffect from './World/PostEffect'
+import Debug from '../utils/Debug'
+import Ray from './Ray'
 
 let instance = null
 
