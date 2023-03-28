@@ -19,8 +19,32 @@ export default class OrbitMovement {
     this.setEnvironment()
     this.setObjects()
     this.setPath()
+    this.setFooter()
   }
+  setFooter = () => {
+    const footer = document.getElementById('footer')
 
+    const title = document.createElement('p')
+    title.classList.add('title')
+    title.innerHTML = 'Moving the moon along the path. '
+    footer.appendChild(title)
+
+    const title2 = document.createElement('p')
+    title2.classList.add('title')
+    title2.innerHTML = 'Apply ' +
+        '<a href="https://threejs.org/examples/?q=after#webgl_postprocessing_afterimage" target="blank">AfterImage post-processing</a> ' +
+        'for the moon to make the motion blur effect.'
+    footer.appendChild(title2)
+
+    const info = document.createElement('p')
+    info.innerHTML = 'USE DEBUG MODE (#debug) FOR TESTING BLOOMING'
+    // footer.appendChild(info)
+
+    const link = document.createElement('p')
+    link.innerHTML = 'Credit: ' +
+        '<a href="https://skfb.ly/HpVV" target="blank">Scifi Girl v.01</a> '
+    // footer.appendChild(link)
+  }
   setEnvironment = () => {
     this.camera.position.set(0, 100, 200)
 
@@ -46,7 +70,7 @@ export default class OrbitMovement {
     this.earth.castShadow = true
     this.earth.receiveShadow = true
     this.earth.scale.setScalar(2)
-    // this.scene.add(this.earth)
+    this.scene.add(this.earth)
 
     // moon
     const moonGeo = new THREE.SphereGeometry(5, 32, 16)
@@ -86,11 +110,11 @@ export default class OrbitMovement {
       this.moon.rotation.y = t - Math.PI * 0.5
       this.moon.rotation.z = Math.PI * 0.5
 
-      this.path.rotation.set(
-          performance.now() / 5000 + Math.PI,
-          performance.now() / 5000 + Math.PI,
-          performance.now() / 5000 + Math.PI
-      )
+      // this.path.rotation.set(
+      //     performance.now() / 5000 + Math.PI,
+      //     performance.now() / 5000 + Math.PI,
+      //     performance.now() / 5000 + Math.PI
+      // )
     }
   }
 }

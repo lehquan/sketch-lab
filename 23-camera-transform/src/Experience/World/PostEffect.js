@@ -3,7 +3,6 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 import Experience from '../Experience'
 import Bloom from './Effects/Bloom'
 import AfterImage from './Effects/AfterImage'
-import {AfterimagePass} from 'three/addons/postprocessing/AfterimagePass';
 
 export default class PostEffect {
   constructor() {

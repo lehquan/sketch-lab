@@ -29,6 +29,7 @@ export default class Camera {
     this.controls = new OrbitControls(this.instance, this.canvas)
     this.controls.enabled = true
     this.controls.autoRotate = false
+    this.controls.enablePan = false
 
     //
     if (this.debug.active) {

@@ -1,4 +1,4 @@
-import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass';
+import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass'
 
 export default class AfterImage {
   constructor(composer) {
@@ -8,7 +8,7 @@ export default class AfterImage {
   }
   setEffect = () => {
     const afterimagePass = new AfterimagePass()
-    afterimagePass.uniforms.damp.value = 0.6
+    afterimagePass.uniforms.damp.value = 0.65
     this.composer.addPass(afterimagePass)
   }
 }
