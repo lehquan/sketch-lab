@@ -25,6 +25,7 @@ export default class Glass {
     this.setMaterial()
     this.setObjects()
     this.setDebug()
+    this.setFooter()
   }
   setEnv = () => {
     //
@@ -176,5 +177,19 @@ export default class Glass {
       tetraFolder.close()
     }
   }
+  setFooter = () => {
+    const footer = document.getElementById('footer')
 
+    const title = document.createElement('p')
+    title.classList.add('title')
+    title.innerHTML = 'Create transparent glass material with PhysicalMaterial and transmission. ' +
+        '<br>' +
+        'This is based on ' +
+        '<a href="https://tympanus.net/codrops/2021/10/27/creating-the-effect-of-transparent-glass-and-plastic-in-three-js/" target="blank">the original tutorial on Codrops.</a> '
+    footer.appendChild(title)
+
+    const info = document.createElement('p')
+    info.innerHTML = 'USE DEBUG MODE (#debug) FOR TESTING MATERIAL'
+    footer.appendChild(info)
+  }
 }

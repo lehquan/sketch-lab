@@ -36,6 +36,7 @@ Some pieces of sketch made with three.js :heart:
     <tr>
         <td><a href="https://zoom-to-fit.netlify.app/"><img src="22-zoom/src/assets/screenshot.png" alt=""></a></td>
         <td><a href="https://github.com/lehquan/sketch-lab/tree/master/24-learning-material"><img src="24-learning-material/src/assets/flakesTexture.png" alt=""></a></td>
+        <td><a href="https://github.com/lehquan/sketch-lab/tree/master/24-learning-material"><img src="24-learning-material/src/assets/glass-material.png" alt=""></a></td>
   </tr>
 </table>
 
