@@ -24,6 +24,18 @@ export default [
     source: "https://opengameart.org/content/fox-and-shiba"
   },
   {
+    name: "normalMap",
+    type: "texture",
+    path: "assets/textures/normal.jpg",
+    source: ""
+  },
+  {
+    name: "backdrop",
+    type: "texture",
+    path: "assets/textures/backdrop.jpeg",
+    source: ""
+  },
+  {
     name: "royal_esplanade",
     type: "hdrTexture",
     path: "assets/textures/royal_esplanade_1k.hdr",

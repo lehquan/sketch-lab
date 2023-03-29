@@ -1,5 +1,6 @@
 import Experience from "../Experience.js"
 import SnowFlake from './SnowFlake'
+import Glass from './Glass';
 export default class World {
   constructor() {
     this.experience = new Experience()
@@ -9,10 +10,11 @@ export default class World {
 
     // Wait for resources
     this.resources.on("ready", () => {
-      new SnowFlake()
+      // new SnowFlake()
+      new Glass()
     })
   }
   update() {
-    // if (this.orbitMovement) this.orbitMovement.update()
+    //
   }
 }

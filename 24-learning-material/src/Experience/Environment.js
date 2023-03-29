@@ -8,6 +8,7 @@ export default class Environment {
     this.resources = this.experience.resources
     this.debug = this.experience.debug
 
+    this.bgColorFolder = null
     this.params = {
       backgroundColor: 0x262626,
       blurriness: 0,
@@ -40,23 +41,38 @@ export default class Environment {
     const debugFolder = this.debug.ui.addFolder('Enironment')
     const debugObject = {
       'Add/Remove Scene Texture': () => {
-        if(this.scene.environment === null) {
+        if(this.scene.environment === null) { // set HDRI
+          if(this.bgColorFolder) {
+            this.bgColorFolder.destroy()
+            this.bgColorFolder = null
+            this.params.backgroundColor = 0x262626
+          }
+
           this.scene.environment = this.envTexture
           this.scene.background = this.envTexture
-        } else {
+          this.blurFolder = debugFolder.add( this.params, 'blurriness', 0, 1).onChange( val => {
+            this.scene.backgroundBlurriness = this.params.blurriness
+          })
+        }
+        else { // set bgColor
           this.scene.environment = null
+          if (this.blurFolder) {
+            this.blurFolder.destroy()
+            this.blurFolder = null
+          }
+
           this.scene.background = new THREE.Color(this.params.backgroundColor)
+          this.bgColorFolder = debugFolder.addColor( this.params, 'backgroundColor' ).onChange( val => {
+            this.scene.background.setHex( this.params.backgroundColor )
+          })
         }
       },
     }
 
-    debugFolder.addColor( this.params, 'backgroundColor' ).onChange( val => {
-    	this.scene.background.setHex( this.params.backgroundColor )
+    this.bgColorFolder = debugFolder.addColor( this.params, 'backgroundColor' ).onChange( val => {
+      this.scene.background.setHex( this.params.backgroundColor )
     })
     debugFolder.add(debugObject, 'Add/Remove Scene Texture')
-    debugFolder.add( this.params, 'blurriness', 0, 1).onChange( val => {
-      this.scene.backgroundBlurriness = this.params.blurriness
-    })
     debugFolder.close()
   }
 }
