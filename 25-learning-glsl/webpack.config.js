@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
   mode: "development",
-  name: "windy-grass",
+  name: "learning-glsl",
   devtool: 'eval-source-map',
   entry: {
     app: ["./src/index.js"],
@@ -60,7 +60,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       filename: path.resolve(__dirname, "dist", "index.html"),
-      title: 'Three.js | Learning of GLSL',
+      title: `Three.js | I'm learning GLSL...`,
       hash: true,
     }),
     new CopyPlugin({

@@ -13,3 +13,4 @@
 
 
 ### References
+- [Cartoon Outline Effect](https://medium.com/@joshmarinacci/cartoon-outline-effect-6c4e95545537)

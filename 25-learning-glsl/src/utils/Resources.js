@@ -3,9 +3,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader'
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader'
+import { FBXLoader } from 'three/addons/loaders/FBXLoader'
 import { RGBELoader } from 'three/addons/loaders/RGBELoader'
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module'
-import Experience from '../Experience/Experience';
+import Experience from '../Experience/Experience'
 import EventEmitter from "./EventEmitter.js"
 
 export default class Resources extends EventEmitter {
@@ -49,6 +50,7 @@ export default class Resources extends EventEmitter {
 
     // another loaders
     this.loaders.objLoader = new OBJLoader()
+    this.loaders.fbxLoader = new FBXLoader()
     this.loaders.textureLoader = new THREE.TextureLoader()
     this.loaders.cubeTextureLoader = new THREE.CubeTextureLoader()
     this.loaders.hdrLoader = new RGBELoader()
@@ -64,6 +66,11 @@ export default class Resources extends EventEmitter {
       }
       else if (source.type === "objModel") {
         this.loaders.objLoader.load(source.path, (file) => {
+          this.sourceLoaded(source, file);
+        });
+      }
+      else if (source.type === "fbxModel") {
+        this.loaders.fbxLoader.load(source.path, (file) => {
           this.sourceLoaded(source, file);
         });
       }

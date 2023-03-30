@@ -18,6 +18,12 @@ export default [
     source: "https://skfb.ly/o8RJv"
   },
   {
+    name: "bunny",
+    type: "fbxModel",
+    path: "assets/models/stanford-bunny.fbx",
+    source: "https://threejs.org/examples/?q=sub#webgl_materials_subsurface_scattering"
+  },
+  {
     name: "testMatcap",
     type: "texture",
     path: "assets/textures/matcap.png",
