@@ -6,16 +6,16 @@ varying vec2 vUv;
 void main() {
     vUv = uv;
 
-    vec4 pos = vec4(position, 1.);
+    vec4 pos = vec4(position, 1.0);
     #ifdef USE_INSTANCING
     pos = instanceMatrix * pos;
     #endif
 
-    float topPower = 1. - cos(uv.y * PI);
-
-    float wave = sin(pos.z + uTime * 10.) * .1 * topPower;
+    // waving
+    float tipPower = sin(vUv.y*0.5);
+    float wave = sin(pos.z + uTime * 10.) * 0.1 * tipPower;
     pos.z += wave;
 
-    vec4 mvPosition = modelViewMatrix * pos;
-    gl_Position = projectionMatrix * mvPosition;
+    vec4 mvPostion = modelViewMatrix * pos;
+    gl_Position = projectionMatrix * mvPostion;
 }
