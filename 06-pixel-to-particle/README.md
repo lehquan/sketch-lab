@@ -1,11 +1,14 @@
 # From pixels to particles
 
-## Screenshot
 
 ![screenshot](src/assets/screenshot.png)
 
-## Description
 
-- Three.js : [v147](https://unpkg.com/browse/three@0.147.0/)
+### Libraries
+
+- Three.js : [v151](https://unpkg.com/browse/three@0.151.2/)
 - Load GLSL with [glslify](https://github.com/glslify/glslify)
 - GUI Debug.
+
+### References
+-[Pixel particles](https://codepen.io/zadvorsky/pen/VaXqRW)

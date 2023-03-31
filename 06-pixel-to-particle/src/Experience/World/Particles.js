@@ -7,6 +7,7 @@ export default class Particles {
   constructor() {
     this.experience = new Experience()
     this.scene = this.experience.scene
+    this.camera = this.experience.camera.instance
     this.resources = this.experience.resources
     this.debug = this.experience.debug
 
@@ -14,8 +15,30 @@ export default class Particles {
     this.zRange = 120
     this.isAnimated = true
 
+    this.setEnv()
     this.createImageData()
-    this.createParticle()
+    this.setParticle()
+    this.setFooter()
+  }
+  setEnv = () => {
+    this.camera.position.set(0, 0, 500)
+  }
+  setFooter = () => {
+    const footer = document.getElementById('footer')
+
+    const title = document.createElement('p')
+    title.classList.add('title')
+    title.innerHTML = 'From pixels to particles.'
+    footer.appendChild(title)
+
+    const info = document.createElement('p')
+    info.innerHTML = 'USE DEBUG MODE (#debug) FOR TESTING'
+    footer.appendChild(info)
+
+    const link = document.createElement('p')
+    link.innerHTML = 'Models: ' +
+        '<a href="#" target="blank">Sketchfab</a> '
+    // footer.appendChild(link)
   }
   createImageData = () => {
     const image = this.resources.items.flower.source.data
@@ -34,7 +57,7 @@ export default class Particles {
 
     this.imageData = context.getImageData(0, 0, this.imageWidth, this.imageHeight).data
   }
-  createParticle = () => {
+  setParticle = () => {
     let c = 0
 
     const geometry = new THREE.BufferGeometry()

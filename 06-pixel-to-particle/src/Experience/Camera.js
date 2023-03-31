@@ -1,15 +1,14 @@
 import * as THREE from "three"
 import Experience from "./Experience.js"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-import {EVT} from '../utils/contains'
 
 export default class Camera {
   constructor() {
     this.experience = new Experience()
-    this.debug = this.experience.debug
+    this.canvas = this.experience.canvas
     this.sizes = this.experience.sizes
     this.scene = this.experience.scene
-    this.canvas = this.experience.canvas
+    this.debug = this.experience.debug
 
     this.setInstance()
     this.setControls()
@@ -21,21 +20,23 @@ export default class Camera {
       0.1,
       10000
     )
-    this.instance.position.z = 500
+    this.instance.position.set(0, 0, 10)
     this.scene.add(this.instance)
   }
   setControls() {
     this.controls = new OrbitControls(this.instance, this.canvas)
     this.controls.enabled = true
     this.controls.autoRotate = false
+    this.controls.enablePan = false
 
     if (this.debug.active) {
+      const debugFolder = this.debug.ui.addFolder('Camera').close()
       const debugObject = {
-        'Rotate': this.controls.autoRotate,
-      };
-      this.debug.ui.add(debugObject, "Rotate").onChange(val => {
+        'AutoRotate': this.controls.autoRotate,
+      }
+      debugFolder.add(debugObject, "AutoRotate").onChange(val => {
         this.controls.autoRotate = val
-      });
+      })
     }
   }
   resize() {
