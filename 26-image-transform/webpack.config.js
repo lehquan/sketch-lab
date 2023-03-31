@@ -1,12 +1,13 @@
-const path = require('path');
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin")
+const path = require('path');
 
 module.exports = {
   mode: "development",
-  name: "extrude",
+  name: "image-transform",
+  devtool: 'eval-source-map',
   entry: {
-    app: ["./init.js"],
+    app: ["./src/index.js"],
   },
   output: {
     path: path.join(__dirname, "dist"),
@@ -38,6 +39,14 @@ module.exports = {
         loader: 'webpack-glsl-loader'
       },
       {
+        test: /\.(glsl|vs|fs|vert|frag)$/,
+        exclude: /node_modules/,
+        use: [
+          'raw-loader',
+          'glslify-loader'
+        ]
+      },
+      {
         type: 'javascript/auto',
         test: /\.(glb|png|svg|jpe?g|gif|hdr|json|mp3|mov|woff|woff2|eot|ttf|otf|mp4|webm|ico)$/,
         loader: 'file-loader',
@@ -51,12 +60,13 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       filename: path.resolve(__dirname, "dist", "index.html"),
-      title: 'SVG Extrude | Sketch of three.js',
+      title: `Three.js | Image Transform`,
       hash: true,
     }),
     new CopyPlugin({
       patterns: [
-        { from: "assets/", to: "assets/" },
+        { from: "src/assets/", to: "assets/" },
+        { from: "src/vendor/", to: "vendor/" },
       ],
       options: {
         concurrency: 100,

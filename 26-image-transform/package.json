@@ -1,0 +1,29 @@
+{
+  "name": "image-transform",
+  "version": "0.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "dev": "webpack serve --config webpack.config.js"
+  },
+  "dependencies": {
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.7.2",
+    "esbuild-loader": "^2.20.0",
+    "glsl-noise": "^0.0.0",
+    "glslify": "^7.1.1",
+    "glslify-loader": "^2.0.0",
+    "gsap": "^3.11.4",
+    "html-webpack-plugin": "^5.5.0",
+    "raw-loader": "^4.0.2",
+    "sass": "^1.56.2",
+    "sass-loader": "^13.2.0",
+    "stats.js": "^0.17.0",
+    "style-loader": "^3.3.1",
+    "three": "^0.150.1",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1",
+    "webpack-glsl-loader": "^1.0.1"
+  }
+}
