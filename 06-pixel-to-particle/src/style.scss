@@ -50,4 +50,21 @@ body {
       width: 20%;
     }
   }
+  & > button {
+    width: 80px;
+    height: 40px;
+    background: none;
+    border: 1px solid white;
+    color: white;
+    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color .3s;
+    &:hover {
+      background: white;
+      color: black;
+    }
+  }
 }

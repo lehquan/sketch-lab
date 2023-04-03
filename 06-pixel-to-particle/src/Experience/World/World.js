@@ -1,5 +1,6 @@
 import Experience from "../Experience.js"
-import Particles from './Particles';
+import FlowerParticles from './FlowerParticles';
+import DotMap from './DotMap';
 
 export default class World {
   constructor() {
@@ -8,12 +9,12 @@ export default class World {
 
     // Wait for resources
     this.resources.on("ready", () => {
-
-      // Original version: https://codepen.io/zadvorsky/pen/VaXqRW
-      this.particles = new Particles()
+      // this.flowerParticles = new FlowerParticles()
+      this.dotMap = new DotMap()
     })
   }
   update() {
-    if (this.particles) this.particles.update()
+    // if (this.flowerParticles) this.flowerParticles.update()
+    if (this.dotMap) this.dotMap.update()
   }
 }
