@@ -1,6 +1,6 @@
 import Experience from "../Experience.js"
 import FlowerParticles from './FlowerParticles';
-import DotMap from './DotMap';
+import AudioVisualizer from './AudioVisualizer';
 
 export default class World {
   constructor() {
@@ -10,7 +10,7 @@ export default class World {
     // Wait for resources
     this.resources.on("ready", () => {
       // this.flowerParticles = new FlowerParticles()
-      this.dotMap = new DotMap()
+      this.dotMap = new AudioVisualizer()
     })
   }
   update() {

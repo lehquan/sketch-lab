@@ -9,6 +9,7 @@ import sources from "./sources.js"
 import Environment from './Environment'
 import Debug from '../utils/Debug'
 import PostEffect from './PostEffect'
+import {EVT} from '../utils/contains';
 
 let instance = null
 
@@ -48,6 +49,29 @@ export default class Experience {
     this.tick()
   }
   initDOM = () => {
+    // overlay
+    const overlay = document.createElement('div')
+    overlay.id = 'overlay'
+    document.body.appendChild(overlay)
+
+    const startButton = document.createElement('button')
+    startButton.id = 'startButton'
+    startButton.innerHTML = 'START'
+    startButton.addEventListener('click', () => {
+      overlay.classList.add('transform')
+
+      setTimeout(() => {
+        this.camera.transformCamera()
+        window.dispatchEvent(new Event(EVT.START_EXPERIENCE))
+      }, 3000)
+
+    })
+    overlay.appendChild(startButton)
+
+    const msg = document.createElement('p')
+    msg.innerHTML = 'Use headphone for better experience'
+    overlay.appendChild(msg)
+
     // canvas
     const _canvas = document.createElement("canvas")
     _canvas.id = 'experience'

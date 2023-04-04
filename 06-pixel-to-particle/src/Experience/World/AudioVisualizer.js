@@ -2,12 +2,13 @@ import * as THREE from 'three'
 import Experience from '../Experience'
 import vertexShader from '../../shaders/particle.vert'
 import fragmentShader from '../../shaders/particle.frag'
+import {EVT} from '../../utils/contains';
 
-export default class DotMap {
+export default class AudioVisualizer {
   constructor() {
     this.experience = new Experience()
     this.scene = this.experience.scene
-    this.camera = this.experience.camera.instance
+    this.controls = this.experience.camera.controls
     this.renderer = this.experience.renderer.instance
     this.resources = this.experience.resources
 
@@ -16,47 +17,51 @@ export default class DotMap {
     this.analyser = null
     this.fftSize = 1024
 
-    this.setEnv()
     this.createImageData()
-    this.setFooter()
+    window.addEventListener(EVT.START_EXPERIENCE, this.init)
   }
-  initAudio = () => {
+  init = () => {
+    // environment
+    this.setEnv()
+
+    // audio
     const listener = new THREE.AudioListener()
     const audio = new THREE.Audio( listener )
     const buffer = this.resources.items.Inuyasha
     audio.setBuffer(buffer)
-    audio.setLoop(true)
+    audio.setLoop(false)
     audio.play()
 
     this.analyser = new THREE.AudioAnalyser( audio, this.fftSize );
     this.dataArray = this.analyser.getFrequencyData()
 
+    // particle
     this.setParticle()
+    this.setFooter()
   }
   setEnv = () => {
-    this.camera.position.set(0, 0, 300)
+    this.controls.maxDistance = 500
+    this.controls.minDistance = 100
   }
   setFooter = () => {
     const footer = document.getElementById('footer')
 
     const title = document.createElement('p')
     title.classList.add('title')
-    title.innerHTML = 'From pixels to particles.'
+    title.innerHTML = 'Extract image data to create particles, and using ' +
+        '<a href="https://threejs.org/docs/#api/en/audio/AudioAnalyser" target="blank">THREE.AudioAnalyser</a> ' +
+        'for 3D Audio and vertex animation.'
     footer.appendChild(title)
 
     const info = document.createElement('p')
     info.innerHTML = 'USE DEBUG MODE (#debug) FOR TESTING'
-    footer.appendChild(info)
+    // footer.appendChild(info)
 
     const link = document.createElement('p')
-    link.innerHTML = 'Models: ' +
-        '<a href="#" target="blank">Sketchfab</a> '
-    // footer.appendChild(link)
-
-    const button = document.createElement('button')
-    button.innerHTML = 'PLAY'
-    button.addEventListener('click', this.initAudio)
-    footer.appendChild(button)
+    link.innerHTML =
+        'Song: <a href="https://youtu.be/lSCHU3kwrm8" target="blank">Inuyasha 犬夜叉, </a>' +
+        'Flower: <a href="https://www.google.com/" target="blank">Internet</a>'
+    footer.appendChild(link)
   }
   setDebug = () => {
     if(!this.debug.active) return
@@ -137,16 +142,13 @@ export default class DotMap {
     this.particle = new THREE.Points(geometry, material)
     this.scene.add(this.particle)
   }
-  max = arr => {
-    return arr.reduce(function(a, b){ return Math.max(a, b); })
-  }
   update = () => {
     if (this.particle) {
 
       this.analyser.getFrequencyData()
       this.uniforms.uDataArray.value.needsUpdate = true
       this.uniforms.uDataArray.value = this.dataArray
-      console.log(this.dataArray)
+      // console.log(this.dataArray)
       // this.uniforms.uAmplitude.value = Math.sin(performance.now() / 1000)
 
       // let { uAmplitude } = this.particle.material.uniforms

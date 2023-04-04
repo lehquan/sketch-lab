@@ -21,7 +21,6 @@ void main() {
     pos.z = abs(position.z);
 
     float floor_z = round(pos.z);
-//    pos.z = uDataArray[int(pos.z)] * uAmplitude;
     pos.z = sin(uDataArray[int(floor_z)] / 200.0 ) * uAmplitude;
 
     vec4 mvPosition = modelViewMatrix * pos;

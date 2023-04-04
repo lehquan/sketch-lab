@@ -19,6 +19,6 @@ export default [
     name: "Inuyasha",
     type: "audio",
     path: "assets/audio/Inuyasha.mp3",
-    source: "https://threejs.org/"
+    source: "https://youtu.be/lSCHU3kwrm8"
   },
 ]
