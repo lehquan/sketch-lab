@@ -29,7 +29,7 @@ export default class AudioVisualizer {
     const audio = new THREE.Audio( listener )
     const buffer = this.resources.items.Inuyasha
     audio.setBuffer(buffer)
-    audio.setLoop(false)
+    audio.setLoop(true)
     audio.play()
 
     this.analyser = new THREE.AudioAnalyser( audio, this.fftSize );
@@ -77,6 +77,7 @@ export default class AudioVisualizer {
     const image = this.resources.items.poster.source.data
     image.minFilter = THREE.LinearFilter
     image.magFilter = THREE.LinearFilter
+    image.wrapT = image.wrapS = THREE.RepeatWrapping
     image.format = THREE.sRGBEncoding
 
     this.imageWidth = this.resources.items.poster.source.data.width
@@ -110,8 +111,10 @@ export default class AudioVisualizer {
         color.setRGB(this.imageData[index] / 255, this.imageData[index+1] / 255, this.imageData[index+2] / 255)
         colors.push(color.r, color.g, color.b)
 
-        const weight = (color.r + color.g + color.b)/3
-        vertices.push(x, y, this.zRange * weight)
+        //const weight = (color.r + color.g + color.b)/3
+        //vertices.push(x, y, this.zRange * weight)
+        const weight = color.r * this.weight[0] + color.g * this.weight[1] + color.b * this.weight[2]
+        vertices.push(x, y, (this.zRange * -0.5) + (this.zRange * weight))
 
         index += 4;
         x++;
@@ -124,11 +127,13 @@ export default class AudioVisualizer {
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
     geometry.center()
 
+    const format = ( this.renderer.capabilities.isWebGL2 ) ? THREE.RedFormat : THREE.LuminanceFormat;
     this.uniforms = {
       uDataArray: {
         type: "float[64]",
-        value: this.dataArray,
+        value: this.analyser.data, //this.dataArray,
       },
+      tAudioData: { value: new THREE.DataTexture( this.analyser.data, this.fftSize / 2, 1, format ) },
       uAmplitude: { value: 20.0},
       uSize: { value: 2.0},
     }
@@ -147,10 +152,11 @@ export default class AudioVisualizer {
 
       this.analyser.getFrequencyData()
       this.uniforms.uDataArray.value.needsUpdate = true
-      this.uniforms.uDataArray.value = this.dataArray
+      this.uniforms.tAudioData.value.needsUpdate = true
+      // this.uniforms.uDataArray.value = this.dataArray
       // console.log(this.dataArray)
-      // this.uniforms.uAmplitude.value = Math.sin(performance.now() / 1000)
 
+      // this.uniforms.uAmplitude.value = Math.sin(performance.now() / 1000)
       // let { uAmplitude } = this.particle.material.uniforms
       // this.isAnimated ? uAmplitude.value = Math.sin(performance.now() / 1000) : uAmplitude.value = 0.5
     }

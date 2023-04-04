@@ -47,7 +47,7 @@ export default class Camera {
       duration: 3,
       x: 0,
       y: 0,
-      z: 400,
+      z: 300,
       ease: "Quad.easeOut",
       onUpdate: () => {
         overlay.remove()

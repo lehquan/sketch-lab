@@ -1,3 +1,4 @@
+
 uniform float[64] uDataArray;
 uniform float uAmplitude;
 uniform float uSize;
