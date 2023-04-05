@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Drawing Point</title>
+  <script src="../lib/webgl-utils.js"></script>
+  <script src="../lib/webgl-debug.js"></script>
+  <script src="../lib/cuon-utils.js"></script>
+  <script src="Points.js"></script>
+  
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<canvas id="webgl" width="400" height="400">
+  Please use a browser to support canvas
+</canvas>
+
+<div class="footer">
+  <button onclick="drawOnePoint()">Point: {size: 10}</button>
+  <button onclick="drawOnePointWithAttr()">Point: {size: 5; position: (0, 0.5, 0)}</button>
+  <button onclick="drawClickedPoint()">Point with mouse click</button>
+  <button onclick="drawColoredPoint()">Point with color</button>
+</div>
+</body>
+</html>
