@@ -9,18 +9,25 @@ body {
   justify-content: center;
   align-items: center;
   .textureDiv, .textureMap {
+    //border: 1px solid red;
     width: 100%;
-    height: 500px;
-    border: 1px solid red;
-    margin: 20px;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding-right: 100px;
     canvas {
-      border: 2px solid white;
+      //border: 2px solid white;
       z-index: 10;
+      //width: 100%;
     }
+  }
+  .textureMap {
+    visibility: hidden;
   }
 }
 #experience {
-  border: 1px solid yellow;
+  //border: 1px solid yellow;
 }
 .footer {
   width: 100%;

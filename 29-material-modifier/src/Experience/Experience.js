@@ -56,9 +56,9 @@ export default class Experience {
     textureDiv.classList.add('textureDiv')
     wrapper.appendChild(textureDiv)
 
-    const textureMap = document.createElement('div')
-    textureMap.classList.add('textureMap')
-    wrapper.appendChild(textureMap)
+    // const textureMap = document.createElement('div')
+    // textureMap.classList.add('textureMap')
+    // wrapper.appendChild(textureMap)
 
     // canvas
     const _canvas = document.createElement("canvas")
