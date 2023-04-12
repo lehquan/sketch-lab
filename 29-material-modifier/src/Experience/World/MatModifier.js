@@ -53,14 +53,7 @@ export default class MatModifier {
     this.drawingCanvas.height = texture.source.data.height
     this.drawingCtx.drawImage(texture.source.data, 0, 0)
 
-    this.selectedObject.material.map = new THREE.CanvasTexture(
-        this.drawingCanvas,
-        THREE.UVMapping,
-        THREE.RepeatWrapping,
-        THREE.RepeatWrapping)
-    this.selectedObject.material.map.encoding = THREE.sRGBEncoding
-    this.selectedObject.material.map.flipY = false
-    this.selectedObject.material.map.needsUpdate = true
+    this.updateMaterial()
   }
   setDrawingCanvas = () => {
     const textureDiv = document.querySelector('.textureDiv')
@@ -82,12 +75,6 @@ export default class MatModifier {
       this.isDrawing = false
     });
   }
-  setTextureCanvas = () => {
-    const textureMap = document.querySelector('.textureMap')
-    this.textureCanvas = document.createElement('canvas')
-    this.textureCtx = this.textureCanvas.getContext('2d');
-    textureMap.appendChild(this.textureCanvas)
-  }
   draw = (x, y) => {
     this.drawingCtx.moveTo(this.drawStartPos.x, this.drawStartPos.y);
     this.drawingCtx.lineTo(x, y);
@@ -100,28 +87,18 @@ export default class MatModifier {
     // reset drawing start position to current position.
     this.drawStartPos.set( x, y );
     this.selectedObject.material.map.needsUpdate = true
-  }
-  findMousePosition = (res, e) => {
-    if (res === 'down') {
-      this.lastPos.x = this.currPos.x;
-      this.lastPos.y = this.currPos.y;
-      this.currPos.x = e.clientX - this.drawingCanvas.offsetLeft;
-      this.currPos.y = e.clientY - this.drawingCanvas.offsetTop;
 
-      this.isDrawing = true;
-    }
-    if (res === 'up' || res === "out") {
-      this.isDrawing = false;
-    }
-    if (res === 'move') {
-      if (this.isDrawing) {
-        this.lastPos.x = this.currPos.x;
-        this.lastPos.y = this.currPos.y;
-        this.currPos.x = e.clientX - this.drawingCanvas.offsetLeft;
-        this.currPos.y = e.clientY - this.drawingCanvas.offsetTop;
-        this.draw();
-      }
-    }
+    // this.updateMaterial()
+  }
+  updateMaterial = () => {
+    this.selectedObject.material.map = new THREE.CanvasTexture(
+        this.drawingCanvas,
+        THREE.UVMapping,
+        THREE.RepeatWrapping,
+        THREE.RepeatWrapping)
+    this.selectedObject.material.map.encoding = THREE.sRGBEncoding
+    this.selectedObject.material.map.flipY = false
+    this.selectedObject.material.map.needsUpdate = true
   }
   update = () => {
   }
