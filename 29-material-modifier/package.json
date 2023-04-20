@@ -6,6 +6,9 @@
     "build": "webpack --config webpack.config.js",
     "dev": "webpack serve --config webpack.config.js"
   },
+  "opencv4nodejs": {
+    "disableAutoBuild": 1
+  },
   "dependencies": {
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.2",
@@ -15,6 +18,9 @@
     "glslify-loader": "^2.0.0",
     "gsap": "^3.11.4",
     "html-webpack-plugin": "^5.5.0",
+    "node-polyfill-webpack-plugin": "^2.0.1",
+    "opencv.js": "^1.2.1",
+    "opencv4nodejs": "^5.6.0",
     "raw-loader": "^4.0.2",
     "sass": "^1.56.2",
     "sass-loader": "^13.2.0",

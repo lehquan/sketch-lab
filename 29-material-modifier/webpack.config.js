@@ -1,6 +1,7 @@
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const path = require('path');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
   mode: "development",
@@ -13,13 +14,21 @@ module.exports = {
     path: path.join(__dirname, "dist"),
     filename: "bundle.js",
   },
+
+  resolve: {
+    fallback: {
+      fs: false,
+      path: false,
+      crypto: false
+    }
+  },
+
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.[jt]sx?$/,
         loader: 'esbuild-loader',
         options: {
-          loader: 'jsx',
           target: 'es2015',
         },
       },
@@ -72,6 +81,7 @@ module.exports = {
         concurrency: 100,
       },
     }),
+    new NodePolyfillPlugin()
   ],
   devServer: {
     static: {

@@ -1,21 +1,21 @@
 export default [
   {
-    name: "potato",
-    type: "gltfModel",
-    path: "assets/models/potato_character-v1.glb",
-    source: "https://skfb.ly/6yUwQ"
-  },
-  {
     name: "ghost",
     type: "gltfModel",
     path: "assets/models/cute_ghost-v1.glb",
     source: "https://skfb.ly/oyXOH"
   },
   {
-    name: "chair",
+    name: "fish",
     type: "gltfModel",
-    path: "assets/models/chair-v1.glb",
-    source: "https://tympanus.net/codrops/2019/09/17/how-to-build-a-color-customizer-app-for-a-3d-model-with-three-js/"
+    path: "assets/models/fish.glb",
+    source: ""
+  },
+  {
+    name: "template",
+    type: "texture",
+    path: "assets/textures/download.png",
+    source: ""
   },
   {
     name: "royal_esplanade",

@@ -9,15 +9,13 @@ body {
   justify-content: center;
   align-items: center;
   .textureDiv, .textureMap {
-    //border: 1px solid red;
     width: 100%;
     height: auto;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: flex-end;
     padding-right: 100px;
     canvas {
-      border: 2px solid white;
       z-index: 10;
       //width: 100%;
     }

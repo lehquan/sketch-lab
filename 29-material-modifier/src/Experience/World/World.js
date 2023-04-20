@@ -1,5 +1,6 @@
 import Experience from "../Experience.js"
 import MatModifier from './MatModifier';
+import TestVideo from './TestVideo';
 export default class World {
   constructor() {
     this.experience = new Experience()
@@ -9,10 +10,10 @@ export default class World {
 
     // Wait for resources
     this.resources.on("ready", () => {
-      this.modifier = new MatModifier()
+      this.testVid = new TestVideo()
     })
   }
   update() {
-    if(this.modifier) this.modifier.update()
+    if(this.testVid) this.testVid.update()
   }
 }
