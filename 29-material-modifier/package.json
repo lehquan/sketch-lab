@@ -19,6 +19,7 @@
     "gsap": "^3.11.4",
     "html-webpack-plugin": "^5.5.0",
     "node-polyfill-webpack-plugin": "^2.0.1",
+    "opencv-wasm": "^4.3.0-10",
     "opencv.js": "^1.2.1",
     "opencv4nodejs": "^5.6.0",
     "raw-loader": "^4.0.2",

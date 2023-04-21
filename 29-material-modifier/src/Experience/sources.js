@@ -1,11 +1,5 @@
 export default [
   {
-    name: "ghost",
-    type: "gltfModel",
-    path: "assets/models/cute_ghost-v1.glb",
-    source: "https://skfb.ly/oyXOH"
-  },
-  {
     name: "fish",
     type: "gltfModel",
     path: "assets/models/fish.glb",
@@ -14,7 +8,7 @@ export default [
   {
     name: "template",
     type: "texture",
-    path: "assets/textures/download.png",
+    path: "assets/textures/texture_512.png",
     source: ""
   },
   {

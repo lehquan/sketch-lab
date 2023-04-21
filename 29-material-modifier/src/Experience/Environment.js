@@ -10,7 +10,7 @@ export default class Environment {
 
     this.bgColorFolder = null
     this.params = {
-      backgroundColor: 0x000000,
+      backgroundColor: 0xfee9d7,
       blurriness: 0,
       isTextureEnabled: false
     }

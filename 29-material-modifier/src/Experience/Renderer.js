@@ -14,7 +14,7 @@ export default class Renderer {
       exposure: Math.pow(0.4, 0.9),
       toneMapping: 'None',
       useLegacyLights: false,
-      clearColor: 0x000000
+      clearColor: 0xf8f8f8
     }
     this.guiExposure = null
     this.toneMappingOptions = {
