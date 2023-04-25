@@ -1,5 +1,5 @@
 import Experience from "../Experience.js"
-import Remap from './Remap';
+import Pool from './Pool';
 
 export default class World {
   constructor() {
@@ -10,7 +10,7 @@ export default class World {
 
     // Wait for resources
     this.resources.on("ready", () => {
-      this.remap = new Remap()
+      this.remap = new Pool()
     })
   }
   update() {

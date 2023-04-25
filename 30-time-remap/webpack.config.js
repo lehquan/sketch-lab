@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
   mode: "development",
-  name: "threejs-webpack-template",
+  name: "pool-remap",
   devtool: 'eval-source-map',
   entry: {
     app: ["./src/index.js"],
@@ -60,7 +60,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       filename: path.resolve(__dirname, "dist", "index.html"),
-      title: 'Three.js | Webpack Template',
+      title: 'Three.js | Pool TimeRemap',
       hash: true,
     }),
     new CopyPlugin({
