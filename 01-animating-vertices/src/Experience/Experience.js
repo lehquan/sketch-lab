@@ -26,13 +26,10 @@ export default class Experience {
     /**Global Access */
     window.experience = this
 
-    this.createDOM()
-
-    /**Canvas*/
-    const _canvas = document.createElement("canvas")
-    _canvas.id = 'experience'
-    document.body.appendChild(_canvas)
-    this.canvas = _canvas
+    /**Canvas & DOM*/
+    this.initDOM()
+    this.canvas = document.querySelector('#experience')
+    console.log(`THREE.REVISION: ${THREE.REVISION}`)
 
     /**Setup Classes */
     this.debug = new Debug()
@@ -53,20 +50,16 @@ export default class Experience {
     this.tick()
   }
 
-  createDOM = () => {
+  initDOM = () => {
+    // canvas
+    const _canvas = document.createElement("canvas")
+    _canvas.id = 'experience'
+    document.body.appendChild(_canvas)
+
+    // footer
     const footer = document.createElement("div")
     footer.classList.add('footer')
-
-    const note = document.createElement('p')
-    note.innerHTML = 'Image Credit: '
-
-    const linkNote = document.createElement('a')
-    linkNote.innerHTML = 'Misato Town'
-    linkNote.href = 'https://shiftbrain.com/work/misatoto/?lang=en'
-    linkNote.target = 'blank'
-    note.appendChild(linkNote)
-
-    footer.appendChild(note)
+    footer.id = 'footer'
     document.body.appendChild(footer)
   }
 

@@ -1,15 +1,12 @@
 # Vertices Animation and WebGL Hover Effects
 
-## Screenshot
+![screenshot](src/assets/screenshot.png)
 
-![screenshot](src/assets/screenshot.jpeg)
+### Libraries
 
-## Description
-
-- Three.js : [v147](https://unpkg.com/browse/three@0.147.0/)
+- Three.js : [v150](https://unpkg.com/browse/three@0.152.0/)
 - Load GLSL with [glslify](https://github.com/glslify/glslify)
-- GUI Debug
 
-## References:
+### References:
 - Hover Effects Tutorial:
     - [Yuri Artiukh](https://tympanus.net/codrops/2020/04/14/interactive-webgl-hover-effects/)

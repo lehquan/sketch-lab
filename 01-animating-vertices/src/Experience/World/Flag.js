@@ -19,14 +19,42 @@ export default class Flag {
     this.zRange = 120
     this.textures = []
     this.inks = []
-
-    // debug
     this.effect = { 'Transition Speed': 0.25 }
 
     this.setTextures()
     this.setMap()
+    this.setDebug()
+    this.setFooter()
 
     window.addEventListener('mousemove', this.onMouseMove)
+  }
+  setFooter = () => {
+    const footer = document.getElementById('footer')
+
+    const title = document.createElement('p')
+    title.classList.add('title')
+    title.innerHTML = 'Vertices Animation and WebGL Hover Effects. ' +
+        '<br>' +
+        'This is based on ' +
+        '<a href="https://tympanus.net/codrops/2020/04/14/interactive-webgl-hover-effects/" target="blank">the tutorial of Yuri Artiukh.</a> '
+    footer.appendChild(title)
+
+    const info = document.createElement('p')
+    info.innerHTML = 'USE DEBUG MODE (#debug) FOR TESTING MATERIAL'
+    footer.appendChild(info)
+
+    const link = document.createElement('p')
+    link.innerHTML = 'Image Credit: ' +
+        '<a href="https://shiftbrain.com/work/misatoto/?lang=en" target="blank">Misato Town</a>'
+    footer.appendChild(link)
+  }
+  setDebug = () => {
+    if (this.debug.active) {
+      this.debug.ui.add(this.effect, 'Transition Speed', 0.01, 0.5).step(0.01).onChange(val => {
+        this.flag.material.uniforms.uSpeed.value = val
+        this.flag.material.uniforms.needsUpdate = true
+      })
+    }
   }
   setTextures = () => {
     this.textures.push(
@@ -158,12 +186,7 @@ export default class Flag {
     // this.startSequence(material)
 
     // debug
-    if (this.debug.active) {
-      this.debug.ui.add(this.effect, 'Transition Speed', 0.01, 0.5).step(0.01).onChange(val => {
-        this.flag.material.uniforms.uSpeed.value = val
-        this.flag.material.uniforms.needsUpdate = true
-      })
-    }
+
   }
   startSequence = (m) => {
     gsap.fromTo(m.uniforms.transition,
