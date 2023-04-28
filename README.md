@@ -9,7 +9,7 @@ Some pieces of sketch made with three.js :heart:
 <br></br>
 <table>
     <tr>
-        <td><a href="https://vertices-animation.netlify.app/"><img src="01-animating-vertices/src/assets/screenshot.jpeg" alt=""></a></td>
+        <td><a href="https://vertices-animation.netlify.app/"><img src="01-animating-vertices/src/assets/screenshot.png" alt=""></a></td>
         <td><a href="https://fbo-particles.netlify.app/"><img src="02-fbo-particle/src/assets/screenshot.jpeg" alt=""></a></td>
         <td><a href="https://grain-material.netlify.app/"><img src="03-grain-effect/src/assets/screenshot.jpeg" alt=""></a></td>
     </tr>
