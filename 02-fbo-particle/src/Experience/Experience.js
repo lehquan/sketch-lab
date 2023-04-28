@@ -27,12 +27,8 @@ export default class Experience {
 
     /**Canvas & DOM*/
     this.initDOM()
-    // this.canvas = document.querySelector('#experience')
+    this.canvas = document.querySelector('#experience')
     console.log(`THREE.REVISION: ${THREE.REVISION}`)
-    const _canvas = document.createElement("canvas")
-    _canvas.id = 'experience'
-    document.body.appendChild(_canvas)
-    this.canvas = _canvas
 
     /**Setup Classes */
     this.debug = new Debug()
@@ -40,7 +36,6 @@ export default class Experience {
     this.sizes = new Sizes()
     this.time = new Time()
     this.mouse = new Mouse()
-
 
     this.scene = new THREE.Scene()
     this.camera = new Camera()
@@ -54,14 +49,14 @@ export default class Experience {
   }
 
   initDOM = () => {
-    // canvas
-    // const _canvas = document.createElement("canvas")
-    // _canvas.id = 'experience'
-    // document.body.appendChild(_canvas)
-
     const curtain = document.createElement("div")
     curtain.classList.add('curtain')
     document.body.appendChild(curtain)
+
+    // canvas
+    const _canvas = document.createElement("canvas")
+    _canvas.id = 'experience'
+    document.body.appendChild(_canvas)
   }
 
   resize() {
