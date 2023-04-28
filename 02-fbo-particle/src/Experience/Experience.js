@@ -25,10 +25,10 @@ export default class Experience {
     /**Global Access */
     window.experience = this
 
-    /**Setup DOMElement */
-    this.createDOM()
-
-    /**Canvas*/
+    /**Canvas & DOM*/
+    this.initDOM()
+    // this.canvas = document.querySelector('#experience')
+    console.log(`THREE.REVISION: ${THREE.REVISION}`)
     const _canvas = document.createElement("canvas")
     _canvas.id = 'experience'
     document.body.appendChild(_canvas)
@@ -40,19 +40,25 @@ export default class Experience {
     this.sizes = new Sizes()
     this.time = new Time()
     this.mouse = new Mouse()
-    this.resources = new Resources(sources)
+
 
     this.scene = new THREE.Scene()
-    this.environment = new Environment()
     this.camera = new Camera()
     this.renderer = new Renderer()
+    this.resources = new Resources(sources)
+    new Environment()
     this.world = new World()
 
     this.sizes.on("resize", () => this.resize())
     this.time.on("tick", () => this.update())
   }
 
-  createDOM = () => {
+  initDOM = () => {
+    // canvas
+    // const _canvas = document.createElement("canvas")
+    // _canvas.id = 'experience'
+    // document.body.appendChild(_canvas)
+
     const curtain = document.createElement("div")
     curtain.classList.add('curtain')
     document.body.appendChild(curtain)
@@ -74,6 +80,58 @@ export default class Experience {
 
     /**Finish analyzing frame */
     this.stats.active && this.stats.afterRender()
+  }
+
+  /**
+   * Traverse the whole {resource} and clean up
+   * geometry, material, texture, uniforms and skeleton.
+   * @param resource
+   */
+  dispose = resource => {
+    if (resource instanceof THREE.Object3D) {
+
+      resource.traverse(child => {
+
+        // If object is type of SkinnedMesh
+        if (child.isSkinnedMesh) {
+          child.skeleton.dispose()
+        }
+
+        // geometry
+        if (child.geometry) child.geometry.dispose()
+
+        // material
+        if (child.material) {
+
+          // We have to check if there are any textures on the material
+          for (const value of Object.values(child.material)) {
+            if (value instanceof THREE.Texture) {
+              value.dispose()
+            }
+          }
+
+          // We also have to check if any uniforms reference textures or arrays of textures
+          if (child.material.uniforms) {
+            for (const value of Object.values(child.material.uniforms)) {
+              if (value) {
+                const uniformValue = value.value;
+                // if (uniformValue instanceof THREE.Texture || Array.isArray(uniformValue)) {
+                if (uniformValue instanceof THREE.Texture ) {
+                  uniformValue.dispose()
+                }
+              }
+            }
+          }
+
+          // Dispose texture
+          child.material.dispose()
+        }
+      })
+    }
+
+    // remove resource
+    this.scene.remove(resource)
+    console.info(this.renderer.instance.info)
   }
 
   destroy() {

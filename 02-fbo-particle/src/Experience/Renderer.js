@@ -19,8 +19,8 @@ export default class Renderer {
     });
 
     this.instance.setClearColor(0x000000, 1);
-    this.instance.physicallyCorrectLights = true;
-    this.instance.outputEncoding = THREE.sRGBEncoding;
+    this.instance.useLegacyLights = true;
+    this.instance.outputColorSpace = THREE.SRGBColorSpace;
     this.instance.toneMapping = THREE.NoToneMapping;
     this.instance.toneMappingExposure = 1;
     this.instance.sortObjects = false
