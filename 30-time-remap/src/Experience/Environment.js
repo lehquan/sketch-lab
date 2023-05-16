@@ -9,7 +9,7 @@ export default class Environment {
     this.debug = this.experience.debug
 
     this.params = {
-      backgroundColor: 0x262626,
+      backgroundColor: 0x111111,
       blurriness: 0
     }
 
@@ -21,8 +21,12 @@ export default class Environment {
   }
 
   setEnv = () => {
+    // lights
     this.scene.add( new THREE.AmbientLight(0xffffff, 2))
     this.scene.add( new THREE.DirectionalLight(0xffffff, 2))
+    // const light = new THREE.PointLight(0xffffff, 1, 0);
+    // light.position.set(1, 1, 1);
+    // this.scene.add(light)
 
     // backgroundColor
     this.scene.background = new THREE.Color(this.params.backgroundColor)
@@ -33,6 +37,13 @@ export default class Environment {
 
     // blurries
     this.scene.backgroundBlurriness = this.params.blurriness
+
+    // fog
+    this.scene.fog = new THREE.Fog(0x000000, 100, 12500)
+
+    // grid
+    const grid = new THREE.GridHelper(20000, this.params.STEP, 0x393646, 0x393646)
+    this.scene.add(grid)
   }
 
   setDebug = () => {
