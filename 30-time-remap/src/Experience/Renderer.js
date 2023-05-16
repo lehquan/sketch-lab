@@ -65,6 +65,7 @@ export default class Renderer {
     this.instance.outputEncoding = THREE.sRGBEncoding
     this.instance.toneMapping = this.toneMappingOptions.None
     this.instance.toneMappingExposure = this.params.exposure
+    this.instance.shadowMap.enabled = true
 
     this.resize()
   }

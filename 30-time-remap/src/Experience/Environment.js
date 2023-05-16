@@ -22,11 +22,20 @@ export default class Environment {
 
   setEnv = () => {
     // lights
-    this.scene.add( new THREE.AmbientLight(0xffffff, 2))
+    this.scene.add( new THREE.AmbientLight(0xf0f0f0, 2))
     this.scene.add( new THREE.DirectionalLight(0xffffff, 2))
-    // const light = new THREE.PointLight(0xffffff, 1, 0);
-    // light.position.set(1, 1, 1);
-    // this.scene.add(light)
+
+    // this.scene.add( new THREE.AmbientLight( 0xf0f0f0 ) );
+    const light = new THREE.SpotLight( 0xffffff, 1.5 );
+    light.position.set( 0, 1500, 200 );
+    light.angle = Math.PI * 0.2;
+    light.castShadow = true;
+    light.shadow.camera.near = 200;
+    light.shadow.camera.far = 2000;
+    light.shadow.bias = - 0.000222;
+    light.shadow.mapSize.width = 1024;
+    light.shadow.mapSize.height = 1024;
+    this.scene.add( light );
 
     // backgroundColor
     this.scene.background = new THREE.Color(this.params.backgroundColor)
