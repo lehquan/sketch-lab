@@ -34,8 +34,7 @@ export default class Pool {
   }
   setTimeLine = () => {
     // this.timeline = gsap.timeline({ repeat: -1 })
-    // this.timeline = new TimelineMax({ repeat: -1 });
-    this.timeline = new TimelineMax()
+    this.timeline = new TimelineMax({ repeat: -1 });
 
     this.timeline.set(this, { rot: 135 }, 0);
     this.timeline.to(this, 7, { rot: 0, ease: Cubic.easeInOut }, 0);
@@ -97,9 +96,9 @@ export default class Pool {
       this.timeline.to(mesh.position, sec, { y: this.params.STEP / 2 + 1, ease: Bounce.easeOut }, 0)
     }
     this.createTimescale()
-    // this.timeline.addCallback( () => {
-    //   this.createTimescale(this.timeline);
-    // }, this.timeline.duration());
+    this.timeline.addCallback( () => {
+      this.createTimescale(this.timeline);
+    }, this.timeline.duration());
   }
   createTimescale = () => {
     const totalTimeline = new TimelineMax();
