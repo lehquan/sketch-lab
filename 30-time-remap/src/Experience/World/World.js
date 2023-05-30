@@ -1,5 +1,5 @@
 import Experience from "../Experience.js"
-import Pool from './Pool';
+import Pool from './Pool'
 
 export default class World {
   constructor() {
