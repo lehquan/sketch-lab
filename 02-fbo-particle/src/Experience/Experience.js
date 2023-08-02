@@ -57,6 +57,11 @@ export default class Experience {
     const _canvas = document.createElement("canvas")
     _canvas.id = 'experience'
     document.body.appendChild(_canvas)
+
+    // footer
+    const footer = document.createElement("div")
+    footer.classList.add('footer')
+    document.body.appendChild(footer)
   }
 
   resize() {

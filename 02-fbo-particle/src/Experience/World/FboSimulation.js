@@ -2,8 +2,8 @@ import * as THREE from 'three'
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer'
 import Experience from '../Experience'
 import fragmentShader from '../../shaders/particles.frag'
-import fragmentSimulation from '../../shaders/fboSimulation.frag'
 import vertexShader from '../../shaders/fboSimulation.vert'
+import fragmentSimulation from '../../shaders/fboSimulation.frag'
 
 export default class FboSimulation {
   constructor() {
@@ -80,6 +80,10 @@ export default class FboSimulation {
     })
 
     let geometry = new THREE.BufferGeometry()
+    let modelColors = []
+    let c1 = new THREE.Color(0x00ffff);
+    let c2 = new THREE.Color(0xff00ff);
+    let c = new THREE.Color();
     let positions = new Float32Array(this.WIDTH * this.WIDTH * 3)
     let reference = new Float32Array(this.WIDTH * this.WIDTH * 3)
     for(let i=0; i<this.WIDTH * this.WIDTH; i++) {
@@ -90,15 +94,20 @@ export default class FboSimulation {
       let yy = ~~(i/this.WIDTH)/this.WIDTH
       positions.set([x,y,z], i*3)
       reference.set([xx,yy], i*2)
+
+      c.lerpColors(c1, c2, (1 - Math.random() / 2));
+      modelColors.push(c.r, c.g, c.b);
     }
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
     geometry.setAttribute('reference', new THREE.BufferAttribute(reference, 2))
+    geometry.setAttribute("color", new THREE.Float32BufferAttribute(modelColors, 3));
 
     this.particle = new THREE.Points(geometry, this.material)
-    // this.scene.add(particle)
+    this.particle.add( new THREE.AxesHelper(10000))
   }
   update = (isEnabled) => {
     if(isEnabled) {
+      console.log('fbo')
       this.scene.add(this.particle)
       this.positionVariable.material.uniforms.time.value = performance.now() / 1000
       this.gpuCompute.compute()
