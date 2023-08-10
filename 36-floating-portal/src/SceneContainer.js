@@ -19,6 +19,7 @@ import {
 } from '@react-three/postprocessing';
 import { BlendFunction, Resizer, KernelSize } from "postprocessing";
 import {Color, CylinderGeometry, Mesh, MeshBasicMaterial} from 'three';
+import {SceneParticles} from './SceneParticles';
 
 const lightColor = new Color(1, 0.2, 0.1)
 const mesh = new Mesh(
@@ -59,6 +60,7 @@ export function SceneContainer() {
           <FloatingIsland/>
           <Trees/>
           <Grass/>
+          <SceneParticles/>
         </Float>
 
         <FloatingRocks/>
