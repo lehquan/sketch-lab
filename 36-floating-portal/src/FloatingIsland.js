@@ -2,9 +2,15 @@ import { useLoader } from '@react-three/fiber';
 import { useEffect } from 'react';
 import { BufferAttribute, Color } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader';
 
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderConfig({type: 'js'});
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 export function FloatingIsland() {
-  const gltf = useLoader(GLTFLoader, process.env.PUBLIC_URL + "/models/floating_island.glb")
+  const gltf = useLoader(GLTFLoader, process.env.PUBLIC_URL + "/models/floating_island.glb", loader => {
+    loader.setDRACOLoader(dracoLoader);
+  })
 
   useEffect(() => {
     if(!gltf) return;

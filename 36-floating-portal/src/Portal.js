@@ -10,6 +10,7 @@ import {
   WebGLRenderTarget,
 } from 'three';
 import {FillQuad} from './FillQuad';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader';
 
 const scene = new Scene()
 scene.background = new TextureLoader()
@@ -18,16 +19,22 @@ scene.background = new TextureLoader()
   texture.mapping = EquirectangularReflectionMapping
 })
 
-
 const target = new WebGLRenderTarget(window.innerWidth, window.innerHeight)
 
 window.addEventListener('resize', () => {
   target.setSize(window.innerWidth, window.innerHeight)
 })
 
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderConfig({type: 'js'});
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 export function Portal() {
-  const model = useLoader(GLTFLoader, process.env.PUBLIC_URL + "/models/portal.glb")
-  const mask = useLoader(GLTFLoader, process.env.PUBLIC_URL + "/models/portal_mask.glb")
+  const model = useLoader(GLTFLoader, process.env.PUBLIC_URL + "/models/portal.glb", loader => {
+    loader.setDRACOLoader(dracoLoader);
+  })
+  const mask = useLoader(GLTFLoader, process.env.PUBLIC_URL + "/models/portal_mask.glb", loader => {
+    loader.setDRACOLoader(dracoLoader);
+  })
 
   useEffect(() => {
     if(!model) return

@@ -2,22 +2,28 @@ import {useLoader} from '@react-three/fiber';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {useEffect} from 'react';
 import {Color, DoubleSide} from 'three';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader';
 
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderConfig({type: 'js'});
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 export function Grass() {
-  const gltf = useLoader(GLTFLoader, process.env.PUBLIC_URL + "/models/grass.glb")
+  const grass = useLoader(GLTFLoader, process.env.PUBLIC_URL + "/models/grass.glb", loader => {
+    loader.setDRACOLoader(dracoLoader);
+  })
 
   useEffect(() => {
-    if(!gltf) return
+    if(!grass) return
 
-    gltf.scene.children[0].material.alphaToCoverage = true
-    gltf.scene.children[0].material.transparent = true
-    gltf.scene.children[0].material.map = gltf.scene.children[0].material.emissiveMap
-    gltf.scene.children[0].material.emissive = new Color(0.5, 0.5, 0.5)
-    gltf.scene.children[0].material.side = DoubleSide
+    grass.scene.children[0].material.alphaToCoverage = true
+    grass.scene.children[0].material.transparent = true
+    grass.scene.children[0].material.map = grass.scene.children[0].material.emissiveMap
+    grass.scene.children[0].material.emissive = new Color(0.5, 0.5, 0.5)
+    grass.scene.children[0].material.side = DoubleSide
 
-  }, [gltf])
+  }, [grass])
 
   return(
-      <primitive object={gltf.scene}/>
+      <primitive object={grass.scene}/>
   )
 }
