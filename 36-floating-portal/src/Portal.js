@@ -4,7 +4,7 @@ import {useEffect} from 'react';
 import {
   AlwaysStencilFunc,
   DoubleSide, EquirectangularReflectionMapping,
-  LinearEncoding, ReplaceStencilOp,
+  LinearSRGBColorSpace, ReplaceStencilOp,
   Scene,
   TextureLoader,
   WebGLRenderTarget,
@@ -14,7 +14,7 @@ import {FillQuad} from './FillQuad';
 const scene = new Scene()
 scene.background = new TextureLoader()
 .load(process.env.PUBLIC_URL + "/textures/galaxy.jpg", texture => {
-  texture.encoding = LinearEncoding
+  texture.colorSpace = LinearSRGBColorSpace
   texture.mapping = EquirectangularReflectionMapping
 })
 

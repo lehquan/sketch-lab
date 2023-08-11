@@ -50,7 +50,7 @@ export function SceneContainer() {
               angle={60.65}
               attenuation={1}
               anglePower={3}
-              intensity={0.3}
+              intensity={200}
               color={lightColor}
               position={[1.19, 10.85, -4.45]}
               target-position={[0, 0, -1]}
