@@ -1,9 +1,16 @@
 import {useGLTF, useTexture} from '@react-three/drei'
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader';
 import { data as sparklesShader } from './sparkles-shader.js'
 import {NodeToyMaterial} from '@nodetoy/react-nodetoy';
 
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderConfig({type: 'js'});
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 export default function Scene() {
-  const { nodes } = useGLTF("assets/models/scene.glb");
+  const { nodes } = useGLTF("assets/models/scene.glb", loader => {
+    loader.setDRACOLoader(dracoLoader);
+  });
+
   const [
     ground,
     ground2,
