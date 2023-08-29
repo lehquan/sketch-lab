@@ -13,7 +13,6 @@ export default class Renderer {
     this.params = {
       exposure: 1.0,
       toneMapping: 'None',
-      useLegacyLights: true
     }
     this.guiExposure = null
     this.toneMappingOptions = {
@@ -26,7 +25,7 @@ export default class Renderer {
     }
 
     this.setInstance()
-    this.setDebug()
+    // this.setDebug()
   }
 
   setDebug = () => {
@@ -49,9 +48,9 @@ export default class Renderer {
       }
     })
 
-    debugFolder.add(this.params, 'useLegacyLights').onChange(val => {
+    /*debugFolder.add(this.params, 'useLegacyLights').onChange(val => {
       this.instance.useLegacyLights = this.params.useLegacyLights
-    })
+    })*/
   }
 
   setInstance() {

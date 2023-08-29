@@ -15,28 +15,32 @@ export default class Camera {
   }
   setInstance() {
     this.instance = new PerspectiveCamera(
-      70,
+      60,
       this.sizes.width / this.sizes.height,
-      0.001,
-      1000
+      0.01,
+      10000
     )
-    this.instance.position.set(0, -1, -0.05)
+    // this.instance.position.set(0, -1, -0.05)
+    // this.instance.position.set(0, -2.5, -0.5)
+    this.instance.position.set(0, -3, -1)
+    // this.instance.position.set(0, -2, -0.5)
     this.scene.add(this.instance)
   }
   setControls() {
     this.controls = new OrbitControls(this.instance, this.canvas)
     this.controls.enabled = true
     this.controls.autoRotate = false
+    this.controls.maxDistance = 5
 
-    if (this.debug.active) {
-      this.debugFolder = this.debug.ui.addFolder('Camera')
-      const debugObject = {
-        'Rotate': this.controls.autoRotate,
-      };
-      this.debugFolder.add(debugObject, "Rotate").onChange(val => {
-        this.controls.autoRotate = val
-      });
-    }
+    // if (this.debug.active) {
+    //   this.debugFolder = this.debug.ui.addFolder('Camera')
+    //   const debugObject = {
+    //     'Rotate': this.controls.autoRotate,
+    //   };
+    //   this.debugFolder.add(debugObject, "Rotate").onChange(val => {
+    //     this.controls.autoRotate = val
+    //   });
+    // }
   }
   resize() {
     this.instance.aspect = this.sizes.width / this.sizes.height

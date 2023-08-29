@@ -8,6 +8,7 @@ import { GammaCorrectionShader } from 'three/addons/shaders/GammaCorrectionShade
 import { ColorCorrectionShader } from 'three/addons/shaders/ColorCorrectionShader';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass';
 import Experience from './Experience'
+import {OutputPass} from 'three/addons/postprocessing/OutputPass';
 export default class PostEffect {
   constructor() {
     this.experience = new Experience()
@@ -17,53 +18,46 @@ export default class PostEffect {
     this.sizes = this.experience.sizes
     this.debug = this.experience.debug
 
+    this.bloomPass = null
     this.params = {
       exposure: 1,
-      bloomStrength: 0.2,
+      bloomStrength: 0.4,
       bloomThreshold: 0,
-      bloomRadius: 0.55
+      bloomRadius: 0
     }
-    this.effectFXAAPass = null
     this.composer = null
 
     this.setEffect()
+    this.setDebug()
+  }
+  setDebug = () => {
+    if (!this.debug.active) return
+
+    this.debug.ui.add(this.params, 'bloomStrength', 0.2, 0.6, 0.01).onChange(val => {
+      this.bloomPass.strength = val
+    })
   }
   setEffect = () => {
-
     const renderPass = new RenderPass(this.scene, this.camera)
-    const effectBleachPass = new ShaderPass(BleachBypassShader)
-    const effectColorPass = new ShaderPass(ColorCorrectionShader)
-    this.effectFXAAPass = new ShaderPass(FXAAShader)
-    const gammaPass = new ShaderPass(GammaCorrectionShader)
 
-    this.effectFXAAPass.uniforms.resolution.value.set(
-        1 / this.sizes.width,
-        1 / this.sizes.height
-    );
-    effectBleachPass.uniforms.opacity.value = 0.2;
-    effectColorPass.uniforms.powRGB.value.set(1.4, 1.45, 1.45);
-    effectColorPass.uniforms.mulRGB.value.set(1.1, 1.1, 1.1);
-
-    const bloomPass = new UnrealBloomPass(
+    this.bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),
         1.5,
         0.4,
         0.85
     );
-    bloomPass.threshold = this.params.bloomThreshold;
-    bloomPass.strength = this.params.bloomStrength;
-    bloomPass.radius = this.params.bloomRadius;
+    this.bloomPass.threshold = this.params.bloomThreshold;
+    this.bloomPass.strength = this.params.bloomStrength;
+    this.bloomPass.radius = this.params.bloomRadius;
+
+    const outputPass = new OutputPass();
 
     this.composer = new EffectComposer(this.renderer)
     this.composer.addPass(renderPass)
-    this.composer.addPass(this.effectFXAAPass)
-    this.composer.addPass(effectBleachPass)
-    this.composer.addPass(effectColorPass)
-    this.composer.addPass(gammaPass)
-    this.composer.addPass(bloomPass)
+    this.composer.addPass(this.bloomPass)
+    this.composer.addPass( outputPass );
   }
   resize = () => {
-    this.effectFXAAPass.uniforms[ 'resolution' ].value.set( 1 / ( this.sizes.width * window.devicePixelRatio ), 1 / ( this.sizes.width * window.devicePixelRatio ) );
     this.composer.setSize(this.sizes.width, this.sizes.height)
   }
   update = () => {

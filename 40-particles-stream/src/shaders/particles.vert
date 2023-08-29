@@ -1,4 +1,6 @@
 uniform float uTime;
+uniform float uSize;
+uniform float uSpeed;
 varying float vProgress;
 
 //	Classic Perlin 3D Noise
@@ -279,10 +281,10 @@ void main() {
     newpos.y -= mod(uTime/30., 3.) ;
     float progress  = smoothstep(-1., 4.,newpos.y);
     float progress1 = smoothstep(-1., 8.,newpos.y);
-    //    newpos += cnoise(vec4(position, uTime/5.0));
     vProgress = progress;
 
-    vec3 noise1 = 1. * (position*vec3(1., 3., 1.) + uTime * vec3(0., 0.4, 0.))*vec3(5., 1., 1.);
+//    vec3 noise1 = 1. * (position*vec3(1., 3., 1.) + uTime * vec3(0., 0.4, 0.))*vec3(5., 1., 1.);
+    vec3 noise1 = 1. * (position*vec3(1., 3., 1.) + uTime * vec3(0., uSpeed, 0.))*vec3(5., 1., 1.);
     vec3 noise2 = 1. * (position + uTime * vec3(0., 0.6, 0.))*vec3(5., 1., 1.);
 
     newpos.z += progress * -newpos.y * newpos.y;
@@ -290,6 +292,6 @@ void main() {
     newpos.yz += 0.7 * progress1 * (cnoise(vec4(noise2, uTime/5.)) + 0.2);
 
     vec4 mvPosition = modelViewMatrix * vec4(newpos, 1.);
-    gl_PointSize = 4. * (1. / -mvPosition.z);
+    gl_PointSize = uSize * (1. / -mvPosition.z);
     gl_Position = projectionMatrix * mvPosition;
 }

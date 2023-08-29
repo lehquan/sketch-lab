@@ -16,13 +16,13 @@ export default class Environment {
     // Wait for resources
     this.resources.on("ready", () => {
       this.setEnv()
-      this.setDebug()
+      // this.setDebug()
     })
   }
 
   setEnv = () => {
-    this.scene.add( new THREE.AmbientLight(0xffffff, 2))
-    this.scene.add( new THREE.DirectionalLight(0xffffff, 2))
+    // this.scene.add( new THREE.AmbientLight(0xffffff, 2))
+    // this.scene.add( new THREE.DirectionalLight(0xffffff, 2))
 
     // backgroundColor
     // this.scene.background = new THREE.Color(this.params.backgroundColor)
@@ -32,7 +32,7 @@ export default class Environment {
     this.envTexture.mapping = THREE.EquirectangularReflectionMapping
 
     // blurries
-    this.scene.backgroundBlurriness = this.params.blurriness
+    // this.scene.backgroundBlurriness = this.params.blurriness
   }
 
   setDebug = () => {

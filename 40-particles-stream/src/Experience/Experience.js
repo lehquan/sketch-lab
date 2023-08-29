@@ -1,6 +1,5 @@
 import * as THREE from "three"
 import Sizes from "../utils/Sizes.js"
-// import Time from "../utils/Time.js"
 import Camera from "./Camera.js"
 import Renderer from "./Renderer.js"
 import World from "./World/World.js"
@@ -8,36 +7,30 @@ import Resources from "../utils/Resources.js"
 import Stats from "../utils/Stats.js"
 import sources from "./sources.js"
 import Environment from './Environment'
-import Mouse from '../utils/Mouse';
 import Debug from '../utils/Debug';
 import PostEffect from './PostEffect';
-import Ray from './Ray';
 
 let instance = null
 
 export default class Experience {
   constructor() {
     /**Singleton */
-    if (instance) {
-      return instance
-    }
+    if (instance) return instance
     instance = this
 
-    /**Global Access */
-    window.experience = this
-    this.isPostRender = false // not using post-processing by default
-
-    /**Canvas*/
+    /**DOM and Canvas*/
     this.initDOM()
     this.canvas = document.querySelector('#experience')
     console.log(`THREE.REVISION: ${THREE.REVISION}`)
+
+    this.params = {
+      bloom: false // not using post-processing by default
+    }
 
     /**Setup Classes */
     this.debug = new Debug()
     this.stats = new Stats()
     this.sizes = new Sizes()
-    // this.time = new Time()
-    // this.mouse = new Mouse()
 
     this.scene = new THREE.Scene()
     this.camera = new Camera()
@@ -45,11 +38,13 @@ export default class Experience {
     this.resources = new Resources(sources) // resources need renderer for meshopt
     new Environment()
     this.world = new World()
+
+    // Post-Processing
+    this.setDebug()
+    this.isPostRender = this.params.bloom
     this.postEffect = new PostEffect()
-    // this.ray = new Ray(this.camera, this.scene)
 
     this.sizes.on("resize", () => this.resize())
-    // this.time.on("tick", () => this.update())
     this.tick()
   }
 
@@ -63,6 +58,14 @@ export default class Experience {
     footer.classList.add('footer')
     footer.id = 'footer'
     document.body.appendChild(footer)
+  }
+
+  setDebug = () => {
+    if (!this.debug.active) return
+
+    this.debug.ui.add(this.params, 'bloom').onChange(val => {
+      this.isPostRender = val
+    })
   }
 
   resize() {
