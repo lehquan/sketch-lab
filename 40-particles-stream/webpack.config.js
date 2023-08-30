@@ -60,7 +60,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       filename: path.resolve(__dirname, "dist", "index.html"),
-      title: 'Three.js | Particles Stream',
+      title: 'Three.js | Curtain',
       hash: true,
     }),
     new CopyPlugin({

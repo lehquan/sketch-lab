@@ -25,6 +25,7 @@ export default class Particles{
 
     this.addParticles()
     this.setDebug()
+    this.setFooter()
   }
   setDebug = () => {
     if (!this.debug.active) return
@@ -35,6 +36,36 @@ export default class Particles{
     this.debug.ui.add(this.params, 'speed', 0.4, 4.0).onChange(val => {
       this.uniforms.uSpeed.value = val
     })
+  }
+  setFooter = () => {
+    const footer = document.getElementById('footer')
+
+    const infoWrapper = document.createElement('div')
+    infoWrapper.classList.add('info')
+    footer.appendChild(infoWrapper)
+
+    // title
+    const title = document.createElement('h1')
+    title.innerHTML = 'Curtain'
+    infoWrapper.appendChild(title)
+
+    // description
+    const description = document.createElement('p')
+    description.innerHTML = 'Applying Classic Perlin 3D Noise for Particles to achieve a waving curtain effect.' +
+            '<br>' +
+            'Thanks to ' +
+            '<a href="https://www.youtube.com/live/i-uesNLuunw?si=a70EWcgOdfTqdJx-" target="blank">the tutorial of Yuri Artiukh.</a> '
+    infoWrapper.appendChild(description)
+
+    const hint = document.createElement('p')
+    hint.classList.add('hint')
+    hint.innerHTML = 'USE DEBUG MODE (#debug) FOR TESTING'
+    infoWrapper.appendChild(hint)
+
+    // const link = document.createElement('p')
+    // link.innerHTML = 'Image Credit: ' +
+    //     '<a href="https://shiftbrain.com/work/misatoto/?lang=en" target="blank">Misato Town</a>'
+    // footer.appendChild(link)
   }
   addParticles = () => {
     this.uniforms = {
