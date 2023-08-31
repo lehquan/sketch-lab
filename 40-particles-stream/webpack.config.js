@@ -59,9 +59,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      filename: path.resolve(__dirname, "dist", "index.html"),
-      title: 'Three.js | Curtain',
-      hash: true,
+      template: "./src/index.html",
     }),
     new CopyPlugin({
       patterns: [

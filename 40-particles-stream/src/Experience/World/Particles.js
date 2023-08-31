@@ -25,7 +25,6 @@ export default class Particles{
 
     this.addParticles()
     this.setDebug()
-    this.setFooter()
   }
   setDebug = () => {
     if (!this.debug.active) return

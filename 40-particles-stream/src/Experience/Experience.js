@@ -19,7 +19,7 @@ export default class Experience {
     instance = this
 
     /**DOM and Canvas*/
-    this.initDOM()
+    // this.initDOM()
     this.canvas = document.querySelector('#experience')
     console.log(`THREE.REVISION: ${THREE.REVISION}`)
 
@@ -47,19 +47,6 @@ export default class Experience {
     this.sizes.on("resize", () => this.resize())
     this.tick()
   }
-
-  initDOM = () => {
-    // canvas
-    const _canvas = document.createElement("canvas")
-    _canvas.id = 'experience'
-    document.body.appendChild(_canvas)
-
-    const footer = document.createElement("div")
-    footer.classList.add('footer')
-    footer.id = 'footer'
-    document.body.appendChild(footer)
-  }
-
   setDebug = () => {
     if (!this.debug.active) return
 
