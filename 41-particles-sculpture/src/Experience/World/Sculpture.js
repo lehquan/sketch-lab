@@ -61,7 +61,7 @@ export default class Sculpture {
     })
 
     this.model = this.resources.items.bust.scene.children[0].children[0].children[0]
-    this.model.geometry.scale(3, 3, 3)
+    this.model.geometry.scale(5, 5, 5)
     this.model.geometry.translate(0, 0, -0.5)
     this.model.geometry.rotateX(-Math.PI / 2)
     this.model.geometry.rotateY(Math.PI / 2)
