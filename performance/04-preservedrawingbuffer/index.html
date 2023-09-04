@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Some grass experiment</title>
+  <meta name='viewport' content='width=device-width, user-scalable=no'/>
+  <style>
+    body{
+      margin:0;
+      overflow:hidden;
+    }
+    canvas{
+      cursor:grab;
+      cursor:-webkit-grab;
+      cursor:-moz-grab;
+    }
+    canvas:active{
+      cursor:grabbing;
+      cursor:-webkit-grabbing;
+      cursor:-moz-grabbing;
+    }
+    #render {
+      position:absolute;
+      top:100%;
+      margin-top:-28px;
+      color:#eee;
+      text-shadow:0 -1px 0 #111;
+      background:#1A1A1A;
+      padding:5px 15px;
+    }
+    #render ul {
+      padding:0;margin:0;
+    }
+    #render ul li, #render ul p {
+      display:inline-block;
+      font:11px 'Lucida Grande', sans-serif;
+      margin:0;
+    }
+  </style>
+</head>
+<body>
+
+<div id='render'>
+  <ul>
+    <p style='text-decoration:underline;'>renderer.info.render :</p>
+    <li>calls : <span class='value'></span></li>
+    <li>, faces : <span class='value'></span></li>
+    <li>, vertices : <span class='value'></span></li>
+  </ul>
+</div>
+
+<script src='threer76.js'></script>
+<script src='OrbitControls.js'></script>
+<script src='stats.min.js'></script>
+<script src='dat.gui.js'></script>
+
+<script id=vertexShader type=x-shader/x-vertex>
+  uniform float time;
+  uniform vec3 gColor;
+  uniform float windSize;
+  uniform float windSpeed;
+  uniform float windInfluence;
+  attribute vec3 color;
+  attribute vec3 pos1;
+  attribute vec3 pos2;
+  attribute vec4 data;
+  varying vec3 vCol;
+  varying float shade;
+  vec2 windDir = vec2(.0,1.);
+  float hash( vec2 p ){
+    float h = dot(p,vec2(127.1,311.7));
+    return -1.0 + 2.0*fract(sin(h)*43758.5453123);
+  }
+  float noise( in vec2 p ){
+    vec2 i = floor( p );
+    vec2 f = fract( p );
+    vec2 u = f*f*(3.0-2.0*f);
+    return mix( mix( hash( i + vec2(0.0,0.0) ),
+    hash( i + vec2(1.0,0.0) ), u.x),
+    mix( hash( i + vec2(0.0,1.0) ),
+    hash( i + vec2(1.0,1.0) ), u.x), u.y);
+  }
+  float wind(in vec2 coord){
+    float value = noise(coord / 64.) * 64.;
+    value += noise(coord / 32.) * 32.;
+    value += noise(coord / 16.) * 16.;
+    value += noise(coord / 8.) * 8.;
+    value += noise(coord / 4.) * 4.;
+    
+    return value;
+  }
+  void main () {
+    float type = data.x, weight = data.z, date = data.y;
+    vCol = color ;
+    if ( type != 2. ) vCol = 2. * color.y * gColor;// '2 *' is a bit hacky because color.y does not exceed .5 roughly in the color attribute
+    vec4 light = modelViewMatrix * vec4(-1.,3.,-1.,1.);
+    vec4 wNormal = modelMatrix * vec4(normal,1.);
+    shade = dot(light,wNormal) ;
+    vec3 pos = vec3(0.);
+    float a = mod(time * .0002 + date * 3.,3.);
+    //todo : math way to avoid the ifs
+    if ( a < 1. ) {
+      pos = ( 1. - a ) * position + a * pos1;
+    } else if ( a < 2. ) {
+      pos = ( 2. - a ) * pos1 + ( a - 1. ) * pos2;
+    } else {
+      pos = ( 3. - a ) * pos2 + ( a - 2. ) * position;
+    }
+    if (weight != 0.){
+      float w = 2. * wind(pos.xz * windSize + windDir * time * windSpeed ) - 1.;
+      w *= .00018 * windInfluence;
+      vCol *= 1. + max(0.,( weight * 2. - 1.)) * ( max(0.,w) * 3.5 );
+      pos.xz += w * weight;
+    }
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.);
+  }
+</script>
+<script id=fragmentShader type="x-shader/x-fragment">
+  varying vec3 vCol;
+  varying float shade;
+  void main() {
+    gl_FragColor = vec4(vCol,1.);
+  }
+</script>
+
+<script>
+  'use strict';
+  
+  var scene, camera, gui, stats;
+  var rendererA, rendererB, renderer;
+  var controlsA, controlsB, controls;
+  var calls = document.getElementsByClassName( 'value' )[ 0 ],
+    vertices = document.getElementsByClassName( 'value' )[ 1 ],
+    faces = document.getElementsByClassName( 'value' )[ 2 ];
+  
+  
+  var main = { preserveDrawingBuffer : false, gColor : "#72961B" };
+  
+  var soil,
+    soilData = {
+      planeSide : 2,
+      sideVertices : 40,
+      imgData : null,
+      visible : false,
+      displacementScale : .1,
+      img:getGrassTexture(),
+      POT : null,
+      hills : [
+        { x : .5, y : .1, factor : .25 },
+        { x : -.5, y : -.3, factor : .25 },
+        { x : .5, y : .6, factor : .5 }
+      ]
+    };
+  
+  var grassGeo, grassMat, grass,
+    grassData = {
+      seeds:6000,
+      doubleSided:true,
+      mainColor:new THREE.Color( parseInt( main.gColor.replace(/#/,'0x') ) ),
+      wind:{
+        size:42,
+        speed:.06,
+        influence:.4
+      },
+      strands:{
+        height : .3,
+        heightVariation : .1,
+        baseRadius : .03,
+        bend : .2,
+        counter:0
+      },
+      daisies:{
+        baseRadius : .03,
+        bend : .2,
+        centerWidth:.015,
+        height : .6,
+        heightVariation : 0,
+        flowerAngle:1,
+        petals:{
+          number:20,
+          width:.1,//rad
+          length:.03,//+-
+          height:.01,//variation to apex , +-
+          colors:[
+            [1,1,1],//white default
+            [.5,.1,.7],//blue-violet
+            [.8,.4,.3]//orange
+          ],
+          multicolor:false//false=use first color only
+        },
+        proba:.03,
+        counter:0
+      },
+      geometry:{
+        vertices:[
+          [],[],[]
+        ],
+        colors:[],
+        data:[],
+        indices:[]
+      },
+      texture:{
+        img : null,
+        POT : null,
+        imgData : null,
+      }
+    };
+  
+  /*SCENE*/
+  
+  function setScene () {
+    scene = new THREE.Scene();
+    
+    setRenderer();
+    
+    setView();
+    
+    createSoil();
+    
+    prepareGrassMesh();
+    
+    addController();
+    
+    addStats();
+  }
+  
+  function addController () {
+    gui = new dat.GUI();
+    
+    //antialias
+    gui.add( main, 'preserveDrawingBuffer' ).onChange( function () {
+      document.body.removeChild( renderer.domElement );
+      var t = controls.target.clone();
+      if ( renderer === rendererA ) {
+        renderer = rendererB;
+        controls = controlsB;
+      } else {
+        renderer = rendererA;
+        controls = controlsA;
+      }
+      controls.target.copy( t );
+      document.body.appendChild( renderer.domElement );
+    });
+    
+    //wind params
+    var windFolder = gui.addFolder( 'wind' );
+    var windFolder1 = windFolder.add( grassData.wind, 'size', 0, 150 );windFolder1.listen();windFolder1.onChange( function () { grass.material.uniforms.windSize.value = grassData.wind.size; } );
+    var windFolder2 = windFolder.add( grassData.wind, 'speed', 0, .6 );windFolder2.listen();windFolder2.onChange( function () { grass.material.uniforms.windSpeed.value = grassData.wind.speed; } );
+    var windFolder3 = windFolder.add( grassData.wind, 'influence', 0, 10 );windFolder3.listen();windFolder3.onChange( function () { grass.material.uniforms.windInfluence.value = grassData.wind.influence; } );
+    
+    //soil params
+    var soilFolder = gui.addFolder( 'soil' );
+    var soilFolder1 = soilFolder.add( soilData, 'planeSide', 1, 20 );soilFolder1.listen();soilFolder1.onFinishChange( function () {
+      scene.remove( soil );
+      soil.geometry.dispose();soil.material.dispose();
+      createSoil();
+      recreateGrass();
+    });
+    var soilFolder2 = soilFolder.add( soilData, 'visible' );soilFolder2.listen();soilFolder2.onChange( function () {
+      soil.visible = soilData.visible;
+      updateInfos();
+    });
+    
+    //main grass params
+    var grassFolder = gui.addFolder( 'grass' );
+    var grassFolder1 = grassFolder.add( grassData, 'seeds', 0, 90000 );grassFolder1.listen();grassFolder1.onFinishChange( recreateGrass );
+    var grassFolder2 = grassFolder.add( grassData, 'doubleSided', 1000, 90000 );grassFolder2.listen();grassFolder2.onChange( function () {
+      if ( typeof grassMat !== 'undefined' ) grassMat.side = grassData.doubleSided ? THREE.DoubleSide : THREE.FrontSide;
+    } );
+    var grassFolder3 = grassFolder.addColor( main, 'gColor' );grassFolder3.listen();grassFolder3.name( 'grass color' );grassFolder3.onChange( function () {
+      grassData.mainColor.setHex( parseInt( main.gColor.replace(/#/,'0x') ) );
+      grass.material.uniforms.gColor.value = grassData.mainColor;
+    } );
+    
+    //strands params
+    var strandsFolder = grassFolder.addFolder( 'strands' );
+    var strandsFolder1 = strandsFolder.add( grassData.strands, 'height', .01, 3 );strandsFolder1.listen();strandsFolder1.onFinishChange( recreateGrass );
+    var strandsFolder2 = strandsFolder.add( grassData.strands, 'heightVariation', 0, 2.5 );strandsFolder2.listen();strandsFolder2.onFinishChange( recreateGrass );
+    var strandsFolder3 = strandsFolder.add( grassData.strands, 'baseRadius', .01, .4 );strandsFolder3.listen();strandsFolder3.onFinishChange( recreateGrass );
+    var strandsFolder4 = strandsFolder.add( grassData.strands, 'bend', 0, 1 );strandsFolder4.listen();strandsFolder4.onFinishChange( recreateGrass );
+    
+    //daisies params
+    var daisiesFolder = grassFolder.addFolder( 'daisies' );
+    var stemFolder1 = daisiesFolder.add( grassData.daisies, 'proba', 0, 1 ); stemFolder1.listen(); stemFolder1.onFinishChange( recreateGrass );
+    //stems params
+    var stemFolder = daisiesFolder.addFolder( 'stem' );
+    var stemFolder2 = stemFolder.add( grassData.daisies, 'height', .01, 3 ); stemFolder2.listen(); stemFolder2.onFinishChange( recreateGrass );
+    var stemFolder3 = stemFolder.add( grassData.daisies, 'heightVariation', 0, 1 ); stemFolder3.listen(); stemFolder3.onFinishChange( recreateGrass );
+    var stemFolder4 = stemFolder.add( grassData.daisies, 'baseRadius', 0.01, .2 ); stemFolder4.listen(); stemFolder4.onFinishChange( recreateGrass );
+    var stemFolder5 = stemFolder.add( grassData.daisies, 'bend', 0, 2 ); stemFolder5.listen(); stemFolder5.onFinishChange( recreateGrass );
+    var stemFolder6 = stemFolder.add( grassData.daisies, 'proba', 0, 1 ); stemFolder6.listen(); stemFolder6.onFinishChange( recreateGrass );
+    //flower params
+    var flowerFolder = daisiesFolder.addFolder( 'petals' );
+    var flowerFolder1 = flowerFolder.add( grassData.daisies, 'centerWidth', .01, .12 ); flowerFolder1.listen(); flowerFolder1.onFinishChange( recreateGrass );
+    var flowerFolder2 = flowerFolder.add( grassData.daisies.petals, 'number', 0, 30 ); flowerFolder2.step( 1 ); flowerFolder2.listen(); flowerFolder2.onFinishChange( recreateGrass );
+    var flowerFolder3 = flowerFolder.add( grassData.daisies.petals, 'length', .01, .25 ); flowerFolder3.listen(); flowerFolder3.onFinishChange( recreateGrass );
+    var flowerFolder4 = flowerFolder.add( grassData.daisies.petals, 'height', 0, .1 ); flowerFolder4.listen(); flowerFolder4.onFinishChange( recreateGrass );
+    var flowerFolder5 = flowerFolder.add( grassData.daisies.petals, 'width', .1, Math.PI * 2 / 3 ); flowerFolder5.listen(); flowerFolder5.onFinishChange( recreateGrass );
+    var flowerFolder6 = flowerFolder.add( grassData.daisies.petals, 'multicolor' ); flowerFolder6.listen(); flowerFolder6.onChange( recreateGrass );
+    
+  }
+  
+  function recreateGrass () {
+    scene.remove( grass );
+    grass.geometry.dispose();grass.material.dispose();
+    grassData.geometry.vertices[ 0 ] = [];
+    grassData.geometry.vertices[ 1 ] = [];
+    grassData.geometry.vertices[ 2 ] = [];
+    grassData.geometry.colors = [];
+    grassData.geometry.data = [];
+    grassData.geometry.indices = [];
+    grassData.strands.counter = grassData.daisies.counter = 0;
+    prepareGrassMesh();
+  }
+  
+  function growGrass () {
+    createGrassMesh();
+    createGrassGeo();
+  }
+  
+  function createGrassGeo () {
+    if ( typeof grassGeo !== 'undefined' ) grassGeo.dispose();
+    grassGeo = new THREE.BufferGeometry();
+    
+    var vertA0 = new Float32Array(grassData.geometry.vertices[0]);
+    grassGeo.addAttribute('position',new THREE.BufferAttribute(vertA0,3));
+    
+    var vertA1 = new Float32Array(grassData.geometry.vertices[1]);
+    grassGeo.addAttribute('pos1',new THREE.BufferAttribute(vertA1,3));
+    
+    var vertA2 = new Float32Array(grassData.geometry.vertices[2]);
+    grassGeo.addAttribute('pos2',new THREE.BufferAttribute(vertA2,3));
+    
+    var colA = new Float32Array(grassData.geometry.colors);
+    grassGeo.addAttribute('color',new THREE.BufferAttribute(colA,3));
+    
+    var dataA = new Float32Array(grassData.geometry.data);
+    grassGeo.addAttribute('data',new THREE.BufferAttribute(dataA,4));
+    
+    var indA = new Uint32Array(grassData.geometry.indices);
+    grassGeo.setIndex( new THREE.BufferAttribute( indA, 1 ) );
+    
+    grass = new THREE.Mesh( grassGeo, grassMat );
+    scene.add( grass );
+    
+    updateInfos();
+  }
+  
+  function createGrassMesh ( msg ) {
+    var target = new THREE.Vector3(0,0,0);
+    
+    for ( var i = grassData.strands.counter + grassData.daisies.counter ; i < grassData.seeds ; i++ ) {
+      target.x = ( Math.random() * 2 - 1 ) * soilData.planeSide / 2 ;
+      target.z = ( Math.random() * 2 - 1 ) * soilData.planeSide / 2 ;
+      
+      //reloop to get y value
+      var px = Math.floor( ( target.x + soilData.planeSide / 2 ) / soilData.planeSide * soilData.POT ),
+        py = Math.floor( ( target.z + soilData.planeSide / 2 ) / soilData.planeSide * soilData.POT );
+      
+      //if ok then get more info : loop to get y value
+      var	pI = py * soilData.POT + px,
+        luminosity = 0.21 * soilData.imgData.data[ pI * 4 ] / 255 + 0.72 * soilData.imgData.data[ pI * 4 + 1 ] / 255 + 0.07 * soilData.imgData.data[ pI * 4 + 2 ] / 255 - .5,
+        elevation = 0;
+      for ( var k = 0; k < soilData.hills.length ; k ++ ) {
+        var hillDistanceX = target.x / ( soilData.planeSide  / 2 ) - soilData.hills[ k ].x,
+          hillDistanceY = - target.z / ( soilData.planeSide / 2 ) - soilData.hills[ k ].y,
+          hillDistance = Math.sqrt( hillDistanceX * hillDistanceX + hillDistanceY * hillDistanceY );
+        elevation += Math.max( 0, 1 - hillDistance ) * soilData.hills[ k ].factor;
+      }
+      //target.x *= 1 + 2 * ( 1 - py / soilData.POT );
+      target.y = luminosity * soilData.displacementScale + elevation;
+      
+      if ( ! grow( target, i ) ) i--;
+    }
+  }
+  
+  function prepareGrassMesh () {
+    grassData.texture.POT = grassData.texture.img.width;
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = canvas.height = grassData.texture.POT;
+    ctx.drawImage( grassData.texture.img, 0, 0, grassData.texture.POT, grassData.texture.POT );
+    grassData.texture.imgData = ctx.getImageData( 0, 0, grassData.texture.POT, grassData.texture.POT );
+    
+    grassMat = new THREE.ShaderMaterial({
+      vertexShader : document.getElementById( 'vertexShader' ).textContent,
+      fragmentShader : document.getElementById( 'fragmentShader' ).textContent,
+      uniforms : {
+        time : { type : 'f', value : 0 },
+        windSize : { type : 'f', value : grassData.wind.size },
+        windSpeed : { type : 'f', value : grassData.wind.speed },
+        windInfluence : { type : 'f', value : grassData.wind.influence },
+        gColor : { type : 'c', value : grassData.mainColor },
+      }
+    });
+    
+    grassMat.side = grassData.doubleSided ? THREE.DoubleSide : THREE.FrontSide,
+      
+      growGrass();
+  }
+  
+  function setView () {
+    camera = new THREE.PerspectiveCamera( 50, innerWidth / innerHeight, .1, 100 );
+    camera.position.set(0,2,4);
+    
+    controlsA = new THREE.OrbitControls( camera, rendererA.domElement );
+    controlsA.enableDamping=true;
+    controlsA.dampingFactor=.05;
+    controlsA.rotateSpeed=.07;
+    controlsA.maxPolarAngle=2;
+    controlsB = new THREE.OrbitControls( camera, rendererB.domElement );
+    controlsB.enableDamping=true;
+    controlsB.dampingFactor=.05;
+    controlsB.rotateSpeed=.07;
+    controlsB.maxPolarAngle=2;
+    
+    controls = main.antialias ? controlsA : controlsB;
+    
+    window.addEventListener( 'resize', resize, false );
+  }
+  
+  function createSoil () {
+    //1. create canvas
+    soilData.POT = soilData.img.width;
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = canvas.height = soilData.POT;
+    ctx.drawImage(soilData.img, 0, 0, soilData.POT, soilData.POT);
+    
+    //2. create texture from canvas
+    var tx = new THREE.Texture(canvas);
+    tx.minFilter = THREE.LinearFilter;
+    tx.needsUpdate = true;
+    
+    //3. create material and map texture
+    var soilMat = new THREE.MeshBasicMaterial({
+      color:0xbbbbbb,
+      map:tx
+    });
+    
+    //4. create plane geometry, displaced from canvas greyscale + hill from circles
+    var sV = soilData.sideVertices,
+      pS = soilData.planeSide,
+      POT = soilData.POT,
+      soilGeo = new THREE.PlaneBufferGeometry( pS, pS, sV, sV );
+    soilData.imgData = ctx.getImageData( 0, 0, POT, POT );
+    var iD = soilData.imgData.data;
+    
+    for ( var i = 0 ; i < ( sV ) ; i ++ ) {
+      for ( var j = 0 ; j < ( sV + 2 ) ; j ++ ) {//dont know why +2 but otherwise the 2 last rows stay flat
+        
+        var px = ( j * sV + i ),
+          luminosity = 0.21 * iD[ px * 4 ] / 255 + 0.72 * iD[ px * 4 + 1 ] / 255 + 0.07 * iD[ px * 4 + 2 ] / 255 - .5,
+          elevation = 0;
+        
+        //1.get y value
+        for ( var k = 0; k < soilData.hills.length ; k ++ ) {
+          var hillDistanceX = soilGeo.attributes.position.array[ px * 3 ] / ( pS / 2 ) - soilData.hills[ k ].x,
+            hillDistanceY = soilGeo.attributes.position.array[ px * 3 + 1 ] / ( pS / 2 ) - soilData.hills[ k ].y;
+          var hillDistance = Math.sqrt( hillDistanceX * hillDistanceX + hillDistanceY * hillDistanceY );
+          elevation += Math.max( 0, 1 - hillDistance ) * soilData.hills[ k ].factor;
+        }
+        soilGeo.attributes.position.array[ px * 3 + 2 ] = luminosity * soilData.displacementScale + elevation;
+        
+        soilGeo.attributes.position.needsUpdate = true;
+      }
+    }
+    soilGeo.computeVertexNormals();
+    
+    //create mesh
+    soil = new THREE.Mesh(soilGeo,soilMat);
+    soil.rotation.x = -Math.PI/2;
+    scene.add(soil);
+    soil.visible = soilData.visible;
+  }
+  
+  function setRenderer () {
+    rendererA = new THREE.WebGLRenderer( { preserveDrawingBuffer: true } );
+    rendererA.setClearColor(0x555555);
+    rendererA.setSize( innerWidth, innerHeight );
+    
+    rendererB = new THREE.WebGLRenderer();
+    rendererB.setSize( innerWidth, innerHeight );
+    
+    renderer = main.preserveDrawingBuffer ? rendererA : rendererB ;
+    
+    document.body.appendChild( renderer.domElement );
+  }
+  
+  function updateInfos () {
+    setTimeout( function () {
+      calls.textContent = renderer.info.render.calls;
+      vertices.textContent = renderer.info.render.vertices;
+      faces.textContent = renderer.info.render.faces;
+    }, 500 );//don't know since it is called after geometry instanciation... probably because one render call is needed. 500ms in case of freeze.
+  }
+  
+  function addStats () {
+    stats = new Stats();
+    stats.setMode( 0 );
+    stats.domElement.style.cssText = ''+
+      'position : absolute;'+
+      'left : 0; top : 0;';
+    document.body.appendChild( stats.domElement );
+  }
+  
+  function resize () {
+    rendererA.setSize( innerWidth, innerHeight );
+    rendererB.setSize( innerWidth, innerHeight );
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+  }
+  
+  function animate ( t ) {
+    requestAnimationFrame( animate );
+    controls.update();
+    
+    if ( typeof grassMat !== 'undefined' ) grassMat.uniforms.time.value = t;
+    renderer.render( scene, camera );
+    stats.update();
+  }
+  
+  function grow ( crd, index, seedType  ) {
+    /* SETTINGS */
+    
+    var seed = ( typeof seedType === 'undefined' ) ? Math.random() : seedType === 'daisy' ? -1 : 1;
+    
+    //texture spread
+    var x = Math.floor( ( crd.x + soilData.planeSide / 2 ) * soilData.POT / soilData.planeSide),
+      y = Math.floor( ( soilData.planeSide / 2 - crd.z ) * soilData.POT / soilData.planeSide),
+      I = y * soilData.POT + x,
+      R = soilData.imgData.data[ I * 4 ] / 255,
+      G = soilData.imgData.data[ I * 4 + 1 ] / 255,
+      B = soilData.imgData.data[ I * 4 + 2 ] / 255;
+    
+    //shape settings
+    var angle = Math.random() * 2 * Math.PI,//randomize angle for better result (the base is actually a equilateral triangle so 2PI/3 should be enough)
+      angle90 = angle + Math.PI / 2,
+      cos = Math.cos(angle), sin = Math.sin(angle),
+      hcos90 = Math.cos(angle90)/2, hsin90 = Math.sin(angle90)/2;
+    
+    var seedBend = Math.random() * 2 - 1,
+      seedHeight = .5 + Math.random() * .5;
+    
+    //colors settings
+    var cL = grassData.geometry.colors.length;
+    
+    var px = Math.floor( ( crd.x + soilData.planeSide / 2 ) * grassData.texture.POT / soilData.planeSide),
+      py = Math.floor( ( soilData.planeSide / 2 - crd.z ) * grassData.texture.POT / soilData.planeSide),
+      pI = py * grassData.texture.POT + px,
+      cR = grassData.texture.imgData.data[ pI * 4 ] / 255,
+      cG = grassData.texture.imgData.data[ pI * 4 + 1 ] / 255,
+      cB = grassData.texture.imgData.data[ pI * 4 + 2 ] / 255;
+    
+    //data settings
+    var dL = grassData.geometry.data.length;
+    
+    //indices settings
+    var fL = grassData.geometry.indices.length,
+      r = grassData.strands.counter * 7 + ( 15 + grassData.daisies.petals.number * 5 ) * grassData.daisies.counter ;
+    
+    /*STRAND*/
+    
+    if ( seed >= grassData.daisies.proba ) {
+      
+      grassData.strands.counter++;
+      
+      //vertices0
+      var vL = grassData.geometry.vertices[0].length;
+      grassData.strands.heightVariation *= Math.random() * 2 - 1;
+      //Base
+      //vertices
+      grassData.geometry.vertices[ 0 ][ vL ] = crd.x + hcos90 * grassData.strands.baseRadius;
+      grassData.geometry.vertices[ 0 ][ vL + 1 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 2 ] = crd.z - hsin90 * grassData.strands.baseRadius;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 3 ] = crd.x - hcos90 * grassData.strands.baseRadius;
+      grassData.geometry.vertices[ 0 ][ vL + 4 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 5 ] = crd.z + hsin90 * grassData.strands.baseRadius;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 6 ] = crd.x + cos * grassData.strands.baseRadius;
+      grassData.geometry.vertices[ 0 ][ vL + 7 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 8 ] = crd.z - sin * grassData.strands.baseRadius;
+      
+      //Middle
+      //vertices
+      grassData.geometry.vertices[ 0 ][ vL + 9 ] = crd.x + hcos90 * .6 * grassData.strands.baseRadius + cos * grassData.strands.bend * seedBend * .2;
+      grassData.geometry.vertices[ 0 ][ vL + 10 ] = crd.y + .5 * ( 1 + grassData.strands.heightVariation ) * grassData.strands.height * seedHeight;
+      grassData.geometry.vertices[ 0 ][ vL + 11 ] = crd.z - hsin90 * .6 * grassData.strands.baseRadius - sin * grassData.strands.bend * seedBend * .2;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 12 ] = crd.x - hcos90 * .6 * grassData.strands.baseRadius + cos * grassData.strands.bend * seedBend * .2;
+      grassData.geometry.vertices[ 0 ][ vL + 13 ] = crd.y + .5 * ( 1 + grassData.strands.heightVariation ) * grassData.strands.height * seedHeight;
+      grassData.geometry.vertices[ 0 ][ vL + 14 ] = crd.z + hsin90 * .6 * grassData.strands.baseRadius - sin * grassData.strands.bend * seedBend * .2;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 15 ] = crd.x + cos * .6 * grassData.strands.baseRadius + cos * grassData.strands.bend * seedBend * .2;
+      grassData.geometry.vertices[ 0 ][ vL + 16 ] = crd.y + .5 * ( 1 + grassData.strands.heightVariation ) * grassData.strands.height * seedHeight;
+      grassData.geometry.vertices[ 0 ][ vL + 17 ] = crd.z - sin * .6 * grassData.strands.baseRadius - sin * grassData.strands.bend * seedBend * .2;
+      
+      //Apex
+      //vertex
+      grassData.geometry.vertices[ 0 ][ vL + 18 ] = crd.x + cos * grassData.strands.bend * seedBend;
+      grassData.geometry.vertices[ 0 ][ vL + 19 ] = crd.y + 1.2 * ( 1 + grassData.strands.heightVariation ) * grassData.strands.height * seedHeight;
+      grassData.geometry.vertices[ 0 ][ vL + 20 ] = crd.z - sin * grassData.strands.bend * seedBend;
+      
+      //vertices1 & 2
+      //Base
+      //vertices
+      grassData.geometry.vertices[ 1 ][ vL ] = grassData.geometry.vertices[ 2 ][ vL ] = grassData.geometry.vertices[ 0 ][ vL ];
+      grassData.geometry.vertices[ 1 ][ vL + 1 ] = grassData.geometry.vertices[ 2 ][ vL + 1 ] = grassData.geometry.vertices[ 0 ][ vL + 1 ];
+      grassData.geometry.vertices[ 1 ][ vL + 2 ] = grassData.geometry.vertices[ 2 ][ vL + 2 ] = grassData.geometry.vertices[ 0 ][ vL + 2 ];
+      
+      grassData.geometry.vertices[ 1 ][ vL + 3 ] = grassData.geometry.vertices[ 2 ][ vL + 3 ] = grassData.geometry.vertices[ 0 ][ vL + 3 ];
+      grassData.geometry.vertices[ 1 ][ vL + 4 ] = grassData.geometry.vertices[ 2 ][ vL + 4 ] = grassData.geometry.vertices[ 0 ][ vL + 4 ];
+      grassData.geometry.vertices[ 1 ][ vL + 5 ] = grassData.geometry.vertices[ 2 ][ vL + 5 ] = grassData.geometry.vertices[ 0 ][ vL + 5 ];
+      
+      grassData.geometry.vertices[ 1 ][ vL + 6 ] = grassData.geometry.vertices[ 2 ][ vL + 6 ] = grassData.geometry.vertices[ 0 ][ vL + 6 ];
+      grassData.geometry.vertices[ 1 ][ vL + 7 ] = grassData.geometry.vertices[ 2 ][ vL + 7 ] = grassData.geometry.vertices[ 0 ][ vL + 7 ];
+      grassData.geometry.vertices[ 1 ][ vL + 8 ] = grassData.geometry.vertices[ 2 ][ vL + 8 ] = grassData.geometry.vertices[ 0 ][ vL + 8 ];
+      
+      //Middle
+      //vertices
+      grassData.geometry.vertices[ 1 ][ vL + 9 ] = grassData.geometry.vertices[ 2 ][ vL + 9 ] = grassData.geometry.vertices[ 0 ][ vL + 9 ];
+      grassData.geometry.vertices[ 1 ][ vL + 10 ] = grassData.geometry.vertices[ 2 ][ vL + 10 ] = grassData.geometry.vertices[ 0 ][ vL + 10 ];
+      grassData.geometry.vertices[ 1 ][ vL + 11 ] = grassData.geometry.vertices[ 2 ][ vL + 11 ] = grassData.geometry.vertices[ 0 ][ vL + 11 ];
+      
+      grassData.geometry.vertices[ 1 ][ vL + 12 ] = grassData.geometry.vertices[ 2 ][ vL + 12 ] = grassData.geometry.vertices[ 0 ][ vL + 12 ];
+      grassData.geometry.vertices[ 1 ][ vL + 13 ] = grassData.geometry.vertices[ 2 ][ vL + 13 ] = grassData.geometry.vertices[ 0 ][ vL + 13 ];
+      grassData.geometry.vertices[ 1 ][ vL + 14 ] = grassData.geometry.vertices[ 2 ][ vL + 14 ] = grassData.geometry.vertices[ 0 ][ vL + 14 ];
+      
+      grassData.geometry.vertices[ 1 ][ vL + 15 ] = grassData.geometry.vertices[ 2 ][ vL + 15 ] = grassData.geometry.vertices[ 0 ][ vL + 15 ];
+      grassData.geometry.vertices[ 1 ][ vL + 16 ] = grassData.geometry.vertices[ 2 ][ vL + 16 ] = grassData.geometry.vertices[ 0 ][ vL + 16 ];
+      grassData.geometry.vertices[ 1 ][ vL + 17 ] = grassData.geometry.vertices[ 2 ][ vL + 17 ] = grassData.geometry.vertices[ 0 ][ vL + 17 ];
+      
+      //Apex
+      //vertex
+      grassData.geometry.vertices[ 1 ][ vL + 18 ] = grassData.geometry.vertices[ 2 ][ vL + 18 ] = grassData.geometry.vertices[ 0 ][ vL + 18 ];
+      grassData.geometry.vertices[ 1 ][ vL + 19 ] = grassData.geometry.vertices[ 2 ][ vL + 19 ] = grassData.geometry.vertices[ 0 ][ vL + 19 ];
+      grassData.geometry.vertices[ 1 ][ vL + 20 ] = grassData.geometry.vertices[ 2 ][ vL + 20 ] = grassData.geometry.vertices[ 0 ][ vL + 20 ];
+      
+      //data
+      
+      //.x : type = 0
+      grassData.geometry.data[ dL ] = grassData.geometry.data[ dL + 4 ] = grassData.geometry.data[ dL + 8 ] = grassData.geometry.data[ dL + 12 ] = grassData.geometry.data[ dL + 16 ] = grassData.geometry.data[ dL + 20 ] = grassData.geometry.data[ dL + 24 ] = 0;
+      
+      //.y : timestamp
+      grassData.geometry.data[ dL + 1 ] = grassData.geometry.data[ dL + 4 + 1 ] = grassData.geometry.data[ dL + 8 + 1 ] = grassData.geometry.data[ dL + 12 + 1 ] = grassData.geometry.data[ dL + 16 + 1 ] = grassData.geometry.data[ dL + 20 + 1 ] = grassData.geometry.data[ dL + 24 + 1 ] = Math.random();
+      
+      //.z : weights
+      grassData.geometry.data[ dL + 2 ] = grassData.geometry.data[ dL + 4 + 2 ] = grassData.geometry.data[ dL + 8 + 2 ] = 0;
+      grassData.geometry.data[ dL + 12 + 2 ] = grassData.geometry.data[ dL + 16 + 2 ] = grassData.geometry.data[ dL + 20 + 2 ] = .4;
+      grassData.geometry.data[ dL + 24 + 2 ] = 1;
+      
+      //.w : indices
+      grassData.geometry.data[ dL + 3 ] = grassData.geometry.data[ dL + 4 + 3 ] = grassData.geometry.data[ dL + 8 + 3 ] = index ? index : 0;
+      grassData.geometry.data[ dL + 12 + 3 ] = grassData.geometry.data[ dL + 16 + 3 ] = grassData.geometry.data[ dL + 20 + 3 ] = index ? index : 0;
+      grassData.geometry.data[ dL + 24 + 3 ] = index ? index : 0;
+      
+      //colors
+      
+      //Base
+      grassData.geometry.colors[ cL ] = cR * .6;
+      grassData.geometry.colors[ cL + 1 ] = cG * .6;//greenish : .6, redish : .5
+      grassData.geometry.colors[ cL + 2 ] = cB * .3;
+      
+      grassData.geometry.colors[ cL + 3 ] = cR * .6;
+      grassData.geometry.colors[ cL + 4 ] = cG * .6;//greenish : .6, redish : .5
+      grassData.geometry.colors[ cL + 5 ] = cB * .3;
+      
+      grassData.geometry.colors[ cL + 6 ] = cR * .3;
+      grassData.geometry.colors[ cL + 7 ] = cG * .4;//greenish : .4, redish : .25
+      grassData.geometry.colors[ cL + 8 ] = cB * .15;
+      
+      //Middle
+      grassData.geometry.colors[ cL + 9 ] = cR * .5;
+      grassData.geometry.colors[ cL + 10 ] = cG * .5;//greenish : .5, redish : .4
+      grassData.geometry.colors[ cL + 11 ] = cB * .25;
+      
+      grassData.geometry.colors[ cL + 12 ] = cR * .3;//greenish : .3, redish : .5
+      grassData.geometry.colors[ cL + 13 ] = cG * .5;//greenish : .5, redish : .4
+      grassData.geometry.colors[ cL + 14 ] = cB * .25;
+      
+      grassData.geometry.colors[ cL + 15 ] = cR * .2;//greenish : .2, redish : .25
+      grassData.geometry.colors[ cL + 16 ] = cG * .25;//greenish : .25, redish : .2
+      grassData.geometry.colors[ cL + 17 ] = cB * .125;
+      
+      //Apex
+      grassData.geometry.colors[ cL + 18 ] = cR * .5;//greenish : .5, redish : 1
+      grassData.geometry.colors[ cL + 19 ] = cG * 1;//greenish : 1, redish : .7
+      grassData.geometry.colors[ cL + 20 ] = cB * .4;
+      
+      //indices
+      
+      grassData.geometry.indices[ fL ] = r;
+      grassData.geometry.indices[ fL + 1 ] = r + 1;
+      grassData.geometry.indices[ fL + 2 ] = r + 3;
+      
+      grassData.geometry.indices[ fL + 3 ] = r + 1;
+      grassData.geometry.indices[ fL + 4 ] = r + 4;
+      grassData.geometry.indices[ fL + 5 ] = r + 3;
+      
+      grassData.geometry.indices[ fL + 6 ] = r + 1;
+      grassData.geometry.indices[ fL + 7 ] = r + 2;
+      grassData.geometry.indices[ fL + 8 ] = r + 4;
+      
+      grassData.geometry.indices[ fL + 9 ] = r + 2;
+      grassData.geometry.indices[ fL + 10 ] = r + 5;
+      grassData.geometry.indices[ fL + 11 ] = r + 4;
+      
+      grassData.geometry.indices[ fL + 12 ] = r + 2;
+      grassData.geometry.indices[ fL + 13 ] = r;
+      grassData.geometry.indices[ fL + 14 ] = r + 5;
+      
+      grassData.geometry.indices[ fL + 15 ] = r;
+      grassData.geometry.indices[ fL + 16 ] = r + 3;
+      grassData.geometry.indices[ fL + 17 ] = r + 5;
+      
+      grassData.geometry.indices[ fL + 18 ] = r + 3;
+      grassData.geometry.indices[ fL + 19 ] = r + 4;
+      grassData.geometry.indices[ fL + 20 ] = r + 6;
+      
+      grassData.geometry.indices[ fL + 21 ] = r + 4;
+      grassData.geometry.indices[ fL + 22 ] = r + 5;
+      grassData.geometry.indices[ fL + 23 ] = r + 6;
+      
+      grassData.geometry.indices[ fL + 24 ] = r + 5;
+      grassData.geometry.indices[ fL + 25 ] = r + 3;
+      grassData.geometry.indices[ fL + 26 ] = r + 6;
+      
+      /*DAISY*/
+      
+    } else if ( seed < grassData.daisies.proba ) {
+      
+      grassData.daisies.counter++;
+      
+      //vertices0
+      var vL = grassData.geometry.vertices[0].length,
+        hAngle = grassData.daisies.flowerAngle + .5 * Math.random();
+      grassData.strands.heightVariation *= Math.random() * 2 - 1;
+      
+      //Base
+      grassData.geometry.vertices[ 0 ][ vL ] = crd.x + hcos90 * grassData.daisies.baseRadius * .5;
+      grassData.geometry.vertices[ 0 ][ vL + 1 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 2 ] = crd.z - hsin90 * grassData.daisies.baseRadius * .5;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 3 ] = crd.x - hcos90 * grassData.daisies.baseRadius * .5;
+      grassData.geometry.vertices[ 0 ][ vL + 4 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 5 ] = crd.z + hsin90 * grassData.daisies.baseRadius * .5;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 6 ] = crd.x + cos * grassData.daisies.baseRadius * .5;
+      grassData.geometry.vertices[ 0 ][ vL + 7 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 8 ] = crd.z - sin * grassData.daisies.baseRadius * .5;
+      
+      //Stem
+      grassData.geometry.vertices[ 0 ][ vL + 9 ] = crd.x + hcos90 * .35 * grassData.daisies.baseRadius;
+      grassData.geometry.vertices[ 0 ][ vL + 10 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 11 ] = crd.z - hsin90 * .35 * grassData.daisies.baseRadius;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 12 ] = crd.x - hcos90 * .35 * grassData.daisies.baseRadius;
+      grassData.geometry.vertices[ 0 ][ vL + 13 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 14 ] = crd.z + hsin90 * .35 * grassData.daisies.baseRadius;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 15 ] = crd.x + cos * .35 * grassData.daisies.baseRadius;
+      grassData.geometry.vertices[ 0 ][ vL + 16 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 17 ] = crd.z - sin * .35 * grassData.daisies.baseRadius;
+      
+      //Top
+      grassData.geometry.vertices[ 0 ][ vL + 18 ] = crd.x;
+      grassData.geometry.vertices[ 0 ][ vL + 19 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 20 ] = crd.z;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 21 ] = crd.x;
+      grassData.geometry.vertices[ 0 ][ vL + 22 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 23 ] = crd.z;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 24 ] = crd.x;
+      grassData.geometry.vertices[ 0 ][ vL + 25 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 26 ] = crd.z;
+      
+      //flower part
+      
+      //center
+      grassData.geometry.vertices[ 0 ][ vL + 27 ] = crd.x;
+      grassData.geometry.vertices[ 0 ][ vL + 28 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 29 ] = crd.z;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 30 ] = crd.x;
+      grassData.geometry.vertices[ 0 ][ vL + 31 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 32 ] = crd.z;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 33 ] = crd.x;
+      grassData.geometry.vertices[ 0 ][ vL + 34 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 35 ] = crd.z;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 36 ] = crd.x;
+      grassData.geometry.vertices[ 0 ][ vL + 37 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 38 ] = crd.z;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 39 ] = crd.x;
+      grassData.geometry.vertices[ 0 ][ vL + 40 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 41 ] = crd.z;
+      
+      grassData.geometry.vertices[ 0 ][ vL + 42 ] = crd.x;
+      grassData.geometry.vertices[ 0 ][ vL + 43 ] = crd.y;
+      grassData.geometry.vertices[ 0 ][ vL + 44 ] = crd.z;
+      
+      //petals
+      for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+        grassData.geometry.vertices[ 0 ][ vL + 45 + i * 15 ] = crd.x;
+        grassData.geometry.vertices[ 0 ][ vL + 46 + i * 15 ] = crd.y;
+        grassData.geometry.vertices[ 0 ][ vL + 47 + i * 15 ] = crd.z;
+        
+        grassData.geometry.vertices[ 0 ][ vL + 48 + i * 15 ] = crd.x;
+        grassData.geometry.vertices[ 0 ][ vL + 49 + i * 15 ] = crd.y;
+        grassData.geometry.vertices[ 0 ][ vL + 50 + i * 15 ] = crd.z;
+        
+        grassData.geometry.vertices[ 0 ][ vL + 51 + i * 15 ] = crd.x;
+        grassData.geometry.vertices[ 0 ][ vL + 52 + i * 15 ] = crd.y;
+        grassData.geometry.vertices[ 0 ][ vL + 53 + i * 15 ] = crd.z;
+        
+        grassData.geometry.vertices[ 0 ][ vL + 54 + i * 15 ] = crd.x;
+        grassData.geometry.vertices[ 0 ][ vL + 55 + i * 15 ] = crd.y;
+        grassData.geometry.vertices[ 0 ][ vL + 56 + i * 15 ] = crd.z;
+        
+        grassData.geometry.vertices[ 0 ][ vL + 57 + i * 15 ] = crd.x;
+        grassData.geometry.vertices[ 0 ][ vL + 58 + i * 15 ] = crd.y;
+        grassData.geometry.vertices[ 0 ][ vL + 59 + i * 15 ] = crd.z;
+      }
+      
+      //vertices1
+      
+      //Base
+      grassData.geometry.vertices[ 1 ][ vL ] = crd.x + hcos90 * grassData.daisies.baseRadius * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 1 ] = crd.y;
+      grassData.geometry.vertices[ 1 ][ vL + 2 ] = crd.z - hsin90 * grassData.daisies.baseRadius * .8;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 3 ] = crd.x - hcos90 * grassData.daisies.baseRadius * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 4 ] = crd.y;
+      grassData.geometry.vertices[ 1 ][ vL + 5 ] = crd.z + hsin90 * grassData.daisies.baseRadius * .8;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 6 ] = crd.x + cos * grassData.daisies.baseRadius * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 7 ] = crd.y;
+      grassData.geometry.vertices[ 1 ][ vL + 8 ] = crd.z - sin * grassData.daisies.baseRadius * .8;
+      
+      //Stem
+      grassData.geometry.vertices[ 1 ][ vL + 9 ] = crd.x + hcos90 * .6 * grassData.daisies.baseRadius + cos * grassData.daisies.bend * seedBend * .4;
+      grassData.geometry.vertices[ 1 ][ vL + 10 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 11 ] = crd.z - hsin90 * .6 * grassData.daisies.baseRadius - sin * grassData.daisies.bend * seedBend * .4;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 12 ] = crd.x - hcos90 * .6 * grassData.daisies.baseRadius + cos * grassData.daisies.bend * seedBend * .4;
+      grassData.geometry.vertices[ 1 ][ vL + 13 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 14 ] = crd.z + hsin90 * .6 * grassData.daisies.baseRadius - sin * grassData.daisies.bend * seedBend * .4;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 15 ] = crd.x + cos * .6 * grassData.daisies.baseRadius + cos * grassData.daisies.bend * seedBend * .4;
+      grassData.geometry.vertices[ 1 ][ vL + 16 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 17 ] = crd.z - sin * .6 * grassData.daisies.baseRadius - sin * grassData.daisies.bend * seedBend * .4;
+      
+      //Top
+      grassData.geometry.vertices[ 1 ][ vL + 18 ] = crd.x + hcos90 * .35 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend * .9;
+      grassData.geometry.vertices[ 1 ][ vL + 19 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 20 ] = crd.z - hsin90 * .35 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend * .9;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 21 ] = crd.x - hcos90 * .35 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend * .9;
+      grassData.geometry.vertices[ 1 ][ vL + 22 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 23 ] = crd.z + hsin90 * .35 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend * .9;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 24 ] = crd.x + cos * .35 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend * .9;
+      grassData.geometry.vertices[ 1 ][ vL + 25 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 26 ] = crd.z - sin * .35 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend * .9;
+      
+      //flower part
+      
+      //center
+      //values for the pentagon
+      var rot = Math.PI * 2 / 5,
+        cos1 = Math.cos(rot), sin1 = Math.sin(rot),
+        cos2 = Math.cos(rot*2),sin2 = Math.sin(rot*2);
+      grassData.geometry.vertices[ 1 ][ vL + 27 ] = crd.x + cos * grassData.daisies.bend * seedBend * .9+ grassData.daisies.centerWidth * .5;
+      grassData.geometry.vertices[ 1 ][ vL + 28 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 29 ] = crd.z - sin * grassData.daisies.bend * seedBend;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 30 ] = crd.x + cos * grassData.daisies.bend * seedBend * .9+ grassData.daisies.centerWidth * cos1 * .5;
+      grassData.geometry.vertices[ 1 ][ vL + 31 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 32 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * sin1 * .5;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 33 ] = crd.x + cos * grassData.daisies.bend * seedBend * .9+ grassData.daisies.centerWidth * cos2 * .5;
+      grassData.geometry.vertices[ 1 ][ vL + 34 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 35 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * sin2 * .5;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 36 ] = crd.x + cos * grassData.daisies.bend * seedBend * .9+ grassData.daisies.centerWidth * cos2 * .5;
+      grassData.geometry.vertices[ 1 ][ vL + 37 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 38 ] = crd.z - sin * grassData.daisies.bend * seedBend * .9+ grassData.daisies.centerWidth * sin2 * .5;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 39 ] = crd.x + cos * grassData.daisies.bend * seedBend * .9+ grassData.daisies.centerWidth * cos1 * .5;
+      grassData.geometry.vertices[ 1 ][ vL + 40 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+      grassData.geometry.vertices[ 1 ][ vL + 41 ] = crd.z - sin * grassData.daisies.bend * seedBend * .9+ grassData.daisies.centerWidth * sin1 * .5;
+      
+      grassData.geometry.vertices[ 1 ][ vL + 42 ] = crd.x + cos * grassData.daisies.bend * seedBend * .9;
+      grassData.geometry.vertices[ 1 ][ vL + 43 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8 + grassData.daisies.centerWidth * .4;
+      grassData.geometry.vertices[ 1 ][ vL + 44 ] = crd.z - sin * grassData.daisies.bend * seedBend * .9;
+      
+      //petals
+      for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+        var petRot = Math.PI * 2 / grassData.daisies.petals.number * i + Math.random() * .3,
+          a1 = petRot + grassData.daisies.petals.width,
+          a2 = petRot - grassData.daisies.petals.width,
+          cosa = Math.cos(petRot), sina = Math.sin(petRot),
+          cosa1 = Math.cos(a1), sina1 = Math.sin(a1),
+          cosa2 = Math.cos(a2), sina2 = Math.sin(a2),
+          petHeight = ( Math.random() - .5 ) * grassData.daisies.petals.height;
+        grassData.geometry.vertices[ 1 ][ vL + 45 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend *.9 + grassData.daisies.centerWidth * .5 * cosa2;
+        grassData.geometry.vertices[ 1 ][ vL + 46 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+        grassData.geometry.vertices[ 1 ][ vL + 47 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend *.9 - grassData.daisies.centerWidth * .5 * sina2;
+        
+        grassData.geometry.vertices[ 1 ][ vL + 48 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend *.9 + grassData.daisies.petals.length * cosa2 * .3;
+        grassData.geometry.vertices[ 1 ][ vL + 49 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .83;
+        grassData.geometry.vertices[ 1 ][ vL + 50 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend *.9 - grassData.daisies.petals.length * sina2 * .3;
+        
+        grassData.geometry.vertices[ 1 ][ vL + 51 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend *.9 ;
+        grassData.geometry.vertices[ 1 ][ vL + 52 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .85;
+        grassData.geometry.vertices[ 1 ][ vL + 53 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend *.9 ;
+        
+        grassData.geometry.vertices[ 1 ][ vL + 54 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend *.9 + grassData.daisies.petals.length * cosa1 * .3;
+        grassData.geometry.vertices[ 1 ][ vL + 55 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .83;
+        grassData.geometry.vertices[ 1 ][ vL + 56 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend *.9 - grassData.daisies.petals.length * sina1 * .3;
+        
+        grassData.geometry.vertices[ 1 ][ vL + 57 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend *.9 + grassData.daisies.centerWidth * .5 * cosa1;
+        grassData.geometry.vertices[ 1 ][ vL + 58 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+        grassData.geometry.vertices[ 1 ][ vL + 59 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend *.9 - grassData.daisies.centerWidth * .5 * sina1;
+      }
+      
+      //vertices2
+      
+      //Base
+      grassData.geometry.vertices[ 2 ][ vL ] = crd.x + hcos90 * grassData.daisies.baseRadius;
+      grassData.geometry.vertices[ 2 ][ vL + 1 ] = crd.y;
+      grassData.geometry.vertices[ 2 ][ vL + 2 ] = crd.z - hsin90 * grassData.daisies.baseRadius;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 3 ] = crd.x - hcos90 * grassData.daisies.baseRadius;
+      grassData.geometry.vertices[ 2 ][ vL + 4 ] = crd.y;
+      grassData.geometry.vertices[ 2 ][ vL + 5 ] = crd.z + hsin90 * grassData.daisies.baseRadius;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 6 ] = crd.x + cos * grassData.daisies.baseRadius;
+      grassData.geometry.vertices[ 2 ][ vL + 7 ] = crd.y;
+      grassData.geometry.vertices[ 2 ][ vL + 8 ] = crd.z - sin * grassData.daisies.baseRadius;
+      
+      //Stem
+      grassData.geometry.vertices[ 2 ][ vL + 9 ] = crd.x + hcos90 * .7 * grassData.daisies.baseRadius + cos * grassData.daisies.bend * seedBend * .5;
+      grassData.geometry.vertices[ 2 ][ vL + 10 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 11 ] = crd.z - hsin90 * .7 * grassData.daisies.baseRadius - sin * grassData.daisies.bend * seedBend * .5;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 12 ] = crd.x - hcos90 * .7 * grassData.daisies.baseRadius + cos * grassData.daisies.bend * seedBend * .5;
+      grassData.geometry.vertices[ 2 ][ vL + 13 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 14 ] = crd.z + hsin90 * .7 * grassData.daisies.baseRadius - sin * grassData.daisies.bend * seedBend * .5;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 15 ] = crd.x + cos * .7 * grassData.daisies.baseRadius + cos * grassData.daisies.bend * seedBend * .5;
+      grassData.geometry.vertices[ 2 ][ vL + 16 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 17 ] = crd.z - sin * .7 * grassData.daisies.baseRadius - sin * grassData.daisies.bend * seedBend * .5;
+      
+      //Top
+      grassData.geometry.vertices[ 2 ][ vL + 18 ] = crd.x + hcos90 * .4 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend;
+      grassData.geometry.vertices[ 2 ][ vL + 19 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 20 ] = crd.z - hsin90 * .4 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 21 ] = crd.x - hcos90 * .4 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend;
+      grassData.geometry.vertices[ 2 ][ vL + 22 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 23 ] = crd.z + hsin90 * .4 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 24 ] = crd.x + cos * .4 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend;
+      grassData.geometry.vertices[ 2 ][ vL + 25 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 26 ] = crd.z - sin * .4 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend;
+      
+      //flower part
+      
+      //center
+      //values for the pentagon
+      var rot = Math.PI * 2 / 5,
+        cos1 = Math.cos(rot), sin1 = Math.sin(rot),
+        cos2 = Math.cos(rot*2),sin2 = Math.sin(rot*2);
+      grassData.geometry.vertices[ 2 ][ vL + 27 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth;
+      grassData.geometry.vertices[ 2 ][ vL + 28 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 29 ] = crd.z - sin * grassData.daisies.bend * seedBend;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 30 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos1;
+      grassData.geometry.vertices[ 2 ][ vL + 31 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 32 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * sin1;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 33 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos2;
+      grassData.geometry.vertices[ 2 ][ vL + 34 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 35 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * sin2;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 36 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos2;
+      grassData.geometry.vertices[ 2 ][ vL + 37 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 38 ] = crd.z - sin * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * sin2;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 39 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos1;
+      grassData.geometry.vertices[ 2 ][ vL + 40 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+      grassData.geometry.vertices[ 2 ][ vL + 41 ] = crd.z - sin * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * sin1;
+      
+      grassData.geometry.vertices[ 2 ][ vL + 42 ] = crd.x + cos * grassData.daisies.bend * seedBend;
+      grassData.geometry.vertices[ 2 ][ vL + 43 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight + grassData.daisies.centerWidth * .5;
+      grassData.geometry.vertices[ 2 ][ vL + 44 ] = crd.z - sin * grassData.daisies.bend * seedBend;
+      
+      //petals
+      for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+        var petRot = Math.PI * 2 / grassData.daisies.petals.number * i + Math.random() * .3,
+          a1 = petRot + grassData.daisies.petals.width,
+          a2 = petRot - grassData.daisies.petals.width,
+          cosa = Math.cos(petRot), sina = Math.sin(petRot),
+          cosa1 = Math.cos(a1), sina1 = Math.sin(a1),
+          cosa2 = Math.cos(a2), sina2 = Math.sin(a2),
+          petHeight = ( Math.random() - .5 ) * grassData.daisies.petals.height;
+        grassData.geometry.vertices[ 2 ][ vL + 45 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * .8 * cosa2;
+        grassData.geometry.vertices[ 2 ][ vL + 46 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+        grassData.geometry.vertices[ 2 ][ vL + 47 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * .8 * sina2;
+        
+        grassData.geometry.vertices[ 2 ][ vL + 48 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.petals.length * cosa2;
+        grassData.geometry.vertices[ 2 ][ vL + 49 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight + petHeight;
+        grassData.geometry.vertices[ 2 ][ vL + 50 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.petals.length * sina2;
+        
+        grassData.geometry.vertices[ 2 ][ vL + 51 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.petals.length * 1.2 * cosa;
+        grassData.geometry.vertices[ 2 ][ vL + 52 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+        grassData.geometry.vertices[ 2 ][ vL + 53 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.petals.length * 1.2 * sina;
+        
+        grassData.geometry.vertices[ 2 ][ vL + 54 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.petals.length * cosa1;
+        grassData.geometry.vertices[ 2 ][ vL + 55 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight + petHeight;
+        grassData.geometry.vertices[ 2 ][ vL + 56 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.petals.length * sina1;
+        
+        grassData.geometry.vertices[ 2 ][ vL + 57 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * .8 * cosa1;
+        grassData.geometry.vertices[ 2 ][ vL + 58 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+        grassData.geometry.vertices[ 2 ][ vL + 59 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * .8 * sina1;
+      }
+      
+      //data
+      
+      //.x : type = 1 (stem ) type = 2 (flower)
+      grassData.geometry.data[ dL ] = grassData.geometry.data[ dL + 4 ] = grassData.geometry.data[ dL + 8 ] = grassData.geometry.data[ dL + 12 ] = grassData.geometry.data[ dL + 16 ] = grassData.geometry.data[ dL + 20 ] = grassData.geometry.data[ dL + 24 ] = grassData.geometry.data[ dL + 28 ] = grassData.geometry.data[ dL + 32 ] = 1;
+      grassData.geometry.data[ dL + 36 ] = grassData.geometry.data[ dL + 40 ] = grassData.geometry.data[ dL + 44 ] = grassData.geometry.data[ dL + 48 ] = grassData.geometry.data[ dL + 52 ] = grassData.geometry.data[ dL + 56 ] = 2;
+      
+      //.y : timestamp
+      var tStp = Math.random();
+      grassData.geometry.data[ dL + 1 ] = grassData.geometry.data[ dL + 4 + 1 ] = grassData.geometry.data[ dL + 8 + 1 ] = grassData.geometry.data[ dL + 12 + 1 ] = grassData.geometry.data[ dL + 16 + 1 ] = grassData.geometry.data[ dL + 20 + 1 ] = grassData.geometry.data[ dL + 24 + 1 ] = grassData.geometry.data[ dL + 28 + 1 ] = grassData.geometry.data[ dL + 32 + 1 ] =grassData.geometry.data[ dL + 36 + 1 ] = grassData.geometry.data[ dL + 40 + 1 ] = grassData.geometry.data[ dL + 44 + 1 ] = grassData.geometry.data[ dL + 48 + 1 ] = grassData.geometry.data[ dL + 52 + 1 ] = grassData.geometry.data[ dL + 56 + 1 ] = tStp;
+      
+      //.z : weight
+      grassData.geometry.data[ dL + 2 ] = grassData.geometry.data[ dL + 4 + 2 ] = grassData.geometry.data[ dL + 8 + 2 ] = 0;
+      grassData.geometry.data[ dL + 12 + 2 ] = grassData.geometry.data[ dL + 16 + 2 ] = grassData.geometry.data[ dL + 20 + 2 ] = .4;
+      grassData.geometry.data[ dL + 24 + 2 ] = grassData.geometry.data[ dL + 28 + 2 ] = grassData.geometry.data[ dL + 32 + 2 ] = grassData.geometry.data[ dL + 36 + 2 ] = grassData.geometry.data[ dL + 40 + 2 ] = grassData.geometry.data[ dL + 44 + 2 ] = grassData.geometry.data[ dL + 48 + 2 ] = grassData.geometry.data[ dL + 52 + 2 ] = grassData.geometry.data[ dL + 56 + 2 ] = 1.6;
+      
+      //petals
+      for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+        //type = 2
+        grassData.geometry.data[ dL + 60 + i * 20 ] = grassData.geometry.data[ dL + 64 + i * 20 ] = grassData.geometry.data[ dL + 68 + i * 20 ] = grassData.geometry.data[ dL + 72 + i * 20 ] = grassData.geometry.data[ dL + 76 + i * 20 ] = 2;
+        
+        //timestamp
+        grassData.geometry.data[ dL + 60 + i * 20 + 1 ] = grassData.geometry.data[ dL + 64 + i * 20 + 1 ] = grassData.geometry.data[ dL + 68 + i * 20 + 1 ] = grassData.geometry.data[ dL + 72 + i * 20 + 1 ] = grassData.geometry.data[ dL + 76 + i * 20 + 1 ] = tStp;
+        
+        //weights
+        grassData.geometry.data[ dL + 60 + i * 20 + 2 ] = grassData.geometry.data[ dL + 64 + i * 20 + 2 ] = grassData.geometry.data[ dL + 68 + i * 20 + 2 ] = grassData.geometry.data[ dL + 72 + i * 20 + 2 ] = grassData.geometry.data[ dL + 76 + i * 20 + 2 ] = 1.6;
+        
+        //indices
+        grassData.geometry.data[ dL + 60 + i * 20 + 3 ] = grassData.geometry.data[ dL + 64 + i * 20 + 3 ] = grassData.geometry.data[ dL + 68 + i * 20 + 3 ] = grassData.geometry.data[ dL + 72 + i * 20 + 3 ] = grassData.geometry.data[ dL + 76 + i * 20 + 3 ] = index ? index : 0;
+      }
+      
+      //colors
+      
+      //Base
+      grassData.geometry.colors[ cL ] = cR * .6;
+      grassData.geometry.colors[ cL + 1 ] = cG * .6;//greenish : .6, redish : .5
+      grassData.geometry.colors[ cL + 2 ] = cB * .3;
+      
+      grassData.geometry.colors[ cL + 3 ] = cR * .6;
+      grassData.geometry.colors[ cL + 4 ] = cG * .6;//greenish : .6, redish : .5
+      grassData.geometry.colors[ cL + 5 ] = cB * .3;
+      
+      grassData.geometry.colors[ cL + 6 ] = cR * .3;
+      grassData.geometry.colors[ cL + 7 ] = cG * .4;//greenish : .4, redish : .25
+      grassData.geometry.colors[ cL + 8 ] = cB * .15;
+      
+      //Middle
+      grassData.geometry.colors[ cL + 9 ] = cR * .5;
+      grassData.geometry.colors[ cL + 10 ] = cG * .5;//greenish : .5, redish : .4
+      grassData.geometry.colors[ cL + 11 ] = cB * .25;
+      
+      grassData.geometry.colors[ cL + 12 ] = cR * .3;//greenish : .3, redish : .5
+      grassData.geometry.colors[ cL + 13 ] = cG * .5;//greenish : .5, redish : .4
+      grassData.geometry.colors[ cL + 14 ] = cB * .25;
+      
+      grassData.geometry.colors[ cL + 15 ] = cR * .2;//greenish : .2, redish : .25
+      grassData.geometry.colors[ cL + 16 ] = cG * .25;//greenish : .25, redish : .2
+      grassData.geometry.colors[ cL + 17 ] = cB * .125;
+      
+      //Top
+      grassData.geometry.colors[ cL + 18 ] = cR * .5;//greenish : .5, redish : 1
+      grassData.geometry.colors[ cL + 19 ] = cG * 1;//greenish : 1, redish : .7
+      grassData.geometry.colors[ cL + 20 ] = cB * .4;
+      
+      grassData.geometry.colors[ cL + 21 ] = cR * .5;//greenish : .5, redish : 1
+      grassData.geometry.colors[ cL + 22 ] = cG * 1;//greenish : 1, redish : .7
+      grassData.geometry.colors[ cL + 23 ] = cB * .4;
+      
+      grassData.geometry.colors[ cL + 24 ] = cR * .5;//greenish : .5, redish : 1
+      grassData.geometry.colors[ cL + 25 ] = cG * 1;//greenish : 1, redish : .7
+      grassData.geometry.colors[ cL + 26 ] = cB * .4;
+      
+      //center
+      grassData.geometry.colors[ cL + 27 ] = grassData.geometry.colors[ cL + 30 ] = grassData.geometry.colors[ cL + 33 ] = grassData.geometry.colors[ cL + 36 ] = grassData.geometry.colors[ cL + 39 ] = .8;
+      grassData.geometry.colors[ cL + 28 ] = grassData.geometry.colors[ cL + 31 ] = grassData.geometry.colors[ cL + 34 ] = grassData.geometry.colors[ cL + 37 ] = grassData.geometry.colors[ cL + 40 ] = .8;
+      grassData.geometry.colors[ cL + 29 ] = grassData.geometry.colors[ cL + 32 ] = grassData.geometry.colors[ cL + 35 ] = grassData.geometry.colors[ cL + 38 ] = grassData.geometry.colors[ cL + 41 ] = .3;
+      grassData.geometry.colors[ cL + 42 ] = 1;
+      grassData.geometry.colors[ cL + 43 ] = 1;
+      grassData.geometry.colors[ cL + 44 ] = .4;
+      
+      
+      //petals
+      var cA = grassData.daisies.petals.colors;
+      var	color = grassData.daisies.petals.multicolor ? Math.floor( Math.random() * cA.length ) : 0;
+      var	RED = cA[ color ][ 0 ], GREEN = cA[ color ][ 1 ], BLUE = cA[ color ][ 2 ];
+      
+      for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+        grassData.geometry.colors[ cL + 45 + i * 15 ] = Math.random() * .3 + RED;
+        grassData.geometry.colors[ cL + 46 + i * 15 ] = Math.random() * .3 + GREEN;
+        grassData.geometry.colors[ cL + 47 + i * 15 ] = Math.random() * .3 + BLUE;
+        
+        grassData.geometry.colors[ cL + 48 + i * 15 ] = Math.random() * .3 + RED;
+        grassData.geometry.colors[ cL + 49 + i * 15 ] = Math.random() * .3 + GREEN;
+        grassData.geometry.colors[ cL + 50 + i * 15 ] = Math.random() * .3 + BLUE;
+        
+        grassData.geometry.colors[ cL + 51 + i * 15 ] = Math.random() * .3 + RED;
+        grassData.geometry.colors[ cL + 52 + i * 15 ] = Math.random() * .3 + GREEN;
+        grassData.geometry.colors[ cL + 53 + i * 15 ] = Math.random() * .3 + BLUE;
+        
+        grassData.geometry.colors[ cL + 54 + i * 15 ] = Math.random() * .3 + RED;
+        grassData.geometry.colors[ cL + 55 + i * 15 ] = Math.random() * .3 + GREEN;
+        grassData.geometry.colors[ cL + 56 + i * 15 ] = Math.random() * .3 + BLUE;
+        
+        grassData.geometry.colors[ cL + 57 + i * 15 ] = Math.random() * .3 + RED;
+        grassData.geometry.colors[ cL + 58 + i * 15 ] = Math.random() * .3 + GREEN;
+        grassData.geometry.colors[ cL + 59 + i * 15 ] = Math.random() * .3 + BLUE;
+      }
+      
+      //indices
+      
+      //base
+      grassData.geometry.indices[ fL ] = r;
+      grassData.geometry.indices[ fL + 1 ] = r + 1;
+      grassData.geometry.indices[ fL + 2 ] = r + 3;
+      
+      grassData.geometry.indices[ fL + 3 ] = r + 1;
+      grassData.geometry.indices[ fL + 4 ] = r + 4;
+      grassData.geometry.indices[ fL + 5 ] = r + 3;
+      
+      grassData.geometry.indices[ fL + 6 ] = r + 1;
+      grassData.geometry.indices[ fL + 7 ] = r + 2;
+      grassData.geometry.indices[ fL + 8 ] = r + 4;
+      
+      grassData.geometry.indices[ fL + 9 ] = r + 2;
+      grassData.geometry.indices[ fL + 10 ] = r + 5;
+      grassData.geometry.indices[ fL + 11 ] = r + 4;
+      
+      grassData.geometry.indices[ fL + 12 ] = r + 2;
+      grassData.geometry.indices[ fL + 13 ] = r;
+      grassData.geometry.indices[ fL + 14 ] = r + 5;
+      
+      grassData.geometry.indices[ fL + 15 ] = r;
+      grassData.geometry.indices[ fL + 16 ] = r + 3;
+      grassData.geometry.indices[ fL + 17 ] = r + 5;
+      
+      //stem
+      grassData.geometry.indices[ fL + 18 ] = r + 3;
+      grassData.geometry.indices[ fL + 19 ] = r + 4;
+      grassData.geometry.indices[ fL + 20 ] = r + 6;
+      
+      grassData.geometry.indices[ fL + 21 ] = r + 4;
+      grassData.geometry.indices[ fL + 22 ] = r + 7;
+      grassData.geometry.indices[ fL + 23 ] = r + 6;
+      
+      grassData.geometry.indices[ fL + 24 ] = r + 4;
+      grassData.geometry.indices[ fL + 25 ] = r + 5;
+      grassData.geometry.indices[ fL + 26 ] = r + 7;
+      
+      grassData.geometry.indices[ fL + 27 ] = r + 5;
+      grassData.geometry.indices[ fL + 28 ] = r + 8;
+      grassData.geometry.indices[ fL + 29 ] = r + 7;
+      
+      grassData.geometry.indices[ fL + 30 ] = r + 5;
+      grassData.geometry.indices[ fL + 31 ] = r + 3;
+      grassData.geometry.indices[ fL + 32 ] = r + 8;
+      
+      grassData.geometry.indices[ fL + 33 ] = r + 3;
+      grassData.geometry.indices[ fL + 34 ] = r + 6;
+      grassData.geometry.indices[ fL + 35 ] = r + 8;
+      
+      //flower : center
+      grassData.geometry.indices[ fL + 36 ] = r + 9;
+      grassData.geometry.indices[ fL + 37 ] = r + 10;
+      grassData.geometry.indices[ fL + 38 ] = r + 14;
+      
+      grassData.geometry.indices[ fL + 39 ] = r + 10;
+      grassData.geometry.indices[ fL + 40 ] = r + 11;
+      grassData.geometry.indices[ fL + 41 ] = r + 14;
+      
+      grassData.geometry.indices[ fL + 42 ] = r + 11;
+      grassData.geometry.indices[ fL + 43 ] = r + 12;
+      grassData.geometry.indices[ fL + 44 ] = r + 14;
+      
+      grassData.geometry.indices[ fL + 45 ] = r + 12;
+      grassData.geometry.indices[ fL + 46 ] = r + 13;
+      grassData.geometry.indices[ fL + 47 ] = r + 14;
+      
+      grassData.geometry.indices[ fL + 48 ] = r + 13;
+      grassData.geometry.indices[ fL + 49 ] = r + 9;
+      grassData.geometry.indices[ fL + 50 ] = r + 14;
+      
+      //petals
+      for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+        grassData.geometry.indices[ fL + 51 + i * 9 ] = r + 15 + 5 * i;
+        grassData.geometry.indices[ fL + 52 + i * 9 ] = r + 16 + 5 * i;
+        grassData.geometry.indices[ fL + 53 + i * 9 ] = r + 19 + 5 * i;
+        
+        grassData.geometry.indices[ fL + 54 + i * 9 ] = r + 19 + 5 * i;
+        grassData.geometry.indices[ fL + 55 + i * 9 ] = r + 16 + 5 * i;
+        grassData.geometry.indices[ fL + 56 + i * 9 ] = r + 18 + 5 * i;
+        
+        grassData.geometry.indices[ fL + 57 + i * 9 ] = r + 16 + 5 * i;
+        grassData.geometry.indices[ fL + 58 + i * 9 ] = r + 17 + 5 * i;
+        grassData.geometry.indices[ fL + 59 + i * 9 ] = r + 18 + 5 * i;
+      }
+      
+    }
+    
+    return true;
+  }
+  
+  //replace this with noise..
+  function getGrassTexture () {
+    var grassTexture = new Image();
+    
+    grassTexture.onload = function () { grassData.texture.img=grassTexture;setScene(); animate(); };
+    
+    grassTexture.setAttribute( 'src', 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QCMRXhpZgAATU0AKgAAAAgABQESAAMAAAABAAAAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAAAAIdpAAQAAAABAAAAWgAAAAAAAABIAAAAAQAAAEgAAAABAAOQAAAHAAAABDAyMTCgAAAHAAAABDAxMDCgAQADAAAAAf//AAAAAAAA/+ECoGh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8APD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4KPHg6eG1wbWV0YSB4bWxuczp4PSdhZG9iZTpuczptZXRhLyc+CjxyZGY6UkRGIHhtbG5zOnJkZj0naHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyc+CgogPHJkZjpEZXNjcmlwdGlvbiB4bWxuczpleGlmPSdodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyc+CiAgPGV4aWY6T3JpZW50YXRpb24+VG9wLWxlZnQ8L2V4aWY6T3JpZW50YXRpb24+CiAgPGV4aWY6WFJlc29sdXRpb24+NzI8L2V4aWY6WFJlc29sdXRpb24+CiAgPGV4aWY6WVJlc29sdXRpb24+NzI8L2V4aWY6WVJlc29sdXRpb24+CiAgPGV4aWY6UmVzb2x1dGlvblVuaXQ+SW5jaDwvZXhpZjpSZXNvbHV0aW9uVW5pdD4KICA8ZXhpZjpFeGlmVmVyc2lvbj5FeGlmIFZlcnNpb24gMi4xPC9leGlmOkV4aWZWZXJzaW9uPgogIDxleGlmOkZsYXNoUGl4VmVyc2lvbj5GbGFzaFBpeCBWZXJzaW9uIDEuMDwvZXhpZjpGbGFzaFBpeFZlcnNpb24+CiAgPGV4aWY6Q29sb3JTcGFjZT5VbmNhbGlicmF0ZWQ8L2V4aWY6Q29sb3JTcGFjZT4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KPD94cGFja2V0IGVuZD0ncic/Pgr/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0M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');
+    
+    return grassTexture;
+  }
+
+</script>
+</body>
+</html>

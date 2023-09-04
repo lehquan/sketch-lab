@@ -1,0 +1,80 @@
+$colordark: #020c1b;
+$coloryellow: #FFCC66;
+$colorpink: #CB134E;
+$colorgreen: #64ffda;
+$colorblue: #6C6CE5;
+$colordefault: #454360;
+$colorgray: #808080;
+$colorwhite: #FFFFFF;
+$colorblack: #000000;
+$main-color: #b2954d;
+$second-color: #ffffff; //#e5e1d6;
+
+@mixin dark-mode {
+  --surface-background: #020c1b;
+  --surface-dp00: #112240;
+  --surface-dp01: #CCD6F6;
+
+  --primary: #64ffda;
+  --primary-light: #233554;
+  --secondary: #8892b0;
+  --secondary-light: #a8b2d1;
+  --secondary-extralight: #ccd6f6;
+  --highlight: #FFCC66;
+
+  --font01: #808080;
+  --font02: #9c9ab3;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+.footer {
+  width: 100%;
+  height: 50px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  z-index: 2;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  p {
+    color: $second-color;
+    margin-right: 10px;
+    a {
+      font-weight: 500;
+      color: #646cff;
+      text-decoration: inherit;
+      cursor: pointer;
+      transition: all .3s;
+      &:hover {
+        color: #a2a6ff;
+      }
+    }
+  }
+  & > .iconWrapper {
+    width: 100px;
+    padding: 10px;
+    background: black;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-end;
+    align-items: center;
+    & > img {
+      width: 20%;
+    }
+  }
+}

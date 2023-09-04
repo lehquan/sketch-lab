@@ -1,0 +1,30 @@
+{
+  "name": "threejs-webpack-template",
+  "version": "0.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "dev": "webpack serve --config webpack.config.js",
+    "watch": "webpack serve --config webpack.config.js --watch"
+  },
+  "dependencies": {
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "esbuild-loader": "^4.0.2",
+    "glsl-noise": "0.0.0",
+    "glslify": "^7.1.1",
+    "glslify-loader": "^2.0.0",
+    "gsap": "^3.12.2",
+    "html-webpack-plugin": "^5.5.3",
+    "raw-loader": "^4.0.2",
+    "sass": "^1.66.1",
+    "sass-loader": "^13.3.2",
+    "stats.js": "^0.17.0",
+    "style-loader": "^3.3.3",
+    "three": "^0.155.0",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1",
+    "webpack-glsl-loader": "^1.0.1"
+  }
+}
