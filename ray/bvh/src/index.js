@@ -1,5 +1,5 @@
-import "./style.scss";
-import Experience from "./Experience/Experience.js";
+import './style.scss';
+import Experience from './Experience/Experience.js';
 
 new Experience();
 

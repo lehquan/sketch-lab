@@ -21,7 +21,6 @@ export default class Environment {
     // Wait for resources
     this.resources.on("ready", () => {
       this.setEnv()
-      this.setDebug()
     })
   }
 

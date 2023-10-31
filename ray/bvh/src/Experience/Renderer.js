@@ -31,7 +31,6 @@ export default class Renderer {
     }
 
     this.setInstance()
-    this.setDebug()
   }
 
   setDebug = () => {
@@ -65,7 +64,7 @@ export default class Renderer {
     this.instance.outputColorSpace = SRGBColorSpace
     this.instance.toneMapping = this.toneMappingOptions.None
     this.instance.toneMappingExposure = this.params.exposure
-
+    window.renderer = this.instance
     this.resize()
   }
 

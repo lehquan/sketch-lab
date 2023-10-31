@@ -1,17 +1,15 @@
-import {Mesh, Object3D, REVISION, Scene, Texture} from 'three';
+import { Mesh, Object3D, REVISION, Scene, Texture } from 'three';
 import Sizes from "../utils/Sizes.js"
-// import Time from "../utils/Time.js"
 import Camera from "./Camera.js"
 import Renderer from "./Renderer.js"
 import World from "./World/World.js"
 import Resources from "../utils/Resources.js"
-import Stats from "../utils/Stats.js"
+import StatsUtil from "../utils/StatsUtil.js"
 import sources from "./sources.js"
 import Environment from './Environment'
-import Mouse from '../utils/Mouse';
 import Debug from '../utils/Debug';
 import PostEffect from './PostEffect';
-import Ray from './Ray';
+// import Ray from './Ray';
 
 let instance = null
 
@@ -33,9 +31,8 @@ export default class Experience {
 
     /**Setup Classes */
     this.debug = new Debug()
-    this.stats = new Stats()
+    this.stats = new StatsUtil()
     this.sizes = new Sizes()
-    // this.time = new Time()
     // this.mouse = new Mouse()
 
     this.scene = new Scene()
@@ -48,20 +45,7 @@ export default class Experience {
     // this.ray = new Ray(this.camera, this.scene)
 
     this.sizes.on("resize", () => this.resize())
-    // this.time.on("tick", () => this.update())
     this.tick()
-  }
-
-  initDOM = () => {
-    // canvas
-    const _canvas = document.createElement("canvas")
-    _canvas.id = 'experience'
-    document.body.appendChild(_canvas)
-
-    const footer = document.createElement("div")
-    footer.classList.add('footer')
-    footer.id = 'footer'
-    document.body.appendChild(footer)
   }
 
   resize() {
