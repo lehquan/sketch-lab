@@ -1,5 +1,5 @@
 {
-  "name": "threejs-webpack-template",
+  "name": "curl-tubes",
   "version": "0.0.0",
   "main": "index.js",
   "scripts": {
@@ -17,12 +17,13 @@
     "gsap": "^3.12.2",
     "html-webpack-plugin": "^5.5.3",
     "raw-loader": "^4.0.2",
-    "sass": "^1.66.1",
+    "sass": "^1.69.5",
     "sass-loader": "^13.3.2",
+    "simplex-noise": "^3.0.1",
     "stats.js": "^0.17.0",
     "style-loader": "^3.3.3",
-    "three": "^0.155.0",
-    "webpack": "^5.88.2",
+    "three": "^0.158.0",
+    "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1",
     "webpack-glsl-loader": "^1.0.1"

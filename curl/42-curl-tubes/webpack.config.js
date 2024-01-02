@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
   mode: "development",
-  name: "threejs-webpack-template",
+  name: "curl-tubes",
   devtool: 'eval-source-map',
   entry: {
     app: ["./src/index.js"],
@@ -59,9 +59,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      /*filename: path.resolve(__dirname, "dist", "index.html"),
-      title: 'Three.js | Webpack Template',
-      hash: true,*/
+      /*filename: path.resolve(__dirname, "dist", "index.html"),*/
       template: "./src/index.html",
     }),
     new CopyPlugin({

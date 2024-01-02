@@ -1,9 +1,13 @@
-# Three.js & Webpack Template
+# Curl tubes with noise
 
 ![screenshot](src/assets/screenshot.png)
 
-## Description
+### Description
 
-- Three.js : [v155](https://unpkg.com/browse/three@0.155.1/)
+- Three.js : [v158](https://unpkg.com/browse/three@0.158.0/)
 - Load GLSL with [glslify](https://github.com/glslify/glslify)
-- GUI Debug
+
+### References
+- (Yuri Artiukh tutorial)[https://www.youtube.com/live/8PG4RrNwby0?si=zya8TsIhXE28JdDd]
+- [3D Curl Noise](https://al-ro.github.io/projects/embers/)
+- [simplex noise](https://www.npmjs.com/package/simplex-noise/v/3.0.1)
